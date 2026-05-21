@@ -17,7 +17,7 @@ namespace VTabs
     {
 
         public static bool dragndropEnabled { get => EditorPrefsCached.GetBool("vTabs-dragndropEnabled", true); set => EditorPrefsCached.SetBool("vTabs-dragndropEnabled", value); }
-        public static bool addTabButtonEnabled { get => EditorPrefsCached.GetBool("vTabs-addTabButtonEnabled", false); set => EditorPrefsCached.SetBool("vTabs-addTabButtonEnabled", value); }
+        public static bool addTabButtonEnabled { get => EditorPrefsCached.GetBool("vTabs-addTabButtonEnabled", true); set => EditorPrefsCached.SetBool("vTabs-addTabButtonEnabled", value); }
         public static bool closeTabButtonEnabled { get => EditorPrefsCached.GetBool("vTabs-closeTabButtonEnabled", false); set => EditorPrefsCached.SetBool("vTabs-closeTabButtonEnabled", value); }
         public static bool dividersEnabled { get => EditorPrefsCached.GetBool("vTabs-dividersEnabled", true); set => EditorPrefsCached.SetBool("vTabs-dividersEnabled", value); }
         public static bool hideLockButtonEnabled { get => EditorPrefsCached.GetBool("vTabs-hideLockButtonEnabled", false); set => EditorPrefsCached.SetBool("vTabs-hideLockButtonEnabled", value); }

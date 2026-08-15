@@ -1,9 +1,11 @@
 "use client";
 
-import { useState, type CSSProperties, type PointerEvent } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type PointerEvent, type RefObject } from "react";
 import Image from "next/image";
+import Link from "next/link";
 
 type TabId = "technical" | "games" | "design";
+export type PageId = "home" | TabId;
 type ProjectLink = { label: string; href: string };
 type Project = {
   id: string;
@@ -23,24 +25,27 @@ type Project = {
   tier?: "release" | "study";
 };
 
-const tabs: { id: TabId; label: string; count: string; description: string }[] = [
+const tabs: { id: TabId; label: string; count: string; description: string; path: string }[] = [
   {
     id: "technical",
     label: "Technical Projects",
     count: "05",
     description: "Production tools, gameplay architecture, procedural motion, and real-time rendering studies.",
+    path: "/technical",
   },
   {
     id: "games",
     label: "Game Works",
     count: "04",
     description: "Playable prototypes and small games where design decisions were validated through implementation.",
+    path: "/games",
   },
   {
     id: "design",
     label: "Design Experience",
     count: "03",
     description: "System design documents, comparative analysis, and an evolving library of design breakdowns.",
+    path: "/design",
   },
 ];
 
@@ -388,43 +393,39 @@ function ProjectCard({ project, release = false }: { project: Project; release?:
   );
 }
 
-export function Portfolio() {
-  const [activeTab, setActiveTab] = useState<TabId>("technical");
-  const activeMeta = tabs.find((tab) => tab.id === activeTab) ?? tabs[0];
-  const releasedProjects = projects.technical.filter((project) => project.tier === "release");
-  const studyProjects = projects.technical.filter((project) => project.tier === "study");
+type Accent = "lichen" | "ice" | "ember";
 
-  function trackPointer(event: PointerEvent<HTMLElement>) {
-    const xRatio = event.clientX / window.innerWidth - 0.5;
-    const yRatio = event.clientY / window.innerHeight - 0.5;
-    event.currentTarget.style.setProperty("--pointer-x", `${event.clientX}px`);
-    event.currentTarget.style.setProperty("--pointer-y", `${event.clientY}px`);
-    event.currentTarget.style.setProperty("--pointer-rx", xRatio.toFixed(3));
-    event.currentTarget.style.setProperty("--pointer-ry", yRatio.toFixed(3));
-  }
+function TopographicPointer() {
+  return <div className="pointer-topography" aria-hidden="true">{Array.from({ length: 8 }, (_, index) => <span key={index} style={{ "--ring": index } as CSSProperties} />)}</div>;
+}
 
-  function selectSection(tab: TabId) {
-    setActiveTab(tab);
-    document.getElementById("work")?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }
-
+function Navigation({ page, navRef }: { page: PageId; navRef: RefObject<HTMLElement | null> }) {
   return (
-    <main className="site-shell" onPointerMove={trackPointer} style={{ "--pointer-x": "75vw", "--pointer-y": "20vh", "--pointer-rx": ".25", "--pointer-ry": "-.3" } as CSSProperties}>
-      <div className="ambient-grid" aria-hidden="true" />
-      <div className="ambient-scan" aria-hidden="true" />
-      <div className="pointer-glow" aria-hidden="true" />
+    <header className="site-header nav-visible" ref={navRef}>
+      <Link className="brand" href="/" aria-label="Leon Zhou portfolio home"><span className="brand-mark">LZ</span><span className="brand-label">PORTFOLIO / 2026</span></Link>
+      <nav className="header-links" aria-label="Primary navigation">
+        <Link href="/" aria-current={page === "home" ? "page" : undefined}>Home</Link>
+        {tabs.map((tab) => <Link key={tab.id} href={tab.path} aria-current={page === tab.id ? "page" : undefined}>{tab.id === "technical" ? "Technical" : tab.id === "games" ? "Games" : "Design"}</Link>)}
+      </nav>
+      <span className="nav-proximity">MOVE TO TOP / NAV</span>
+    </header>
+  );
+}
 
-      <header className="site-header">
-        <a className="brand" href="#top" aria-label="Leon Zhou portfolio home"><span className="brand-mark">LZ</span><span className="brand-label">PORTFOLIO / 2026</span></a>
-        <nav className="header-links" aria-label="Primary navigation">
-          <a href="#top">Home</a>
-          <button type="button" onClick={() => selectSection("technical")}>Technical</button>
-          <button type="button" onClick={() => selectSection("games")}>Games</button>
-          <button type="button" onClick={() => selectSection("design")}>Design</button>
-        </nav>
-      </header>
+function Footer() {
+  return (
+    <footer className="site-footer">
+      <div><span className="footer-kicker">OPEN TO COLLABORATION</span><h2>Let’s make<br />something playable.</h2></div>
+      <div className="footer-links"><a href="mailto:leonzhouziang@gmail.com">Email <span>↗</span></a><a href="https://github.com/Hubr1zz" target="_blank" rel="noreferrer">GitHub <span>↗</span></a><a href="https://leon-zhou.itch.io/" target="_blank" rel="noreferrer">Itch.io <span>↗</span></a><a href="https://52ccdc57-ad3f-47d6-9b83-c35f8ad2c41f.filesusr.com/ugd/2967e1_9d3e636f150d4a08a49e78ff06525b6a.pdf" target="_blank" rel="noreferrer">Résumé <span>↗</span></a></div>
+      <div className="footer-base"><span>LEON ZHOU / PORTFOLIO</span><span>DESIGNED FOR CLARITY · BUILT WITH INTENT</span></div>
+    </footer>
+  );
+}
 
-      <section className="hero" id="top">
+function HomePage({ accent, onAccentChange }: { accent: Accent; onAccentChange: (accent: Accent) => void }) {
+  return (
+    <>
+      <section className="hero page-enter" id="top">
         <div className="contour-field" aria-hidden="true"><span /><span /><span /><span /></div>
         <div className="hero-kicker"><span>PROFILE_001</span><span>LOS ANGELES / CA</span></div>
         <div className="hero-copy">
@@ -432,47 +433,134 @@ export function Portfolio() {
           <h1 aria-label="Leon Zhou"><span className="name-leon">Leon</span><span className="name-zhou">Zhou</span></h1>
           <p className="hero-intro">I design gameplay systems and build the technology that makes them tangible—bridging mechanics, tools, and real-time visuals.</p>
         </div>
-        <aside className="hero-profile">
+        <aside className="hero-profile focus-frame">
           <p className="profile-lead">Game designer, gameplay programmer, but most importantly, game player.</p>
           <p>I graduated from Rensselaer Polytechnic Institute’s Games &amp; Simulation Arts &amp; Sciences program, connecting computer science, game design, and real-time visual practice.</p>
           <p>I care about how mechanics, systems, and feedback shape player experience. Programming and 3D math let me turn ambiguous ideas into playable, testable systems.</p>
           <p className="profile-goal">Seeking Technical Designer, Systems Designer, or Gameplay Engineer opportunities.</p>
           <div className="hero-status"><span className="status-dot" /><span>Current focus</span><strong>Gameplay systems &amp; production tooling</strong></div>
         </aside>
-        <a className="scroll-cue" href="#work"><span>Explore selected work</span><i aria-hidden="true" /></a>
-      </section>
-
-      <section className="work-section" id="work">
-        <div className="section-heading"><div><span className="section-index">INDEX / WORK</span><h2>Selected work</h2></div><p>Three expandable areas hold production-ready releases, playable game work, and the design thinking behind both.</p></div>
-        <div className="work-tabs" role="tablist" aria-label="Portfolio categories">
-          {tabs.map((tab) => <button key={tab.id} type="button" role="tab" id={`tab-${tab.id}`} aria-controls={`panel-${tab.id}`} aria-selected={activeTab === tab.id} onClick={() => setActiveTab(tab.id)} className={activeTab === tab.id ? "active" : ""}><span>{tab.label}</span><small>{tab.count}</small></button>)}
-        </div>
-        <div className="tab-summary"><span>ACTIVE_INDEX / {activeMeta.count}</span><p>{activeMeta.description}</p></div>
-
-        <div className="tab-panel" key={activeTab} id={`panel-${activeTab}`} role="tabpanel" aria-labelledby={`tab-${activeTab}`}>
-          {activeTab === "technical" ? (
-            <>
-              <section className="project-tier release-tier" aria-labelledby="released-heading">
-                <div className="tier-heading"><span>01 / RELEASED</span><div><h3 id="released-heading">Published projects</h3><p>Maintained tools and systems intended for use beyond a single prototype.</p></div></div>
-                <div className="release-list">{releasedProjects.map((project) => <ProjectCard project={project} release key={project.id} />)}</div>
-                <a className="roadmap-slot focus-frame" href="https://github.com/Hubr1zz/ZFramework" target="_blank" rel="noreferrer"><span>NEXT_RELEASE</span><strong>ZFramework</strong><small>IN DEVELOPMENT ↗</small></a>
-              </section>
-              <section className="project-tier study-tier" aria-labelledby="studies-heading">
-                <div className="tier-heading"><span>02 / PRACTICE</span><div><h3 id="studies-heading">Studies &amp; experiments</h3><p>Focused exercises used to investigate animation, rendering, and editor workflow problems.</p></div></div>
-                <div className="study-grid">{studyProjects.map((project) => <ProjectCard project={project} key={project.id} />)}</div>
-              </section>
-            </>
-          ) : (
-            <div className="standard-grid">{projects[activeTab].map((project) => <ProjectCard project={project} key={project.id} />)}</div>
-          )}
+        <div className="hero-controls">
+          <a className="scroll-cue" href="#work"><span>Explore selected work</span><i aria-hidden="true" /></a>
+          <div className="accent-picker" aria-label="Topographic highlight color">
+            <span>CONTOUR SIGNAL</span>
+            {(["lichen", "ice", "ember"] as Accent[]).map((item) => <button key={item} type="button" className={accent === item ? "active" : ""} onClick={() => onAccentChange(item)} aria-pressed={accent === item}><i aria-hidden="true" />{item}</button>)}
+          </div>
         </div>
       </section>
 
-      <footer className="site-footer">
-        <div><span className="footer-kicker">OPEN TO COLLABORATION</span><h2>Let’s make<br />something playable.</h2></div>
-        <div className="footer-links"><a href="mailto:leonzhouziang@gmail.com">Email <span>↗</span></a><a href="https://github.com/Hubr1zz" target="_blank" rel="noreferrer">GitHub <span>↗</span></a><a href="https://leon-zhou.itch.io/" target="_blank" rel="noreferrer">Itch.io <span>↗</span></a><a href="https://52ccdc57-ad3f-47d6-9b83-c35f8ad2c41f.filesusr.com/ugd/2967e1_9d3e636f150d4a08a49e78ff06525b6a.pdf" target="_blank" rel="noreferrer">Résumé <span>↗</span></a></div>
-        <div className="footer-base"><span>LEON ZHOU / PORTFOLIO</span><span>DESIGNED FOR CLARITY · BUILT WITH INTENT</span></div>
-      </footer>
+      <section className="home-work-portal page-enter" id="work">
+        <div className="section-heading"><div><span className="section-index">INDEX / WORK</span><h2>Selected work</h2></div><p>A compact index only. Each category opens as a separate page with its own layout, rhythm, and interaction field.</p></div>
+        <div className="portal-grid">
+          {tabs.map((tab, index) => <Link className={`portal-card portal-${tab.id} focus-frame`} href={tab.path} key={tab.id}><span>0{index + 1} / {tab.count}</span><h3>{tab.label}</h3><p>{tab.description}</p><strong>OPEN INDEX ↗</strong></Link>)}
+        </div>
+      </section>
+    </>
+  );
+}
+
+function WorkPage({ page }: { page: TabId }) {
+  const meta = tabs.find((tab) => tab.id === page) ?? tabs[0];
+  const releasedProjects = projects.technical.filter((project) => project.tier === "release");
+  const studyProjects = projects.technical.filter((project) => project.tier === "study");
+
+  return (
+    <>
+      <section className="work-page-head page-enter">
+        <div className="page-field" aria-hidden="true"><i /><i /><i /><i /><i /></div>
+        <span className="section-index">WORK INDEX / {meta.count}</span>
+        <h1>{meta.label}</h1>
+        <p>{meta.description}</p>
+        <div className="page-crosslinks">{tabs.filter((tab) => tab.id !== page).map((tab) => <Link href={tab.path} key={tab.id}>{tab.label}<span>↗</span></Link>)}</div>
+      </section>
+
+      <section className="work-page-body project-surface page-enter">
+        {page === "technical" ? (
+          <>
+            <section className="project-tier release-tier" aria-labelledby="released-heading">
+              <div className="tier-heading"><span>01 / RELEASED</span><div><h2 id="released-heading">Published projects</h2><p>Maintained tools and systems intended for use beyond a single prototype.</p></div></div>
+              <div className="release-list">{releasedProjects.map((project) => <ProjectCard project={project} release key={project.id} />)}</div>
+              <a className="roadmap-slot focus-frame" href="https://github.com/Hubr1zz/ZFramework" target="_blank" rel="noreferrer"><span>NEXT_RELEASE</span><strong>ZFramework</strong><small>IN DEVELOPMENT ↗</small></a>
+            </section>
+            <section className="project-tier study-tier" aria-labelledby="studies-heading">
+              <div className="tier-heading"><span>02 / PRACTICE</span><div><h2 id="studies-heading">Studies &amp; experiments</h2><p>Focused exercises used to investigate animation, rendering, and editor workflow problems.</p></div></div>
+              <div className="study-grid">{studyProjects.map((project) => <ProjectCard project={project} key={project.id} />)}</div>
+            </section>
+          </>
+        ) : <div className="standard-grid">{projects[page].map((project) => <ProjectCard project={project} key={project.id} />)}</div>}
+      </section>
+    </>
+  );
+}
+
+export function Portfolio({ page = "home" }: { page?: PageId }) {
+  const shellRef = useRef<HTMLElement>(null);
+  const navRef = useRef<HTMLElement>(null);
+  const [accent, setAccent] = useState<Accent>("lichen");
+
+  useEffect(() => {
+    try {
+      const savedAccent = window.localStorage.getItem("portfolio-accent") as Accent | null;
+      if (savedAccent === "lichen" || savedAccent === "ice" || savedAccent === "ember") window.requestAnimationFrame(() => setAccent(savedAccent));
+    } catch {
+      // Storage can be unavailable in privacy-restricted contexts; the default remains usable.
+    }
+
+    const target = { x: window.innerWidth * .72, y: window.innerHeight * .24 };
+    const current = { ...target };
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let frame = 0;
+    const navTimer = window.setTimeout(() => navRef.current?.classList.remove("nav-visible"), 1800);
+
+    const move = (event: globalThis.PointerEvent) => {
+      target.x = event.clientX;
+      target.y = event.clientY;
+      const nearTop = event.clientY < 132;
+      navRef.current?.classList.toggle("nav-visible", nearTop);
+      if (nearTop) window.clearTimeout(navTimer);
+      if (reduceMotion && shellRef.current) {
+        shellRef.current.style.setProperty("--pointer-x", `${target.x}px`);
+        shellRef.current.style.setProperty("--pointer-y", `${target.y}px`);
+      }
+    };
+    const animate = () => {
+      current.x += (target.x - current.x) * .095;
+      current.y += (target.y - current.y) * .095;
+      const shell = shellRef.current;
+      if (shell) {
+        shell.style.setProperty("--pointer-x", `${current.x.toFixed(2)}px`);
+        shell.style.setProperty("--pointer-y", `${current.y.toFixed(2)}px`);
+        shell.style.setProperty("--pointer-rx", (current.x / window.innerWidth - .5).toFixed(4));
+        shell.style.setProperty("--pointer-ry", (current.y / window.innerHeight - .5).toFixed(4));
+      }
+      frame = window.requestAnimationFrame(animate);
+    };
+    window.addEventListener("pointermove", move, { passive: true });
+    if (!reduceMotion) frame = window.requestAnimationFrame(animate);
+    return () => {
+      window.removeEventListener("pointermove", move);
+      window.cancelAnimationFrame(frame);
+      window.clearTimeout(navTimer);
+    };
+  }, []);
+
+  function changeAccent(nextAccent: Accent) {
+    setAccent(nextAccent);
+    try {
+      window.localStorage.setItem("portfolio-accent", nextAccent);
+    } catch {
+      // The visual choice still applies for this page even when storage is blocked.
+    }
+  }
+
+  return (
+    <main ref={shellRef} className={`site-shell page-${page} theme-${accent}`} style={{ "--pointer-x": "72vw", "--pointer-y": "24vh", "--pointer-rx": ".22", "--pointer-ry": "-.26" } as CSSProperties}>
+      <div className="ambient-grid" aria-hidden="true" />
+      <div className="ambient-scan" aria-hidden="true" />
+      <TopographicPointer />
+      <Navigation page={page} navRef={navRef} />
+      {page === "home" ? <HomePage accent={accent} onAccentChange={changeAccent} /> : <WorkPage page={page} />}
+      <Footer />
     </main>
   );
 }

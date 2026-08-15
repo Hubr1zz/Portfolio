@@ -20,24 +20,25 @@ type Project = {
   gallery?: { src: string; alt: string }[];
   visual?: "workflow" | "interaction" | "editor" | "prototype";
   featured?: boolean;
+  tier?: "release" | "study";
 };
 
 const tabs: { id: TabId; label: string; count: string; description: string }[] = [
   {
     id: "technical",
-    label: "Technical Work",
+    label: "Technical Projects",
     count: "05",
     description: "Production tools, gameplay architecture, procedural motion, and real-time rendering studies.",
   },
   {
     id: "games",
-    label: "Game Projects",
+    label: "Game Works",
     count: "04",
     description: "Playable prototypes and small games where design decisions were validated through implementation.",
   },
   {
     id: "design",
-    label: "Design & Writing",
+    label: "Design Experience",
     count: "03",
     description: "System design documents, comparative analysis, and an evolving library of design breakdowns.",
   },
@@ -59,6 +60,7 @@ const projects: Record<TabId, Project[]> = {
       links: [{ label: "GitHub repository", href: "https://github.com/Hubr1zz/zWorkFlow" }],
       visual: "workflow",
       featured: true,
+      tier: "release",
     },
     {
       id: "interaction",
@@ -73,6 +75,7 @@ const projects: Record<TabId, Project[]> = {
       tags: ["Unity", "C#", "UGUI", "Architecture"],
       links: [{ label: "GitHub repository", href: "https://github.com/Hubr1zz/InteractionSystem" }],
       visual: "interaction",
+      tier: "release",
     },
     {
       id: "editor-tools",
@@ -87,6 +90,7 @@ const projects: Record<TabId, Project[]> = {
       tags: ["Unity Editor", "C#", "UX", "Productivity"],
       links: [{ label: "GitHub repository", href: "https://github.com/Hubr1zz/UnityEditorTools" }],
       visual: "editor",
+      tier: "study",
     },
     {
       id: "procedural-motion",
@@ -105,6 +109,7 @@ const projects: Record<TabId, Project[]> = {
       ],
       image: "/images/tech-03.webp",
       imageAlt: "Unity editor showing a procedural multi-legged locomotion prototype",
+      tier: "study",
     },
     {
       id: "rendering-studies",
@@ -128,6 +133,7 @@ const projects: Record<TabId, Project[]> = {
         { src: "/images/tech-01.webp", alt: "Grass geometry authored with Blender geometry nodes" },
       ],
       featured: true,
+      tier: "study",
     },
   ],
   games: [
@@ -308,29 +314,113 @@ function ProjectVisual({ project }: { project: Project }) {
   return <div className="system-visual quiet-visual"><span className="visual-label">ARCHIVE / {project.year}</span><strong>{project.index}</strong></div>;
 }
 
-export function Portfolio() {
-  const [activeTab, setActiveTab] = useState<TabId>("technical");
-  const activeMeta = tabs.find((tab) => tab.id === activeTab) ?? tabs[0];
-
-  function trackPointer(event: PointerEvent<HTMLElement>) {
-    event.currentTarget.style.setProperty("--pointer-x", `${event.clientX}px`);
-    event.currentTarget.style.setProperty("--pointer-y", `${event.clientY}px`);
+function ProjectMedia({ project }: { project: Project }) {
+  if (project.image) {
+    return (
+      <figure className="title-media">
+        <Image src={project.image} alt={project.imageAlt ?? ""} width={900} height={540} sizes="(max-width: 760px) 100vw, 34vw" unoptimized />
+        <figcaption>PROJECT MEDIA / {project.year}</figcaption>
+      </figure>
+    );
   }
 
   return (
-    <main className="site-shell" onPointerMove={trackPointer} style={{ "--pointer-x": "75vw", "--pointer-y": "20vh" } as CSSProperties}>
+    <div className="title-media media-placeholder" aria-label={`Reserved space for ${project.title} project imagery`}>
+      <span>PROJECT_MEDIA</span>
+      <strong>IMAGE SLOT</strong>
+      <small>16:09 / READY FOR ASSET</small>
+    </div>
+  );
+}
+
+function ProjectCard({ project, release = false }: { project: Project; release?: boolean }) {
+  function trackCardPointer(event: PointerEvent<HTMLElement>) {
+    const bounds = event.currentTarget.getBoundingClientRect();
+    event.currentTarget.style.setProperty("--local-x", `${event.clientX - bounds.left}px`);
+    event.currentTarget.style.setProperty("--local-y", `${event.clientY - bounds.top}px`);
+  }
+
+  if (release) {
+    return (
+      <article className="release-card focus-frame" onPointerMove={trackCardPointer}>
+        <div className="release-head">
+          <div className="release-title">
+            <div className="project-meta"><span>{project.index}</span><span>{project.year}</span></div>
+            <p className="project-eyebrow">{project.eyebrow}</p>
+            <h3>{project.title}</h3>
+            <div className="release-links">
+              {project.links.map((link) => <a key={link.href} href={link.href} target="_blank" rel="noreferrer">{link.label}<span aria-hidden="true">↗</span></a>)}
+            </div>
+          </div>
+          <ProjectMedia project={project} />
+        </div>
+        <div className="release-body">
+          <div className="project-copy">
+            <p className="project-description">{project.description}</p>
+            {project.details && <p className="project-details">{project.details}</p>}
+            <ul className="tag-list" aria-label={`${project.title} technologies and disciplines`}>
+              {project.tags.map((tag) => <li key={tag}>{tag}</li>)}
+            </ul>
+          </div>
+          <ProjectVisual project={project} />
+        </div>
+      </article>
+    );
+  }
+
+  return (
+    <article className={`project-card focus-frame ${project.featured ? "featured" : ""}`} onPointerMove={trackCardPointer}>
+      <div className="project-copy">
+        <div className="project-meta"><span>{project.index}</span><span>{project.year}</span></div>
+        <p className="project-eyebrow">{project.eyebrow}</p>
+        <h3>{project.title}</h3>
+        <p className="project-description">{project.description}</p>
+        {project.details && <p className="project-details">{project.details}</p>}
+        <ul className="tag-list" aria-label={`${project.title} technologies and disciplines`}>
+          {project.tags.map((tag) => <li key={tag}>{tag}</li>)}
+        </ul>
+        <div className="project-links">
+          {project.links.map((link) => <a key={link.href} href={link.href} target="_blank" rel="noreferrer">{link.label}<span aria-hidden="true">↗</span></a>)}
+        </div>
+      </div>
+      <ProjectVisual project={project} />
+    </article>
+  );
+}
+
+export function Portfolio() {
+  const [activeTab, setActiveTab] = useState<TabId>("technical");
+  const activeMeta = tabs.find((tab) => tab.id === activeTab) ?? tabs[0];
+  const releasedProjects = projects.technical.filter((project) => project.tier === "release");
+  const studyProjects = projects.technical.filter((project) => project.tier === "study");
+
+  function trackPointer(event: PointerEvent<HTMLElement>) {
+    const xRatio = event.clientX / window.innerWidth - 0.5;
+    const yRatio = event.clientY / window.innerHeight - 0.5;
+    event.currentTarget.style.setProperty("--pointer-x", `${event.clientX}px`);
+    event.currentTarget.style.setProperty("--pointer-y", `${event.clientY}px`);
+    event.currentTarget.style.setProperty("--pointer-rx", xRatio.toFixed(3));
+    event.currentTarget.style.setProperty("--pointer-ry", yRatio.toFixed(3));
+  }
+
+  function selectSection(tab: TabId) {
+    setActiveTab(tab);
+    document.getElementById("work")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  return (
+    <main className="site-shell" onPointerMove={trackPointer} style={{ "--pointer-x": "75vw", "--pointer-y": "20vh", "--pointer-rx": ".25", "--pointer-ry": "-.3" } as CSSProperties}>
       <div className="ambient-grid" aria-hidden="true" />
+      <div className="ambient-scan" aria-hidden="true" />
       <div className="pointer-glow" aria-hidden="true" />
 
       <header className="site-header">
-        <a className="brand" href="#top" aria-label="Leon Zhou portfolio home">
-          <span className="brand-mark">LZ</span>
-          <span className="brand-label">PORTFOLIO / 2026</span>
-        </a>
+        <a className="brand" href="#top" aria-label="Leon Zhou portfolio home"><span className="brand-mark">LZ</span><span className="brand-label">PORTFOLIO / 2026</span></a>
         <nav className="header-links" aria-label="Primary navigation">
-          <a href="#work">Work</a>
-          <a href="#profile">Profile</a>
-          <a href="mailto:leonzhouziang@gmail.com">Contact</a>
+          <a href="#top">Home</a>
+          <button type="button" onClick={() => selectSection("technical")}>Technical</button>
+          <button type="button" onClick={() => selectSection("games")}>Games</button>
+          <button type="button" onClick={() => selectSection("design")}>Design</button>
         </nav>
       </header>
 
@@ -339,109 +429,48 @@ export function Portfolio() {
         <div className="hero-kicker"><span>PROFILE_001</span><span>LOS ANGELES / CA</span></div>
         <div className="hero-copy">
           <p className="role-label">Technical Designer · Gameplay Programmer</p>
-          <h1>Leon<br />Zhou</h1>
-          <p className="hero-intro">
-            I design gameplay systems and build the technology that makes them tangible—bridging mechanics, tools, and real-time visuals.
-          </p>
+          <h1 aria-label="Leon Zhou"><span className="name-leon">Leon</span><span className="name-zhou">Zhou</span></h1>
+          <p className="hero-intro">I design gameplay systems and build the technology that makes them tangible—bridging mechanics, tools, and real-time visuals.</p>
         </div>
-        <div className="hero-aside">
-          <p>Game designer, gameplay programmer, but most importantly, game player.</p>
-          <div className="hero-status" aria-label="Current focus">
-            <span className="status-dot" />
-            <span>Current focus</span>
-            <strong>Gameplay systems &amp; production tooling</strong>
-          </div>
-        </div>
+        <aside className="hero-profile">
+          <p className="profile-lead">Game designer, gameplay programmer, but most importantly, game player.</p>
+          <p>I graduated from Rensselaer Polytechnic Institute’s Games &amp; Simulation Arts &amp; Sciences program, connecting computer science, game design, and real-time visual practice.</p>
+          <p>I care about how mechanics, systems, and feedback shape player experience. Programming and 3D math let me turn ambiguous ideas into playable, testable systems.</p>
+          <p className="profile-goal">Seeking Technical Designer, Systems Designer, or Gameplay Engineer opportunities.</p>
+          <div className="hero-status"><span className="status-dot" /><span>Current focus</span><strong>Gameplay systems &amp; production tooling</strong></div>
+        </aside>
         <a className="scroll-cue" href="#work"><span>Explore selected work</span><i aria-hidden="true" /></a>
       </section>
 
       <section className="work-section" id="work">
-        <div className="section-heading">
-          <div>
-            <span className="section-index">SECTION / 01</span>
-            <h2>Selected work</h2>
-          </div>
-          <p>Projects are organized by the problem they solve—not by medium. Technical work opens first.</p>
-        </div>
-
+        <div className="section-heading"><div><span className="section-index">INDEX / WORK</span><h2>Selected work</h2></div><p>Three expandable areas hold production-ready releases, playable game work, and the design thinking behind both.</p></div>
         <div className="work-tabs" role="tablist" aria-label="Portfolio categories">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              type="button"
-              role="tab"
-              id={`tab-${tab.id}`}
-              aria-controls={`panel-${tab.id}`}
-              aria-selected={activeTab === tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={activeTab === tab.id ? "active" : ""}
-            >
-              <span>{tab.label}</span><small>{tab.count}</small>
-            </button>
-          ))}
+          {tabs.map((tab) => <button key={tab.id} type="button" role="tab" id={`tab-${tab.id}`} aria-controls={`panel-${tab.id}`} aria-selected={activeTab === tab.id} onClick={() => setActiveTab(tab.id)} className={activeTab === tab.id ? "active" : ""}><span>{tab.label}</span><small>{tab.count}</small></button>)}
         </div>
-
-        <div className="tab-summary">
-          <span>ACTIVE_INDEX / {activeMeta.count}</span>
-          <p>{activeMeta.description}</p>
-        </div>
+        <div className="tab-summary"><span>ACTIVE_INDEX / {activeMeta.count}</span><p>{activeMeta.description}</p></div>
 
         <div className="tab-panel" key={activeTab} id={`panel-${activeTab}`} role="tabpanel" aria-labelledby={`tab-${activeTab}`}>
-          {projects[activeTab].map((project) => (
-            <article className={`project-card ${project.featured ? "featured" : ""}`} key={project.id}>
-              <div className="project-copy">
-                <div className="project-meta"><span>{project.index}</span><span>{project.year}</span></div>
-                <p className="project-eyebrow">{project.eyebrow}</p>
-                <h3>{project.title}</h3>
-                <p className="project-description">{project.description}</p>
-                {project.details && <p className="project-details">{project.details}</p>}
-                <ul className="tag-list" aria-label={`${project.title} technologies and disciplines`}>
-                  {project.tags.map((tag) => <li key={tag}>{tag}</li>)}
-                </ul>
-                <div className="project-links">
-                  {project.links.map((link) => (
-                    <a key={link.href} href={link.href} target="_blank" rel="noreferrer">
-                      {link.label}<span aria-hidden="true">↗</span>
-                    </a>
-                  ))}
-                </div>
-              </div>
-              <ProjectVisual project={project} />
-            </article>
-          ))}
+          {activeTab === "technical" ? (
+            <>
+              <section className="project-tier release-tier" aria-labelledby="released-heading">
+                <div className="tier-heading"><span>01 / RELEASED</span><div><h3 id="released-heading">Published projects</h3><p>Maintained tools and systems intended for use beyond a single prototype.</p></div></div>
+                <div className="release-list">{releasedProjects.map((project) => <ProjectCard project={project} release key={project.id} />)}</div>
+                <a className="roadmap-slot focus-frame" href="https://github.com/Hubr1zz/ZFramework" target="_blank" rel="noreferrer"><span>NEXT_RELEASE</span><strong>ZFramework</strong><small>IN DEVELOPMENT ↗</small></a>
+              </section>
+              <section className="project-tier study-tier" aria-labelledby="studies-heading">
+                <div className="tier-heading"><span>02 / PRACTICE</span><div><h3 id="studies-heading">Studies &amp; experiments</h3><p>Focused exercises used to investigate animation, rendering, and editor workflow problems.</p></div></div>
+                <div className="study-grid">{studyProjects.map((project) => <ProjectCard project={project} key={project.id} />)}</div>
+              </section>
+            </>
+          ) : (
+            <div className="standard-grid">{projects[activeTab].map((project) => <ProjectCard project={project} key={project.id} />)}</div>
+          )}
         </div>
-      </section>
-
-      <section className="profile-section" id="profile">
-        <div className="profile-ruler" aria-hidden="true"><span>10</span><span>20</span><span>30</span><span>40</span><span>50</span></div>
-        <div className="profile-title">
-          <span className="section-index">SECTION / 02</span>
-          <h2>Design logic.<br />Technical reach.</h2>
-        </div>
-        <div className="profile-copy">
-          <p>
-            I graduated from Rensselaer Polytechnic Institute with a degree in Games &amp; Simulation Arts &amp; Sciences—an interdisciplinary program connecting computer science and game design.
-          </p>
-          <p>
-            I care about how mechanics, systems, and feedback shape the player experience. A strong foundation in 3D math and programming lets me prototype features independently, while an ongoing interest in computer graphics expands how I can communicate a design through motion and image.
-          </p>
-          <p className="profile-goal">Seeking opportunities as a Technical Designer, Systems Designer, or Gameplay Engineer.</p>
-        </div>
-        <ul className="strength-grid">
-          <li><span>01</span><strong>Broad game literacy</strong><p>Experience across a wide range of genres and design traditions.</p></li>
-          <li><span>02</span><strong>Cross-disciplinary practice</strong><p>Programming, systems design, prototyping, and real-time graphics.</p></li>
-          <li><span>03</span><strong>Systems thinking</strong><p>Comfortable turning ambiguous ideas into explicit rules and testable structures.</p></li>
-        </ul>
       </section>
 
       <footer className="site-footer">
         <div><span className="footer-kicker">OPEN TO COLLABORATION</span><h2>Let’s make<br />something playable.</h2></div>
-        <div className="footer-links">
-          <a href="mailto:leonzhouziang@gmail.com">Email <span>↗</span></a>
-          <a href="https://github.com/Hubr1zz" target="_blank" rel="noreferrer">GitHub <span>↗</span></a>
-          <a href="https://leon-zhou.itch.io/" target="_blank" rel="noreferrer">Itch.io <span>↗</span></a>
-          <a href="https://52ccdc57-ad3f-47d6-9b83-c35f8ad2c41f.filesusr.com/ugd/2967e1_9d3e636f150d4a08a49e78ff06525b6a.pdf" target="_blank" rel="noreferrer">Résumé <span>↗</span></a>
-        </div>
+        <div className="footer-links"><a href="mailto:leonzhouziang@gmail.com">Email <span>↗</span></a><a href="https://github.com/Hubr1zz" target="_blank" rel="noreferrer">GitHub <span>↗</span></a><a href="https://leon-zhou.itch.io/" target="_blank" rel="noreferrer">Itch.io <span>↗</span></a><a href="https://52ccdc57-ad3f-47d6-9b83-c35f8ad2c41f.filesusr.com/ugd/2967e1_9d3e636f150d4a08a49e78ff06525b6a.pdf" target="_blank" rel="noreferrer">Résumé <span>↗</span></a></div>
         <div className="footer-base"><span>LEON ZHOU / PORTFOLIO</span><span>DESIGNED FOR CLARITY · BUILT WITH INTENT</span></div>
       </footer>
     </main>

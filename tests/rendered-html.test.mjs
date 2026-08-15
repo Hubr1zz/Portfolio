@@ -22,7 +22,11 @@ test("server-renders Leon Zhou's portfolio shell", async () => {
   assert.match(html, /<title>Leon Zhou — Technical Designer<\/title>/i);
   assert.match(html, /Technical Designer/);
   assert.match(html, /Selected work/);
+  assert.match(html, /Published projects/);
+  assert.match(html, /Studies &amp; experiments/);
   assert.match(html, /zWorkFlow/);
   assert.match(html, /Interaction System/);
+  assert.match(html, /ZFramework/);
+  assert.match(html, /PROJECT_MEDIA/);
   assert.doesNotMatch(html, /codex-preview|react-loading-skeleton/i);
 });

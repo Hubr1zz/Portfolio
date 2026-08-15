@@ -25,6 +25,9 @@ test("server-renders Leon Zhou's portfolio shell", async () => {
   assert.match(html, /Technical Projects/);
   assert.match(html, /Game Works/);
   assert.match(html, /Design Experience/);
+  assert.match(html, /href="\/technical"/);
+  assert.match(html, /href="\/games"/);
+  assert.match(html, /href="\/design"/);
   assert.doesNotMatch(html, /Published projects|PROJECT_MEDIA/);
   assert.doesNotMatch(html, /codex-preview|react-loading-skeleton/i);
 });

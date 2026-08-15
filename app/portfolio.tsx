@@ -1,8 +1,8 @@
+/* eslint-disable @next/next/no-html-link-for-pages */
 "use client";
 
 import { useEffect, useRef, useState, type CSSProperties, type PointerEvent, type RefObject } from "react";
 import Image from "next/image";
-import Link from "next/link";
 
 type TabId = "technical" | "games" | "design";
 export type PageId = "home" | TabId;
@@ -395,17 +395,162 @@ function ProjectCard({ project, release = false }: { project: Project; release?:
 
 type Accent = "lichen" | "ice" | "ember";
 
-function TopographicPointer() {
-  return <div className="pointer-topography" aria-hidden="true">{Array.from({ length: 8 }, (_, index) => <span key={index} style={{ "--ring": index } as CSSProperties} />)}</div>;
+function TopographicField({ accent }: { accent: Accent }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const context = canvas?.getContext("2d");
+    if (!canvas || !context) return;
+
+    const colors: Record<Accent, [number, number, number]> = {
+      lichen: [188, 224, 92],
+      ice: [91, 181, 224],
+      ember: [224, 111, 68],
+    };
+    const [red, green, blue] = colors[accent];
+    const pattern = document.createElement("canvas");
+    const patternContext = pattern.getContext("2d");
+    if (!patternContext) return;
+
+    let viewportWidth = window.innerWidth;
+    let viewportHeight = window.innerHeight;
+    let targetX = viewportWidth * .72;
+    let targetY = viewportHeight * .24;
+    let currentX = targetX;
+    let currentY = targetY;
+    let frame = 0;
+    let resizeFrame = 0;
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    function randomFactory(seed: number) {
+      let value = seed >>> 0;
+      return () => {
+        value = (value * 1664525 + 1013904223) >>> 0;
+        return value / 4294967296;
+      };
+    }
+
+    function buildVoronoiPattern() {
+      viewportWidth = window.innerWidth;
+      viewportHeight = window.innerHeight;
+      const densityWidth = Math.min(460, Math.max(280, Math.round(viewportWidth / 4)));
+      const densityHeight = Math.max(180, Math.round(densityWidth * viewportHeight / viewportWidth));
+      pattern.width = densityWidth;
+      pattern.height = densityHeight;
+
+      const random = randomFactory(731947);
+      const seeds = Array.from({ length: 42 }, () => ({ x: random(), y: random() }));
+      const image = patternContext.createImageData(densityWidth, densityHeight);
+
+      for (let y = 0; y < densityHeight; y += 1) {
+        for (let x = 0; x < densityWidth; x += 1) {
+          const nx = x / densityWidth;
+          const ny = y / densityHeight;
+          let nearest = Number.POSITIVE_INFINITY;
+          let second = Number.POSITIVE_INFINITY;
+
+          for (const seed of seeds) {
+            const dx = nx - seed.x;
+            const dy = (ny - seed.y) * viewportHeight / viewportWidth;
+            const distance = dx * dx + dy * dy;
+            if (distance < nearest) {
+              second = nearest;
+              nearest = distance;
+            } else if (distance < second) {
+              second = distance;
+            }
+          }
+
+          const terrain = Math.sqrt(nearest) * 10.5 + Math.sqrt(second) * 2.8 + Math.sin(nx * 17 + ny * 11) * .075;
+          const phase = Math.abs((terrain * 5.5 % 1) - .5);
+          const cellEdge = Math.sqrt(second) - Math.sqrt(nearest);
+          const contourAlpha = phase > .455 ? Math.min(120, (phase - .455) * 2700) : 0;
+          const edgeAlpha = cellEdge < .006 ? Math.max(0, 52 - cellEdge * 7000) : 0;
+          const alpha = Math.max(contourAlpha, edgeAlpha);
+          const offset = (y * densityWidth + x) * 4;
+          image.data[offset] = red;
+          image.data[offset + 1] = green;
+          image.data[offset + 2] = blue;
+          image.data[offset + 3] = alpha;
+        }
+      }
+      patternContext.putImageData(image, 0, 0);
+
+      const ratio = 1;
+      canvas.width = Math.round(viewportWidth * ratio);
+      canvas.height = Math.round(viewportHeight * ratio);
+      canvas.style.width = `${viewportWidth}px`;
+      canvas.style.height = `${viewportHeight}px`;
+      context.setTransform(ratio, 0, 0, ratio, 0, 0);
+    }
+
+    function draw() {
+      context.clearRect(0, 0, viewportWidth, viewportHeight);
+      context.globalCompositeOperation = "source-over";
+      context.globalAlpha = .78;
+      context.imageSmoothingEnabled = true;
+      context.drawImage(pattern, 0, 0, viewportWidth, viewportHeight);
+      context.globalCompositeOperation = "destination-in";
+      context.globalAlpha = 1;
+      const radius = Math.min(430, Math.max(260, viewportWidth * .25));
+      const light = context.createRadialGradient(currentX, currentY, radius * .08, currentX, currentY, radius);
+      light.addColorStop(0, "rgba(0,0,0,.96)");
+      light.addColorStop(.46, "rgba(0,0,0,.72)");
+      light.addColorStop(.78, "rgba(0,0,0,.22)");
+      light.addColorStop(1, "rgba(0,0,0,0)");
+      context.fillStyle = light;
+      context.fillRect(0, 0, viewportWidth, viewportHeight);
+      context.globalCompositeOperation = "source-over";
+    }
+
+    function animate() {
+      currentX += (targetX - currentX) * .082;
+      currentY += (targetY - currentY) * .082;
+      draw();
+      frame = window.requestAnimationFrame(animate);
+    }
+
+    const move = (event: globalThis.PointerEvent) => {
+      targetX = event.clientX;
+      targetY = event.clientY;
+      if (reduceMotion) {
+        currentX = targetX;
+        currentY = targetY;
+        draw();
+      }
+    };
+    const resize = () => {
+      window.cancelAnimationFrame(resizeFrame);
+      resizeFrame = window.requestAnimationFrame(() => {
+        buildVoronoiPattern();
+        draw();
+      });
+    };
+
+    buildVoronoiPattern();
+    draw();
+    window.addEventListener("pointermove", move, { passive: true });
+    window.addEventListener("resize", resize, { passive: true });
+    if (!reduceMotion) frame = window.requestAnimationFrame(animate);
+    return () => {
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("resize", resize);
+      window.cancelAnimationFrame(frame);
+      window.cancelAnimationFrame(resizeFrame);
+    };
+  }, [accent]);
+
+  return <canvas ref={canvasRef} className="topographic-canvas" aria-hidden="true" />;
 }
 
 function Navigation({ page, navRef }: { page: PageId; navRef: RefObject<HTMLElement | null> }) {
   return (
-    <header className="site-header nav-visible" ref={navRef}>
-      <Link className="brand" href="/" aria-label="Leon Zhou portfolio home"><span className="brand-mark">LZ</span><span className="brand-label">PORTFOLIO / 2026</span></Link>
+    <header className="site-header nav-visible at-page-top" ref={navRef}>
+      <a className="brand" href="/" aria-label="Leon Zhou portfolio home"><span className="brand-mark">LZ</span><span className="brand-label">PORTFOLIO / 2026</span></a>
       <nav className="header-links" aria-label="Primary navigation">
-        <Link href="/" aria-current={page === "home" ? "page" : undefined}>Home</Link>
-        {tabs.map((tab) => <Link key={tab.id} href={tab.path} aria-current={page === tab.id ? "page" : undefined}>{tab.id === "technical" ? "Technical" : tab.id === "games" ? "Games" : "Design"}</Link>)}
+        <a href="/" aria-current={page === "home" ? "page" : undefined}>Home</a>
+        {tabs.map((tab) => <a key={tab.id} href={tab.path} aria-current={page === tab.id ? "page" : undefined}>{tab.id === "technical" ? "Technical" : tab.id === "games" ? "Games" : "Design"}</a>)}
       </nav>
       <span className="nav-proximity">MOVE TO TOP / NAV</span>
     </header>
@@ -452,7 +597,7 @@ function HomePage({ accent, onAccentChange }: { accent: Accent; onAccentChange: 
       <section className="home-work-portal page-enter" id="work">
         <div className="section-heading"><div><span className="section-index">INDEX / WORK</span><h2>Selected work</h2></div><p>A compact index only. Each category opens as a separate page with its own layout, rhythm, and interaction field.</p></div>
         <div className="portal-grid">
-          {tabs.map((tab, index) => <Link className={`portal-card portal-${tab.id} focus-frame`} href={tab.path} key={tab.id}><span>0{index + 1} / {tab.count}</span><h3>{tab.label}</h3><p>{tab.description}</p><strong>OPEN INDEX ↗</strong></Link>)}
+          {tabs.map((tab, index) => <a className={`portal-card portal-${tab.id} focus-frame`} href={tab.path} key={tab.id}><span>0{index + 1} / {tab.count}</span><h3>{tab.label}</h3><p>{tab.description}</p><strong>OPEN INDEX ↗</strong></a>)}
         </div>
       </section>
     </>
@@ -471,7 +616,7 @@ function WorkPage({ page }: { page: TabId }) {
         <span className="section-index">WORK INDEX / {meta.count}</span>
         <h1>{meta.label}</h1>
         <p>{meta.description}</p>
-        <div className="page-crosslinks">{tabs.filter((tab) => tab.id !== page).map((tab) => <Link href={tab.path} key={tab.id}>{tab.label}<span>↗</span></Link>)}</div>
+        <div className="page-crosslinks">{tabs.filter((tab) => tab.id !== page).map((tab) => <a href={tab.path} key={tab.id}>{tab.label}<span>↗</span></a>)}</div>
       </section>
 
       <section className="work-page-body project-surface page-enter">
@@ -510,14 +655,20 @@ export function Portfolio({ page = "home" }: { page?: PageId }) {
     const current = { ...target };
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     let frame = 0;
-    const navTimer = window.setTimeout(() => navRef.current?.classList.remove("nav-visible"), 1800);
+    let pointerY = target.y;
+
+    const updateNavigation = () => {
+      const atPageTop = window.scrollY < 48;
+      const navigation = navRef.current;
+      navigation?.classList.toggle("at-page-top", atPageTop);
+      navigation?.classList.toggle("nav-visible", atPageTop || pointerY < 132);
+    };
 
     const move = (event: globalThis.PointerEvent) => {
       target.x = event.clientX;
       target.y = event.clientY;
-      const nearTop = event.clientY < 132;
-      navRef.current?.classList.toggle("nav-visible", nearTop);
-      if (nearTop) window.clearTimeout(navTimer);
+      pointerY = event.clientY;
+      updateNavigation();
       if (reduceMotion && shellRef.current) {
         shellRef.current.style.setProperty("--pointer-x", `${target.x}px`);
         shellRef.current.style.setProperty("--pointer-y", `${target.y}px`);
@@ -536,11 +687,13 @@ export function Portfolio({ page = "home" }: { page?: PageId }) {
       frame = window.requestAnimationFrame(animate);
     };
     window.addEventListener("pointermove", move, { passive: true });
+    window.addEventListener("scroll", updateNavigation, { passive: true });
+    updateNavigation();
     if (!reduceMotion) frame = window.requestAnimationFrame(animate);
     return () => {
       window.removeEventListener("pointermove", move);
+      window.removeEventListener("scroll", updateNavigation);
       window.cancelAnimationFrame(frame);
-      window.clearTimeout(navTimer);
     };
   }, []);
 
@@ -557,7 +710,7 @@ export function Portfolio({ page = "home" }: { page?: PageId }) {
     <main ref={shellRef} className={`site-shell page-${page} theme-${accent}`} style={{ "--pointer-x": "72vw", "--pointer-y": "24vh", "--pointer-rx": ".22", "--pointer-ry": "-.26" } as CSSProperties}>
       <div className="ambient-grid" aria-hidden="true" />
       <div className="ambient-scan" aria-hidden="true" />
-      <TopographicPointer />
+      <TopographicField accent={accent} />
       <Navigation page={page} navRef={navRef} />
       {page === "home" ? <HomePage accent={accent} onAccentChange={changeAccent} /> : <WorkPage page={page} />}
       <Footer />

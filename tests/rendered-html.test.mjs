@@ -22,14 +22,31 @@ test("server-renders Leon Zhou's portfolio shell", async () => {
   assert.match(html, /<title>Leon Zhou — Technical Designer<\/title>/i);
   assert.match(html, /Technical Designer/);
   assert.match(html, /Selected work/);
-  assert.match(html, /Technical Projects/);
-  assert.match(html, /Game Works/);
-  assert.match(html, /Design Experience/);
+  assert.match(html, /zWorkFlow/);
+  assert.match(html, /Tactical Game Design Document/);
+  assert.match(html, /Next signature work/);
+  assert.match(html, /theme-amber/);
+  assert.match(html, /leonzhouziang@gmail\.com/);
+  assert.doesNotMatch(html, /mailto:|accent-picker/);
   assert.match(html, /href="\/technical"/);
   assert.match(html, /href="\/games"/);
   assert.match(html, /href="\/design"/);
   assert.doesNotMatch(html, /Published projects|PROJECT_MEDIA/);
   assert.doesNotMatch(html, /codex-preview|react-loading-skeleton/i);
+});
+
+test("assigns the GitHub design vault to the tactical design document", async () => {
+  const response = await render("/design");
+  const html = await response.text();
+  const tacticalStart = html.indexOf("project-tactics-design");
+  const notesStart = html.indexOf("project-design-vault");
+  const tacticalSection = html.slice(tacticalStart, notesStart);
+  const notesSection = html.slice(notesStart);
+
+  assert.match(tacticalSection, /GitHub design document/);
+  assert.match(tacticalSection, /GameDesignVault/);
+  assert.match(tacticalSection, /Legacy Notion document/);
+  assert.doesNotMatch(notesSection, /GitHub vault|GameDesignVault/);
 });
 
 test("renders isolated category pages with route-specific metadata", async () => {

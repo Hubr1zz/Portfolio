@@ -224,7 +224,10 @@ const projects: Record<TabId, Project[]> = {
       description:
         "An evolving tactics-game design inspired by the pressure, preparation, and consequence structures of Kingdom Death: Monster.",
       tags: ["Systems Design", "Combat Economy", "Progression", "Documentation"],
-      links: [{ label: "Read on Notion", href: "https://www.notion.so/leonzhouziang/KDM-inspired-tactic-game-design-63affac2d3d843b5bad6e01835a1fba1?p=2a0ca75016908091a97ac2a359c6e375&pm=s" }],
+      links: [
+        { label: "GitHub design document", href: "https://github.com/Hubr1zz/GameDesignVault" },
+        { label: "Legacy Notion document", href: "https://www.notion.so/leonzhouziang/KDM-inspired-tactic-game-design-63affac2d3d843b5bad6e01835a1fba1?p=2a0ca75016908091a97ac2a359c6e375&pm=s" },
+      ],
       image: "/images/design-document.webp",
       imageAlt: "Diagram from Leon Zhou's tactical game design document",
       featured: true,
@@ -254,10 +257,7 @@ const projects: Record<TabId, Project[]> = {
       description:
         "A working library of good and bad design examples, broken down to preserve reusable lessons rather than isolated opinions.",
       tags: ["Design Research", "Breakdowns", "Knowledge Base"],
-      links: [
-        { label: "Notion notebook", href: "https://www.notion.so/leonzhouziang/Game-design-analysis-212ca7501690809586fbd4c37af7e12c?source=copy_link" },
-        { label: "GitHub vault", href: "https://github.com/Hubr1zz/GameDesignVault" },
-      ],
+      links: [{ label: "Notion notebook", href: "https://www.notion.so/leonzhouziang/Game-design-analysis-212ca7501690809586fbd4c37af7e12c?source=copy_link" }],
     },
   ],
 };
@@ -530,16 +530,25 @@ function ProjectCard({ project }: { project: Project }) {
   }
 
   return (
-    <article ref={cardRef} className="project-card uniform-project-card focus-frame" onPointerEnter={cacheCardBounds} onPointerMove={trackCardPointer}>
+    <article id={`project-${project.id}`} ref={cardRef} className="project-card uniform-project-card focus-frame" onPointerEnter={cacheCardBounds} onPointerMove={trackCardPointer}>
       <div className="project-copy">
         <div className="project-meta"><span>{project.index}</span><span>{project.year}</span></div>
         <p className="project-eyebrow">{project.eyebrow}</p>
         <h3>{project.title}</h3>
-        <div className="project-copy-transition" key={selectedBoardItem?.id ?? "project-overview"}>
-          {selectedBoardItem && <p className="project-figure-label">FIG. {String((selectedBoardIndex ?? 0) + 1).padStart(2, "0")} / {selectedBoardItem.title}</p>}
-          <p className="project-description">{selectedBoardItem?.description ?? project.description}</p>
-          {(selectedBoardItem?.details ?? project.details) ? <p className="project-details">{selectedBoardItem?.details ?? project.details}</p> : <p className="project-details project-details-empty" aria-hidden="true" />}
-        </div>
+        <p className="project-description">{project.description}</p>
+        {project.details && <p className="project-details">{project.details}</p>}
+        {selectedBoardItem && (
+          <div className="project-insight-insert" key={selectedBoardItem.id}>
+            <div>
+              <section className="project-image-insight" aria-label={`Details for ${selectedBoardItem.title}`}>
+                <span>SELECTED MEDIA / FIG. {String((selectedBoardIndex ?? 0) + 1).padStart(2, "0")}</span>
+                <h4>{selectedBoardItem.title}</h4>
+                <p>{selectedBoardItem.description}</p>
+                {selectedBoardItem.details && <p>{selectedBoardItem.details}</p>}
+              </section>
+            </div>
+          </div>
+        )}
         <ul className="tag-list" aria-label={`${project.title} technologies and disciplines`}>
           {project.tags.map((tag) => <li key={tag}>{tag}</li>)}
         </ul>
@@ -552,9 +561,7 @@ function ProjectCard({ project }: { project: Project }) {
   );
 }
 
-type Accent = "lichen" | "ice" | "ember";
-
-function TopographicField({ accent }: { accent: Accent }) {
+function TopographicField() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -562,12 +569,7 @@ function TopographicField({ accent }: { accent: Accent }) {
     const context = canvas?.getContext("2d");
     if (!canvas || !context) return;
 
-    const colors: Record<Accent, [number, number, number]> = {
-      lichen: [188, 224, 92],
-      ice: [91, 181, 224],
-      ember: [224, 111, 68],
-    };
-    const [red, green, blue] = colors[accent];
+    const [red, green, blue] = [232, 156, 78];
     let resizeFrame = 0;
 
     function hash(x: number, y: number) {
@@ -652,7 +654,7 @@ function TopographicField({ accent }: { accent: Accent }) {
       context.lineCap = "round";
       context.lineJoin = "round";
 
-      const levelCount = 24;
+      const levelCount = 28;
       const range = maximum - minimum;
       for (let levelIndex = 1; levelIndex < levelCount; levelIndex += 1) {
         const level = minimum + range * levelIndex / levelCount;
@@ -705,8 +707,8 @@ function TopographicField({ accent }: { accent: Accent }) {
           }
         }
 
-        const emphasis = levelIndex % 9 === 0 ? 2 : levelIndex % 3 === 0 ? 1.5 : 1;
-        const alpha = emphasis === 2 ? .48 : emphasis === 1.5 ? .36 : .24;
+        const emphasis = levelIndex % 4 === 0 ? 1.5 : 1;
+        const alpha = emphasis === 1.5 ? .42 : .25;
         context.lineWidth = emphasis;
         context.strokeStyle = `rgba(${red}, ${green}, ${blue}, ${alpha})`;
         context.stroke(path);
@@ -726,7 +728,7 @@ function TopographicField({ accent }: { accent: Accent }) {
       window.removeEventListener("resize", resize);
       window.cancelAnimationFrame(resizeFrame);
     };
-  }, [accent]);
+  }, []);
 
   return <canvas ref={canvasRef} className="topographic-canvas" aria-hidden="true" />;
 }
@@ -745,16 +747,32 @@ function Navigation({ page, navRef }: { page: PageId; navRef: RefObject<HTMLElem
 }
 
 function Footer() {
+  const [copyStatus, setCopyStatus] = useState("COPY");
+  const copyTimer = useRef(0);
+
+  useEffect(() => () => window.clearTimeout(copyTimer.current), []);
+
+  async function copyEmail() {
+    try {
+      await navigator.clipboard.writeText("leonzhouziang@gmail.com");
+      setCopyStatus("COPIED");
+      window.clearTimeout(copyTimer.current);
+      copyTimer.current = window.setTimeout(() => setCopyStatus("COPY"), 1800);
+    } catch {
+      setCopyStatus("COPY FAILED");
+    }
+  }
+
   return (
     <footer className="site-footer">
       <div><span className="footer-kicker">OPEN TO COLLABORATION</span><h2>Let’s make<br />something playable.</h2></div>
-      <div className="footer-links"><a href="mailto:leonzhouziang@gmail.com">Email <span>↗</span></a><a href="https://github.com/Hubr1zz" target="_blank" rel="noreferrer">GitHub <span>↗</span></a><a href="https://leon-zhou.itch.io/" target="_blank" rel="noreferrer">Itch.io <span>↗</span></a><a href="https://52ccdc57-ad3f-47d6-9b83-c35f8ad2c41f.filesusr.com/ugd/2967e1_9d3e636f150d4a08a49e78ff06525b6a.pdf" target="_blank" rel="noreferrer">Résumé <span>↗</span></a></div>
+      <div className="footer-links"><button className="footer-copy" type="button" onClick={copyEmail}><span>leonzhouziang@gmail.com</span><small aria-live="polite">{copyStatus}</small></button><a href="https://github.com/Hubr1zz" target="_blank" rel="noreferrer">GitHub <span>↗</span></a><a href="https://leon-zhou.itch.io/" target="_blank" rel="noreferrer">Itch.io <span>↗</span></a><a href="https://52ccdc57-ad3f-47d6-9b83-c35f8ad2c41f.filesusr.com/ugd/2967e1_9d3e636f150d4a08a49e78ff06525b6a.pdf" target="_blank" rel="noreferrer">Résumé <span>↗</span></a></div>
       <div className="footer-base"><span>LEON ZHOU / PORTFOLIO</span><span>DESIGNED FOR CLARITY · BUILT WITH INTENT</span></div>
     </footer>
   );
 }
 
-function HomePage({ accent, onAccentChange }: { accent: Accent; onAccentChange: (accent: Accent) => void }) {
+function HomePage() {
   return (
     <>
       <section className="hero page-enter" id="top">
@@ -774,17 +792,16 @@ function HomePage({ accent, onAccentChange }: { accent: Accent; onAccentChange: 
         </aside>
         <div className="hero-controls">
           <a className="scroll-cue" href="#work"><span>Explore selected work</span><i aria-hidden="true" /></a>
-          <div className="accent-picker" aria-label="Topographic highlight color">
-            <span>CONTOUR SIGNAL</span>
-            {(["lichen", "ice", "ember"] as Accent[]).map((item) => <button key={item} type="button" className={accent === item ? "active" : ""} onClick={() => onAccentChange(item)} aria-pressed={accent === item}><i aria-hidden="true" />{item}</button>)}
-          </div>
+          <span className="fixed-accent">CONTOUR SIGNAL / AMBER</span>
         </div>
       </section>
 
       <section className="home-work-portal page-enter" id="work">
-        <div className="section-heading"><div><span className="section-index">INDEX / WORK</span><h2>Selected work</h2></div><p>A compact index only. Each category opens as a separate page with its own layout, rhythm, and interaction field.</p></div>
+        <div className="section-heading"><div><span className="section-index">INDEX / WORK</span><h2>Selected work</h2></div><p>Three signature works form the shortest route into my technical and design practice. Two are selected; the final position remains intentionally open.</p></div>
         <div className="portal-grid">
-          {tabs.map((tab, index) => <a className={`portal-card portal-${tab.id} focus-frame`} href={tab.path} key={tab.id}><span>0{index + 1} / {tab.count}</span><h3>{tab.label}</h3><p>{tab.description}</p><strong>OPEN INDEX ↗</strong></a>)}
+          <a className="portal-card portal-technical focus-frame" href="/technical#project-zworkflow"><span>01 / TECHNICAL</span><h3>zWorkFlow</h3><p>An AI-assisted production workflow that turns design intent into reviewable changes, implementation, and traceable project knowledge.</p><strong>OPEN PROJECT ↗</strong></a>
+          <a className="portal-card portal-design focus-frame" href="/design#project-tactics-design"><span>02 / DESIGN</span><h3>Tactical Game Design Document</h3><p>An evolving systems-design project exploring preparation, pressure, progression, and consequence in a tactical game structure.</p><strong>OPEN PROJECT ↗</strong></a>
+          <div className="portal-card portal-pending" aria-label="Third signature project not yet selected"><span>03 / RESERVED</span><h3>Next signature work</h3><p>The third position remains open until another project represents the portfolio at the same level.</p><strong>SELECTION PENDING</strong></div>
         </div>
       </section>
     </>
@@ -827,16 +844,8 @@ function WorkPage({ page }: { page: TabId }) {
 export function Portfolio({ page = "home" }: { page?: PageId }) {
   const shellRef = useRef<HTMLElement>(null);
   const navRef = useRef<HTMLElement>(null);
-  const [accent, setAccent] = useState<Accent>("lichen");
 
   useEffect(() => {
-    try {
-      const savedAccent = window.localStorage.getItem("portfolio-accent") as Accent | null;
-      if (savedAccent === "lichen" || savedAccent === "ice" || savedAccent === "ember") window.requestAnimationFrame(() => setAccent(savedAccent));
-    } catch {
-      // Storage can be unavailable in privacy-restricted contexts; the default remains usable.
-    }
-
     const target = { x: window.innerWidth * .72, y: window.innerHeight * .24 };
     const current = { ...target };
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -883,22 +892,13 @@ export function Portfolio({ page = "home" }: { page?: PageId }) {
     };
   }, []);
 
-  function changeAccent(nextAccent: Accent) {
-    setAccent(nextAccent);
-    try {
-      window.localStorage.setItem("portfolio-accent", nextAccent);
-    } catch {
-      // The visual choice still applies for this page even when storage is blocked.
-    }
-  }
-
   return (
-    <main ref={shellRef} className={`site-shell page-${page} theme-${accent}`} style={{ "--pointer-x": "72vw", "--pointer-y": "24vh", "--pointer-rx": ".22", "--pointer-ry": "-.26" } as CSSProperties}>
+    <main ref={shellRef} className={`site-shell page-${page} theme-amber`} style={{ "--pointer-x": "72vw", "--pointer-y": "24vh", "--pointer-rx": ".22", "--pointer-ry": "-.26" } as CSSProperties}>
       <div className="ambient-grid" aria-hidden="true" />
       <div className="ambient-scan" aria-hidden="true" />
-      <TopographicField accent={accent} />
+      <TopographicField />
       <Navigation page={page} navRef={navRef} />
-      {page === "home" ? <HomePage accent={accent} onAccentChange={changeAccent} /> : <WorkPage page={page} />}
+      {page === "home" ? <HomePage /> : <WorkPage page={page} />}
       <Footer />
     </main>
   );

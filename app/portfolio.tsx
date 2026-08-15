@@ -319,62 +319,15 @@ function ProjectVisual({ project }: { project: Project }) {
   return <div className="system-visual quiet-visual"><span className="visual-label">ARCHIVE / {project.year}</span><strong>{project.index}</strong></div>;
 }
 
-function ProjectMedia({ project }: { project: Project }) {
-  if (project.image) {
-    return (
-      <figure className="title-media">
-        <Image src={project.image} alt={project.imageAlt ?? ""} width={900} height={540} sizes="(max-width: 760px) 100vw, 34vw" unoptimized />
-        <figcaption>PROJECT MEDIA / {project.year}</figcaption>
-      </figure>
-    );
-  }
-
-  return (
-    <div className="title-media media-placeholder" aria-label={`Reserved space for ${project.title} project imagery`}>
-      <span>PROJECT_MEDIA</span>
-      <strong>IMAGE SLOT</strong>
-      <small>16:09 / READY FOR ASSET</small>
-    </div>
-  );
-}
-
-function ProjectCard({ project, release = false }: { project: Project; release?: boolean }) {
+function ProjectCard({ project }: { project: Project }) {
   function trackCardPointer(event: PointerEvent<HTMLElement>) {
     const bounds = event.currentTarget.getBoundingClientRect();
     event.currentTarget.style.setProperty("--local-x", `${event.clientX - bounds.left}px`);
     event.currentTarget.style.setProperty("--local-y", `${event.clientY - bounds.top}px`);
   }
 
-  if (release) {
-    return (
-      <article className="release-card focus-frame" onPointerMove={trackCardPointer}>
-        <div className="release-head">
-          <div className="release-title">
-            <div className="project-meta"><span>{project.index}</span><span>{project.year}</span></div>
-            <p className="project-eyebrow">{project.eyebrow}</p>
-            <h3>{project.title}</h3>
-            <div className="release-links">
-              {project.links.map((link) => <a key={link.href} href={link.href} target="_blank" rel="noreferrer">{link.label}<span aria-hidden="true">↗</span></a>)}
-            </div>
-          </div>
-          <ProjectMedia project={project} />
-        </div>
-        <div className="release-body">
-          <div className="project-copy">
-            <p className="project-description">{project.description}</p>
-            {project.details && <p className="project-details">{project.details}</p>}
-            <ul className="tag-list" aria-label={`${project.title} technologies and disciplines`}>
-              {project.tags.map((tag) => <li key={tag}>{tag}</li>)}
-            </ul>
-          </div>
-          <ProjectVisual project={project} />
-        </div>
-      </article>
-    );
-  }
-
   return (
-    <article className={`project-card focus-frame ${project.featured ? "featured" : ""}`} onPointerMove={trackCardPointer}>
+    <article className="project-card uniform-project-card focus-frame" onPointerMove={trackCardPointer}>
       <div className="project-copy">
         <div className="project-meta"><span>{project.index}</span><span>{project.year}</span></div>
         <p className="project-eyebrow">{project.eyebrow}</p>
@@ -423,51 +376,68 @@ function TopographicField({ accent }: { accent: Accent }) {
     let resizeFrame = 0;
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    function randomFactory(seed: number) {
-      let value = seed >>> 0;
-      return () => {
-        value = (value * 1664525 + 1013904223) >>> 0;
-        return value / 4294967296;
-      };
+    function hash(x: number, y: number) {
+      let value = Math.imul(x, 374761393) + Math.imul(y, 668265263) + 731947;
+      value = Math.imul(value ^ value >>> 13, 1274126177);
+      return ((value ^ value >>> 16) >>> 0) / 4294967295;
     }
 
-    function buildVoronoiPattern() {
+    function smooth(value: number) {
+      return value * value * (3 - 2 * value);
+    }
+
+    function valueNoise(x: number, y: number) {
+      const x0 = Math.floor(x);
+      const y0 = Math.floor(y);
+      const tx = smooth(x - x0);
+      const ty = smooth(y - y0);
+      const a = hash(x0, y0);
+      const b = hash(x0 + 1, y0);
+      const c = hash(x0, y0 + 1);
+      const d = hash(x0 + 1, y0 + 1);
+      const top = a + (b - a) * tx;
+      const bottom = c + (d - c) * tx;
+      return top + (bottom - top) * ty;
+    }
+
+    function fractalNoise(x: number, y: number) {
+      let value = 0;
+      let amplitude = .54;
+      let frequency = 1;
+      let total = 0;
+      for (let octave = 0; octave < 5; octave += 1) {
+        value += valueNoise(x * frequency, y * frequency) * amplitude;
+        total += amplitude;
+        amplitude *= .5;
+        frequency *= 2.03;
+      }
+      return value / total;
+    }
+
+    function buildNoisePattern() {
       viewportWidth = window.innerWidth;
       viewportHeight = window.innerHeight;
-      const densityWidth = Math.min(460, Math.max(280, Math.round(viewportWidth / 4)));
-      const densityHeight = Math.max(180, Math.round(densityWidth * viewportHeight / viewportWidth));
+      const densityWidth = Math.min(720, Math.max(460, Math.round(viewportWidth / 2.5)));
+      const densityHeight = Math.max(260, Math.round(densityWidth * viewportHeight / viewportWidth));
       pattern.width = densityWidth;
       pattern.height = densityHeight;
 
-      const random = randomFactory(731947);
-      const seeds = Array.from({ length: 42 }, () => ({ x: random(), y: random() }));
       const image = patternContext.createImageData(densityWidth, densityHeight);
 
       for (let y = 0; y < densityHeight; y += 1) {
         for (let x = 0; x < densityWidth; x += 1) {
           const nx = x / densityWidth;
           const ny = y / densityHeight;
-          let nearest = Number.POSITIVE_INFINITY;
-          let second = Number.POSITIVE_INFINITY;
-
-          for (const seed of seeds) {
-            const dx = nx - seed.x;
-            const dy = (ny - seed.y) * viewportHeight / viewportWidth;
-            const distance = dx * dx + dy * dy;
-            if (distance < nearest) {
-              second = nearest;
-              nearest = distance;
-            } else if (distance < second) {
-              second = distance;
-            }
-          }
-
-          const terrain = Math.sqrt(nearest) * 10.5 + Math.sqrt(second) * 2.8 + Math.sin(nx * 17 + ny * 11) * .075;
-          const phase = Math.abs((terrain * 5.5 % 1) - .5);
-          const cellEdge = Math.sqrt(second) - Math.sqrt(nearest);
-          const contourAlpha = phase > .455 ? Math.min(120, (phase - .455) * 2700) : 0;
-          const edgeAlpha = cellEdge < .006 ? Math.max(0, 52 - cellEdge * 7000) : 0;
-          const alpha = Math.max(contourAlpha, edgeAlpha);
+          const aspectY = ny * viewportHeight / viewportWidth;
+          const height = fractalNoise(nx * 3.4 + .7, aspectY * 3.4 + 1.9);
+          const contourValue = height * 24;
+          const nearestLevel = Math.round(contourValue);
+          const distanceToLine = Math.abs(contourValue - nearestLevel);
+          const major = Math.abs(nearestLevel) % 3 === 0;
+          const lineWidth = major ? .13 : .07;
+          const antialias = .035;
+          const coverage = Math.max(0, Math.min(1, (lineWidth + antialias - distanceToLine) / antialias));
+          const alpha = coverage * (major ? 190 : 112);
           const offset = (y * densityWidth + x) * 4;
           image.data[offset] = red;
           image.data[offset + 1] = green;
@@ -488,7 +458,7 @@ function TopographicField({ accent }: { accent: Accent }) {
     function draw() {
       context.clearRect(0, 0, viewportWidth, viewportHeight);
       context.globalCompositeOperation = "source-over";
-      context.globalAlpha = .78;
+      context.globalAlpha = .94;
       context.imageSmoothingEnabled = true;
       context.drawImage(pattern, 0, 0, viewportWidth, viewportHeight);
       context.globalCompositeOperation = "destination-in";
@@ -523,12 +493,12 @@ function TopographicField({ accent }: { accent: Accent }) {
     const resize = () => {
       window.cancelAnimationFrame(resizeFrame);
       resizeFrame = window.requestAnimationFrame(() => {
-        buildVoronoiPattern();
+        buildNoisePattern();
         draw();
       });
     };
 
-    buildVoronoiPattern();
+    buildNoisePattern();
     draw();
     window.addEventListener("pointermove", move, { passive: true });
     window.addEventListener("resize", resize, { passive: true });
@@ -616,7 +586,6 @@ function WorkPage({ page }: { page: TabId }) {
         <span className="section-index">WORK INDEX / {meta.count}</span>
         <h1>{meta.label}</h1>
         <p>{meta.description}</p>
-        <div className="page-crosslinks">{tabs.filter((tab) => tab.id !== page).map((tab) => <a href={tab.path} key={tab.id}>{tab.label}<span>↗</span></a>)}</div>
       </section>
 
       <section className="work-page-body project-surface page-enter">
@@ -624,7 +593,7 @@ function WorkPage({ page }: { page: TabId }) {
           <>
             <section className="project-tier release-tier" aria-labelledby="released-heading">
               <div className="tier-heading"><span>01 / RELEASED</span><div><h2 id="released-heading">Published projects</h2><p>Maintained tools and systems intended for use beyond a single prototype.</p></div></div>
-              <div className="release-list">{releasedProjects.map((project) => <ProjectCard project={project} release key={project.id} />)}</div>
+              <div className="release-list">{releasedProjects.map((project) => <ProjectCard project={project} key={project.id} />)}</div>
               <a className="roadmap-slot focus-frame" href="https://github.com/Hubr1zz/ZFramework" target="_blank" rel="noreferrer"><span>NEXT_RELEASE</span><strong>ZFramework</strong><small>IN DEVELOPMENT ↗</small></a>
             </section>
             <section className="project-tier study-tier" aria-labelledby="studies-heading">

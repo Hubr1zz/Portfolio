@@ -45,7 +45,9 @@ test("renders isolated category pages with route-specific metadata", async () =>
     const html = await response.text();
     assert.match(html, new RegExp(`<title>${title}</title>`, "i"));
     assert.match(html, new RegExp(content));
+    assert.match(html, /uniform-project-card/);
     assert.doesNotMatch(html, /<h2>Selected work<\/h2>/i);
+    assert.doesNotMatch(html, /page-crosslinks/);
     assert.doesNotMatch(html, /property="og:image"|name="twitter:image"/i);
   }
 });

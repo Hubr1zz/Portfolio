@@ -362,19 +362,7 @@ function TopographicField({ accent }: { accent: Accent }) {
       ember: [224, 111, 68],
     };
     const [red, green, blue] = colors[accent];
-    const pattern = document.createElement("canvas");
-    const patternContext = pattern.getContext("2d");
-    if (!patternContext) return;
-
-    let viewportWidth = window.innerWidth;
-    let viewportHeight = window.innerHeight;
-    let targetX = viewportWidth * .72;
-    let targetY = viewportHeight * .24;
-    let currentX = targetX;
-    let currentY = targetY;
-    let frame = 0;
     let resizeFrame = 0;
-    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     function hash(x: number, y: number) {
       let value = Math.imul(x, 374761393) + Math.imul(y, 668265263) + 731947;
@@ -414,99 +402,122 @@ function TopographicField({ accent }: { accent: Accent }) {
       return value / total;
     }
 
-    function buildNoisePattern() {
-      viewportWidth = window.innerWidth;
-      viewportHeight = window.innerHeight;
-      const densityWidth = Math.min(720, Math.max(460, Math.round(viewportWidth / 2.5)));
-      const densityHeight = Math.max(260, Math.round(densityWidth * viewportHeight / viewportWidth));
-      pattern.width = densityWidth;
-      pattern.height = densityHeight;
+    type Point = { x: number; y: number };
 
-      const image = patternContext.createImageData(densityWidth, densityHeight);
+    function interpolate(a: Point, b: Point, valueA: number, valueB: number, level: number): Point {
+      const denominator = valueB - valueA;
+      const amount = Math.abs(denominator) < .000001 ? .5 : Math.max(0, Math.min(1, (level - valueA) / denominator));
+      return { x: a.x + (b.x - a.x) * amount, y: a.y + (b.y - a.y) * amount };
+    }
 
-      for (let y = 0; y < densityHeight; y += 1) {
-        for (let x = 0; x < densityWidth; x += 1) {
-          const nx = x / densityWidth;
-          const ny = y / densityHeight;
-          const aspectY = ny * viewportHeight / viewportWidth;
-          const height = fractalNoise(nx * 3.4 + .7, aspectY * 3.4 + 1.9);
-          const contourValue = height * 24;
-          const nearestLevel = Math.round(contourValue);
-          const distanceToLine = Math.abs(contourValue - nearestLevel);
-          const major = Math.abs(nearestLevel) % 3 === 0;
-          const lineWidth = major ? .13 : .07;
-          const antialias = .035;
-          const coverage = Math.max(0, Math.min(1, (lineWidth + antialias - distanceToLine) / antialias));
-          const alpha = coverage * (major ? 190 : 112);
-          const offset = (y * densityWidth + x) * 4;
-          image.data[offset] = red;
-          image.data[offset + 1] = green;
-          image.data[offset + 2] = blue;
-          image.data[offset + 3] = alpha;
+    function segment(path: Path2D, start: Point, end: Point) {
+      path.moveTo(start.x, start.y);
+      path.lineTo(end.x, end.y);
+    }
+
+    function renderContours() {
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+      const spacing = width < 760 ? 9 : 12;
+      const columns = Math.ceil(width / spacing) + 1;
+      const rows = Math.ceil(height / spacing) + 1;
+      const values = new Float32Array(columns * rows);
+      let minimum = Number.POSITIVE_INFINITY;
+      let maximum = Number.NEGATIVE_INFINITY;
+
+      for (let row = 0; row < rows; row += 1) {
+        for (let column = 0; column < columns; column += 1) {
+          const nx = column * spacing / width;
+          const ny = row * spacing / width;
+          const value = fractalNoise(nx * 3.4 + .7, ny * 3.4 + 1.9);
+          values[row * columns + column] = value;
+          minimum = Math.min(minimum, value);
+          maximum = Math.max(maximum, value);
         }
       }
-      patternContext.putImageData(image, 0, 0);
 
-      const ratio = 1;
-      canvas.width = Math.round(viewportWidth * ratio);
-      canvas.height = Math.round(viewportHeight * ratio);
-      canvas.style.width = `${viewportWidth}px`;
-      canvas.style.height = `${viewportHeight}px`;
-      context.setTransform(ratio, 0, 0, ratio, 0, 0);
-    }
+      canvas.width = Math.round(width * pixelRatio);
+      canvas.height = Math.round(height * pixelRatio);
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
+      context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+      context.clearRect(0, 0, width, height);
+      context.lineCap = "round";
+      context.lineJoin = "round";
 
-    function draw() {
-      context.clearRect(0, 0, viewportWidth, viewportHeight);
-      context.globalCompositeOperation = "source-over";
-      context.globalAlpha = .94;
-      context.imageSmoothingEnabled = true;
-      context.drawImage(pattern, 0, 0, viewportWidth, viewportHeight);
-      context.globalCompositeOperation = "destination-in";
-      context.globalAlpha = 1;
-      const radius = Math.min(430, Math.max(260, viewportWidth * .25));
-      const light = context.createRadialGradient(currentX, currentY, radius * .08, currentX, currentY, radius);
-      light.addColorStop(0, "rgba(0,0,0,.96)");
-      light.addColorStop(.46, "rgba(0,0,0,.72)");
-      light.addColorStop(.78, "rgba(0,0,0,.22)");
-      light.addColorStop(1, "rgba(0,0,0,0)");
-      context.fillStyle = light;
-      context.fillRect(0, 0, viewportWidth, viewportHeight);
-      context.globalCompositeOperation = "source-over";
-    }
+      const levelCount = 24;
+      const range = maximum - minimum;
+      for (let levelIndex = 1; levelIndex < levelCount; levelIndex += 1) {
+        const level = minimum + range * levelIndex / levelCount;
+        const path = new Path2D();
 
-    function animate() {
-      currentX += (targetX - currentX) * .082;
-      currentY += (targetY - currentY) * .082;
-      draw();
-      frame = window.requestAnimationFrame(animate);
-    }
+        for (let row = 0; row < rows - 1; row += 1) {
+          for (let column = 0; column < columns - 1; column += 1) {
+            const topLeftValue = values[row * columns + column];
+            const topRightValue = values[row * columns + column + 1];
+            const bottomRightValue = values[(row + 1) * columns + column + 1];
+            const bottomLeftValue = values[(row + 1) * columns + column];
+            const state = (topLeftValue >= level ? 1 : 0) | (topRightValue >= level ? 2 : 0) | (bottomRightValue >= level ? 4 : 0) | (bottomLeftValue >= level ? 8 : 0);
+            if (state === 0 || state === 15) continue;
 
-    const move = (event: globalThis.PointerEvent) => {
-      targetX = event.clientX;
-      targetY = event.clientY;
-      if (reduceMotion) {
-        currentX = targetX;
-        currentY = targetY;
-        draw();
+            const x = column * spacing;
+            const y = row * spacing;
+            const topLeft = { x, y };
+            const topRight = { x: x + spacing, y };
+            const bottomRight = { x: x + spacing, y: y + spacing };
+            const bottomLeft = { x, y: y + spacing };
+            const top = interpolate(topLeft, topRight, topLeftValue, topRightValue, level);
+            const right = interpolate(topRight, bottomRight, topRightValue, bottomRightValue, level);
+            const bottom = interpolate(bottomLeft, bottomRight, bottomLeftValue, bottomRightValue, level);
+            const left = interpolate(topLeft, bottomLeft, topLeftValue, bottomLeftValue, level);
+            const centerIsHigh = (topLeftValue + topRightValue + bottomRightValue + bottomLeftValue) * .25 >= level;
+
+            if (state === 1 || state === 14) segment(path, left, top);
+            else if (state === 2 || state === 13) segment(path, top, right);
+            else if (state === 3 || state === 12) segment(path, left, right);
+            else if (state === 4 || state === 11) segment(path, right, bottom);
+            else if (state === 6 || state === 9) segment(path, top, bottom);
+            else if (state === 7 || state === 8) segment(path, left, bottom);
+            else if (state === 5) {
+              if (centerIsHigh) {
+                segment(path, top, right);
+                segment(path, bottom, left);
+              } else {
+                segment(path, top, left);
+                segment(path, right, bottom);
+              }
+            } else if (state === 10) {
+              if (centerIsHigh) {
+                segment(path, top, left);
+                segment(path, right, bottom);
+              } else {
+                segment(path, top, right);
+                segment(path, bottom, left);
+              }
+            }
+          }
+        }
+
+        const emphasis = levelIndex % 9 === 0 ? 3 : levelIndex % 3 === 0 ? 2 : 1;
+        const alpha = emphasis === 3 ? .52 : emphasis === 2 ? .4 : .24;
+        context.lineWidth = emphasis;
+        context.strokeStyle = `rgba(${red}, ${green}, ${blue}, ${alpha})`;
+        context.stroke(path);
       }
-    };
+    }
+
     const resize = () => {
       window.cancelAnimationFrame(resizeFrame);
       resizeFrame = window.requestAnimationFrame(() => {
-        buildNoisePattern();
-        draw();
+        renderContours();
       });
     };
 
-    buildNoisePattern();
-    draw();
-    window.addEventListener("pointermove", move, { passive: true });
+    renderContours();
     window.addEventListener("resize", resize, { passive: true });
-    if (!reduceMotion) frame = window.requestAnimationFrame(animate);
     return () => {
-      window.removeEventListener("pointermove", move);
       window.removeEventListener("resize", resize);
-      window.cancelAnimationFrame(frame);
       window.cancelAnimationFrame(resizeFrame);
     };
   }, [accent]);

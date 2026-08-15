@@ -447,7 +447,18 @@ button { font: inherit; }
 .header-links a[aria-current="page"]::after { transform: scaleX(1); }
 .nav-proximity { position: absolute; left: 50%; bottom: -19px; transform: translateX(-50%); padding: 5px 10px; color: rgba(233,236,228,.36); background: rgba(8,11,12,.86); font: 7px/1 var(--font-geist-mono), monospace; letter-spacing: .12em; white-space: nowrap; }
 
-.topographic-canvas { position: fixed; inset: 0; z-index: -2; pointer-events: none; opacity: .82; transition: opacity .65s ease, filter .65s ease; }
+.topographic-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  opacity: .92;
+  -webkit-mask-image: radial-gradient(circle 440px at var(--pointer-x) var(--pointer-y), #000 0, rgba(0,0,0,.88) 34%, rgba(0,0,0,.42) 68%, transparent 100%);
+  mask-image: radial-gradient(circle 440px at var(--pointer-x) var(--pointer-y), #000 0, rgba(0,0,0,.88) 34%, rgba(0,0,0,.42) 68%, transparent 100%);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  transition: opacity .65s ease;
+}
 
 .pointer-topography {
   display: none;

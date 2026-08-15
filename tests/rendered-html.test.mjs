@@ -58,7 +58,9 @@ test("renders framed project boards and the updated zWorkFlow tags", async () =>
 
   assert.match(html, /project-board-shell/);
   assert.match(html, /PROJECT_BOARD \/ /);
-  assert.match(html, /Enlarge zWorkFlow system visual/);
+  assert.match(html, /Enlarge image: Reviewed change lifecycle/);
+  assert.match(html, /Enlarge image: Unified 3D and UI routing/);
+  assert.match(html, /CHANGE_LIFECYCLE/);
   assert.match(html, />Unity</);
   assert.doesNotMatch(html, />Python</);
 });

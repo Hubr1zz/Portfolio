@@ -24,6 +24,17 @@ type Project = {
   featured?: boolean;
   tier?: "release" | "study";
 };
+type DiagramId = "workflow-lifecycle" | "workflow-knowledge" | "interaction-routing" | "interaction-typed";
+type BoardItem = {
+  id: string;
+  title: string;
+  description: string;
+  details?: string;
+  image?: string;
+  imageAlt?: string;
+  diagram?: DiagramId;
+  visual?: boolean;
+};
 
 const tabs: { id: TabId; label: string; count: string; description: string; path: string }[] = [
   {
@@ -319,45 +330,167 @@ function ProjectVisual({ project }: { project: Project }) {
   return <div className="system-visual quiet-visual"><span className="visual-label">ARCHIVE / {project.year}</span><strong>{project.index}</strong></div>;
 }
 
-function ProjectBoard({ project }: { project: Project }) {
-  const [selectedItem, setSelectedItem] = useState<number | null>(null);
-  const images = project.gallery ?? (project.image ? [{ src: project.image, alt: project.imageAlt ?? project.title }] : []);
-  const isVisualBoard = images.length === 0;
+function FlowDiagram({ id }: { id: DiagramId }) {
+  if (id === "workflow-lifecycle") {
+    return (
+      <div className="flow-diagram flow-lifecycle" aria-label="zWorkFlow change lifecycle diagram">
+        <span className="flow-kicker">CHANGE_LIFECYCLE</span>
+        <div className="flow-chain"><b>Design docs</b><i>→</i><b>Draft change</b><i>→</i><b>Review</b><i>→</i><b>Approve</b><i>→</i><b>Apply</b><i>→</i><b>Sync + archive</b></div>
+        <p>Human approval remains the gate between design intent and implementation.</p>
+      </div>
+    );
+  }
+
+  if (id === "workflow-knowledge") {
+    return (
+      <div className="flow-diagram flow-network" aria-label="zWorkFlow shared project knowledge diagram">
+        <span className="flow-kicker">SHARED_PROJECT_CONTEXT</span>
+        <div className="flow-inputs"><b>OpenSpec</b><b>Project skills</b><b>Code index</b></div>
+        <i className="flow-line" />
+        <div className="flow-hub"><span>ONE SOURCE</span><strong>WORKBENCH</strong></div>
+        <i className="flow-line" />
+        <div className="flow-outputs"><b>Codex</b><b>Claude</b><b>Cursor + tools</b></div>
+      </div>
+    );
+  }
+
+  if (id === "interaction-routing") {
+    return (
+      <div className="flow-diagram flow-routing" aria-label="Interaction System unified event routing diagram">
+        <span className="flow-kicker">UNIFIED_EVENT_ROUTING</span>
+        <div className="route-sources"><b>Physics raycast<small>3D OBJECT</small></b><b>EventSystem<small>UGUI</small></b></div>
+        <i>↓</i><div className="route-target">IInteractableTarget</div><i>↓</i><div className="route-dispatch">InteractionSystem / dispatch</div>
+        <div className="route-results"><b>FOCUS</b><b>CLICK</b><b>DRAG</b></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flow-diagram flow-typed" aria-label="Interaction System typed drag communication diagram">
+      <span className="flow-kicker">TYPED_DRAG_COMMUNICATION</span>
+      <div className="typed-node"><small>SOURCE</small><b>IDraggable&lt;T&gt;</b><span>Card</span></div>
+      <i>→</i><div className="typed-cache"><small>CACHED MAP</small><strong>T</strong><span>zero runtime reflection</span></div>
+      <i>→</i><div className="typed-node"><small>TARGET</small><b>IFocusable&lt;T&gt;</b><span>Slot</span></div>
+      <p>ENTER · STAY · RELEASE · LEAVE</p>
+    </div>
+  );
+}
+
+function getBoardItems(project: Project): BoardItem[] {
+  if (project.id === "zworkflow") {
+    return [
+      {
+        id: "change-lifecycle",
+        title: "Reviewed change lifecycle",
+        description: "Design intent is converted into a Draft Change, reviewed by a person, then approved before implementation begins.",
+        details: "Apply updates code and validation records without silently rewriting the formal specification. A deliberate sync merges the approved delta into the project contract, and only completed, synchronized work can be archived.",
+        diagram: "workflow-lifecycle",
+      },
+      {
+        id: "shared-context",
+        title: "Shared project context",
+        description: "Different AI tools work from the same OpenSpec records, project skills, code evidence, and design documents.",
+        details: "Thin tool-specific adapters point Codex, Claude Code, Cursor, and other supported agents at one shared source of truth. The Unity Workbench exposes review status, dependencies, blockers, translations, and implementation evidence without duplicating the workflow.",
+        diagram: "workflow-knowledge",
+      },
+    ];
+  }
+
+  if (project.id === "interaction") {
+    return [
+      {
+        id: "unified-routing",
+        title: "Unified 3D and UI routing",
+        description: "Physics raycasts and Unity EventSystem events converge on the same IInteractableTarget contract.",
+        details: "InteractionSystem does not need to know whether a target originated in world space or UI. It dispatches both paths to composable Behaviour classes that implement Focus, Click, or Drag responsibilities.",
+        diagram: "interaction-routing",
+      },
+      {
+        id: "typed-drag",
+        title: "Typed drag communication",
+        description: "Generic drag and focus interfaces let a source and target exchange strongly typed context—for example, a card and its receiving slot.",
+        details: "Generic method mappings are discovered and cached at startup. Runtime dispatch then avoids reflection while still delivering enter, stay, release, and leave callbacks with the correct target data.",
+        diagram: "interaction-typed",
+      },
+    ];
+  }
+
+  if (project.id === "procedural-motion") {
+    return [{
+      id: "locomotion-capture",
+      title: "Procedural locomotion prototype",
+      description: "A locomotion test that combines sphere casts, fixed raycasts, phase offsets, and Cinemachine camera control.",
+      details: "A sphere cast searches for a foot landing area and a raycast rejects positions blocked by obstacles. The search rotates through alternative angles until it finds a valid foothold; if none exists, movement stops. Per-leg phase differences prevent simultaneous steps, while the body interpolates between the average foot position and a predicted movement position.",
+      image: project.image,
+      imageAlt: project.imageAlt,
+    }];
+  }
+
+  if (project.id === "rendering-studies" && project.gallery) {
+    const explanations = [
+      {
+        title: "Stylized grass in Unity",
+        description: "A Shader Graph recreation of the stylized lawn study, including vertex animation and authored lighting response.",
+        details: "The source grass was built in Blender with Geometry Nodes and baked normals so the lawn would not read as a flat sheet under lighting. The Unity version rebuilds the look as a real-time shader; later exploration targets GPU instancing and a mask-painting workflow.",
+      },
+      {
+        title: "Depth-based water and caustics",
+        description: "A stylized water surface built by comparing screen-space depth with reconstructed world-space distance.",
+        details: "World coordinates are reconstructed from the depth buffer and used to sample noise for the caustics. This lets shoreline edges, depth transitions, and the projected light pattern respond to the scene rather than to a fixed texture placement.",
+      },
+      {
+        title: "Wind-shaped desert",
+        description: "A Journey-inspired sand study using a custom HLSL shader and particle-driven wind cues.",
+        details: "The broad terrain undulation is authored in Blender. A custom sand shader and vertex animation add the smaller moving response, while particles provide readable wind direction and rhythm across the scene.",
+      },
+      {
+        title: "Geometry Nodes grass source",
+        description: "The authored Blender source used to study grass distribution, silhouette, and lighting before rebuilding the effect in Unity.",
+        details: "Geometry Nodes distributes the grass procedurally, while baked normals soften the lighting across individual blades. This source establishes the visual target for the later Shader Graph implementation.",
+      },
+    ];
+
+    return project.gallery.map((image, index) => ({ id: `image-${index}`, ...explanations[index], image: image.src, imageAlt: image.alt }));
+  }
+
+  if (project.gallery) return project.gallery.map((image, index) => ({ id: `image-${index}`, title: image.alt, description: image.alt, image: image.src, imageAlt: image.alt }));
+  if (project.image) return [{ id: "image-0", title: project.imageAlt ?? project.title, description: project.imageAlt ?? "", image: project.image, imageAlt: project.imageAlt ?? project.title }];
+  return [{ id: "system-visual", title: project.eyebrow, description: project.description, details: project.details, visual: true }];
+}
+
+function BoardArtwork({ item, project }: { item: BoardItem; project: Project }) {
+  if (item.diagram) return <FlowDiagram id={item.diagram} />;
+  if (item.image) return <Image src={item.image} alt={item.imageAlt ?? item.title} width={1600} height={1000} sizes="(max-width: 760px) 96vw, 58vw" unoptimized />;
+  return <ProjectVisual project={project} />;
+}
+
+function ProjectBoard({ project, items, selectedIndex, onSelect }: { project: Project; items: BoardItem[]; selectedIndex: number | null; onSelect: (index: number | null) => void }) {
+  const selectedItem = selectedIndex === null ? null : items[selectedIndex];
 
   return (
     <div className="project-board-shell">
-      <div className={`project-board ${selectedItem !== null ? "is-detail" : "is-preview"}`}>
+      <div className={`project-board ${selectedItem ? "is-detail" : "is-preview"}`}>
         <div className="board-toolbar">
           <span>PROJECT_BOARD / {project.index}</span>
-          <span>{images.length || 1} ITEM{images.length === 1 || isVisualBoard ? "" : "S"}</span>
+          <span>{items.length} ITEM{items.length === 1 ? "" : "S"}</span>
         </div>
 
-        {selectedItem === null ? (
-          <div className={`board-preview-grid board-count-${Math.min(images.length || 1, 4)}`}>
-            {isVisualBoard ? (
-              <button className="board-item board-vector-item" type="button" onClick={() => setSelectedItem(0)} aria-label={`Enlarge ${project.title} system visual`}>
-                <div className="board-vector-canvas"><ProjectVisual project={project} /></div>
-                <span><b>FIG. 01</b>{project.eyebrow}</span>
-              </button>
-            ) : images.map((image, index) => (
-              <button className="board-item" type="button" key={image.src} onClick={() => setSelectedItem(index)} aria-label={`Enlarge image: ${image.alt}`}>
-                <Image src={image.src} alt={image.alt} width={1200} height={720} sizes="(max-width: 760px) 86vw, 38vw" unoptimized />
-                <span><b>FIG. {String(index + 1).padStart(2, "0")}</b>{image.alt}</span>
+        {!selectedItem ? (
+          <div className={`board-preview-grid board-count-${Math.min(items.length, 4)}`}>
+            {items.map((item, index) => (
+              <button className={`board-item ${item.image ? "" : "board-vector-item"}`} type="button" key={item.id} onClick={() => onSelect(index)} aria-label={`Enlarge image: ${item.title}`}>
+                <div className="board-artwork"><BoardArtwork item={item} project={project} /></div>
+                <span><b>FIG. {String(index + 1).padStart(2, "0")}</b>{item.title}</span>
               </button>
             ))}
             <p className="board-hint">SELECT IMAGE TO INSPECT</p>
           </div>
         ) : (
           <div className="board-detail">
-            <button className="board-back" type="button" onClick={() => setSelectedItem(null)} aria-label="Back to project board">
+            <button className="board-back" type="button" onClick={() => onSelect(null)} aria-label="Back to project board">
               <span aria-hidden="true">←</span> BACK TO BOARD
             </button>
-            <div className={`board-detail-media ${isVisualBoard ? "is-vector" : ""}`}>
-              {isVisualBoard ? <ProjectVisual project={project} /> : (
-                <Image src={images[selectedItem].src} alt={images[selectedItem].alt} width={1600} height={1000} sizes="(max-width: 760px) 90vw, 55vw" unoptimized />
-              )}
-            </div>
-            <p><b>FIG. {String(selectedItem + 1).padStart(2, "0")}</b>{isVisualBoard ? project.eyebrow : images[selectedItem].alt}</p>
+            <div className={`board-detail-media ${selectedItem.image ? "" : "is-vector"}`}><BoardArtwork item={selectedItem} project={project} /></div>
           </div>
         )}
       </div>
@@ -366,6 +499,9 @@ function ProjectBoard({ project }: { project: Project }) {
 }
 
 function ProjectCard({ project }: { project: Project }) {
+  const boardItems = getBoardItems(project);
+  const [selectedBoardIndex, setSelectedBoardIndex] = useState<number | null>(null);
+  const selectedBoardItem = selectedBoardIndex === null ? null : boardItems[selectedBoardIndex];
   const cardRef = useRef<HTMLElement>(null);
   const cardBounds = useRef<DOMRect | null>(null);
   const pendingPointer = useRef<{ x: number; y: number } | null>(null);
@@ -399,8 +535,11 @@ function ProjectCard({ project }: { project: Project }) {
         <div className="project-meta"><span>{project.index}</span><span>{project.year}</span></div>
         <p className="project-eyebrow">{project.eyebrow}</p>
         <h3>{project.title}</h3>
-        <p className="project-description">{project.description}</p>
-        {project.details && <p className="project-details">{project.details}</p>}
+        <div className="project-copy-transition" key={selectedBoardItem?.id ?? "project-overview"}>
+          {selectedBoardItem && <p className="project-figure-label">FIG. {String((selectedBoardIndex ?? 0) + 1).padStart(2, "0")} / {selectedBoardItem.title}</p>}
+          <p className="project-description">{selectedBoardItem?.description ?? project.description}</p>
+          {(selectedBoardItem?.details ?? project.details) ? <p className="project-details">{selectedBoardItem?.details ?? project.details}</p> : <p className="project-details project-details-empty" aria-hidden="true" />}
+        </div>
         <ul className="tag-list" aria-label={`${project.title} technologies and disciplines`}>
           {project.tags.map((tag) => <li key={tag}>{tag}</li>)}
         </ul>
@@ -408,7 +547,7 @@ function ProjectCard({ project }: { project: Project }) {
           {project.links.map((link) => <a key={link.href} href={link.href} target="_blank" rel="noreferrer">{link.label}<span aria-hidden="true">↗</span></a>)}
         </div>
       </div>
-      <ProjectBoard project={project} />
+      <ProjectBoard project={project} items={boardItems} selectedIndex={selectedBoardIndex} onSelect={setSelectedBoardIndex} />
     </article>
   );
 }

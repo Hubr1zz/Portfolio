@@ -61,7 +61,7 @@ const projects: Record<TabId, Project[]> = {
         "A shared workflow that turns game design documents into reviewable specifications, implementation plans, and traceable technical decisions.",
       details:
         "The system coordinates multiple AI coding tools around one source of truth, keeps design intent separate from implementation, and exposes dependency graphs, blockers, and change history through a Unity-based workbench.",
-      tags: ["Python", "Unity", "OpenSpec", "Tooling", "Bilingual"],
+      tags: ["Unity", "OpenSpec", "Tooling", "Bilingual"],
       links: [{ label: "GitHub repository", href: "https://github.com/Hubr1zz/zWorkFlow" }],
       visual: "workflow",
       featured: true,
@@ -319,15 +319,82 @@ function ProjectVisual({ project }: { project: Project }) {
   return <div className="system-visual quiet-visual"><span className="visual-label">ARCHIVE / {project.year}</span><strong>{project.index}</strong></div>;
 }
 
+function ProjectBoard({ project }: { project: Project }) {
+  const [selectedItem, setSelectedItem] = useState<number | null>(null);
+  const images = project.gallery ?? (project.image ? [{ src: project.image, alt: project.imageAlt ?? project.title }] : []);
+  const isVisualBoard = images.length === 0;
+
+  return (
+    <div className="project-board-shell">
+      <div className={`project-board ${selectedItem !== null ? "is-detail" : "is-preview"}`}>
+        <div className="board-toolbar">
+          <span>PROJECT_BOARD / {project.index}</span>
+          <span>{images.length || 1} ITEM{images.length === 1 || isVisualBoard ? "" : "S"}</span>
+        </div>
+
+        {selectedItem === null ? (
+          <div className={`board-preview-grid board-count-${Math.min(images.length || 1, 4)}`}>
+            {isVisualBoard ? (
+              <button className="board-item board-vector-item" type="button" onClick={() => setSelectedItem(0)} aria-label={`Enlarge ${project.title} system visual`}>
+                <div className="board-vector-canvas"><ProjectVisual project={project} /></div>
+                <span><b>FIG. 01</b>{project.eyebrow}</span>
+              </button>
+            ) : images.map((image, index) => (
+              <button className="board-item" type="button" key={image.src} onClick={() => setSelectedItem(index)} aria-label={`Enlarge image: ${image.alt}`}>
+                <Image src={image.src} alt={image.alt} width={1200} height={720} sizes="(max-width: 760px) 86vw, 38vw" unoptimized />
+                <span><b>FIG. {String(index + 1).padStart(2, "0")}</b>{image.alt}</span>
+              </button>
+            ))}
+            <p className="board-hint">SELECT IMAGE TO INSPECT</p>
+          </div>
+        ) : (
+          <div className="board-detail">
+            <button className="board-back" type="button" onClick={() => setSelectedItem(null)} aria-label="Back to project board">
+              <span aria-hidden="true">←</span> BACK TO BOARD
+            </button>
+            <div className={`board-detail-media ${isVisualBoard ? "is-vector" : ""}`}>
+              {isVisualBoard ? <ProjectVisual project={project} /> : (
+                <Image src={images[selectedItem].src} alt={images[selectedItem].alt} width={1600} height={1000} sizes="(max-width: 760px) 90vw, 55vw" unoptimized />
+              )}
+            </div>
+            <p><b>FIG. {String(selectedItem + 1).padStart(2, "0")}</b>{isVisualBoard ? project.eyebrow : images[selectedItem].alt}</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function ProjectCard({ project }: { project: Project }) {
+  const cardRef = useRef<HTMLElement>(null);
+  const cardBounds = useRef<DOMRect | null>(null);
+  const pendingPointer = useRef<{ x: number; y: number } | null>(null);
+  const pointerFrame = useRef(0);
+
+  useEffect(() => () => window.cancelAnimationFrame(pointerFrame.current), []);
+
+  function cacheCardBounds(event: PointerEvent<HTMLElement>) {
+    cardBounds.current = event.currentTarget.getBoundingClientRect();
+  }
+
   function trackCardPointer(event: PointerEvent<HTMLElement>) {
-    const bounds = event.currentTarget.getBoundingClientRect();
-    event.currentTarget.style.setProperty("--local-x", `${event.clientX - bounds.left}px`);
-    event.currentTarget.style.setProperty("--local-y", `${event.clientY - bounds.top}px`);
+    pendingPointer.current = { x: event.clientX, y: event.clientY };
+    if (pointerFrame.current) return;
+
+    pointerFrame.current = window.requestAnimationFrame(() => {
+      pointerFrame.current = 0;
+      const bounds = cardBounds.current;
+      const pointer = pendingPointer.current;
+      const card = cardRef.current;
+      if (!bounds || !pointer || !card) return;
+
+      card.style.setProperty("--local-x", `${pointer.x - bounds.left}px`);
+      card.style.setProperty("--local-y", `${pointer.y - bounds.top}px`);
+    });
   }
 
   return (
-    <article className="project-card uniform-project-card focus-frame" onPointerMove={trackCardPointer}>
+    <article ref={cardRef} className="project-card uniform-project-card focus-frame" onPointerEnter={cacheCardBounds} onPointerMove={trackCardPointer}>
       <div className="project-copy">
         <div className="project-meta"><span>{project.index}</span><span>{project.year}</span></div>
         <p className="project-eyebrow">{project.eyebrow}</p>
@@ -341,7 +408,7 @@ function ProjectCard({ project }: { project: Project }) {
           {project.links.map((link) => <a key={link.href} href={link.href} target="_blank" rel="noreferrer">{link.label}<span aria-hidden="true">↗</span></a>)}
         </div>
       </div>
-      <ProjectVisual project={project} />
+      <ProjectBoard project={project} />
     </article>
   );
 }
@@ -499,8 +566,8 @@ function TopographicField({ accent }: { accent: Accent }) {
           }
         }
 
-        const emphasis = levelIndex % 9 === 0 ? 3 : levelIndex % 3 === 0 ? 2 : 1;
-        const alpha = emphasis === 3 ? .52 : emphasis === 2 ? .4 : .24;
+        const emphasis = levelIndex % 9 === 0 ? 2 : levelIndex % 3 === 0 ? 1.5 : 1;
+        const alpha = emphasis === 2 ? .48 : emphasis === 1.5 ? .36 : .24;
         context.lineWidth = emphasis;
         context.strokeStyle = `rgba(${red}, ${green}, ${blue}, ${alpha})`;
         context.stroke(path);

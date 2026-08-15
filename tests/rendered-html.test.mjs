@@ -51,3 +51,14 @@ test("renders isolated category pages with route-specific metadata", async () =>
     assert.doesNotMatch(html, /property="og:image"|name="twitter:image"/i);
   }
 });
+
+test("renders framed project boards and the updated zWorkFlow tags", async () => {
+  const response = await render("/technical");
+  const html = await response.text();
+
+  assert.match(html, /project-board-shell/);
+  assert.match(html, /PROJECT_BOARD \/ /);
+  assert.match(html, /Enlarge zWorkFlow system visual/);
+  assert.match(html, />Unity</);
+  assert.doesNotMatch(html, />Python</);
+});

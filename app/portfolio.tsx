@@ -464,8 +464,9 @@ function BoardArtwork({ item, project }: { item: BoardItem; project: Project }) 
   return <ProjectVisual project={project} />;
 }
 
-function ProjectBoard({ project, items, selectedIndex, onSelect }: { project: Project; items: BoardItem[]; selectedIndex: number | null; onSelect: (index: number | null) => void }) {
+function ProjectBoard({ project, items, selectedIndex, displayedIndex, onSelect }: { project: Project; items: BoardItem[]; selectedIndex: number | null; displayedIndex: number; onSelect: (index: number | null) => void }) {
   const selectedItem = selectedIndex === null ? null : items[selectedIndex];
+  const displayedItem = items[displayedIndex];
 
   return (
     <div className="project-board-shell">
@@ -475,8 +476,8 @@ function ProjectBoard({ project, items, selectedIndex, onSelect }: { project: Pr
           <span>{items.length} ITEM{items.length === 1 ? "" : "S"}</span>
         </div>
 
-        {!selectedItem ? (
-          <div className={`board-preview-grid board-count-${Math.min(items.length, 4)}`}>
+        <div className="board-stage">
+          <div className={`board-preview-grid board-count-${Math.min(items.length, 4)}`} aria-hidden={selectedItem ? true : undefined} inert={selectedItem ? true : undefined}>
             {items.map((item, index) => (
               <button className={`board-item ${item.image ? "" : "board-vector-item"}`} type="button" key={item.id} onClick={() => onSelect(index)} aria-label={`Enlarge image: ${item.title}`}>
                 <div className="board-artwork"><BoardArtwork item={item} project={project} /></div>
@@ -485,14 +486,13 @@ function ProjectBoard({ project, items, selectedIndex, onSelect }: { project: Pr
             ))}
             <p className="board-hint">SELECT IMAGE TO INSPECT</p>
           </div>
-        ) : (
-          <div className="board-detail">
+          <div className="board-detail" aria-hidden={!selectedItem} inert={!selectedItem}>
             <button className="board-back" type="button" onClick={() => onSelect(null)} aria-label="Back to project board">
               <span aria-hidden="true">←</span> BACK TO BOARD
             </button>
-            <div className={`board-detail-media ${selectedItem.image ? "" : "is-vector"}`}><BoardArtwork item={selectedItem} project={project} /></div>
+            <div className={`board-detail-media ${displayedItem.image ? "" : "is-vector"}`}><BoardArtwork item={displayedItem} project={project} /></div>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
@@ -501,7 +501,9 @@ function ProjectBoard({ project, items, selectedIndex, onSelect }: { project: Pr
 function ProjectCard({ project }: { project: Project }) {
   const boardItems = getBoardItems(project);
   const [selectedBoardIndex, setSelectedBoardIndex] = useState<number | null>(null);
-  const selectedBoardItem = selectedBoardIndex === null ? null : boardItems[selectedBoardIndex];
+  const [displayedBoardIndex, setDisplayedBoardIndex] = useState(0);
+  const selectedBoardItem = selectedBoardIndex === null ? null : boardItems[displayedBoardIndex];
+  const displayedBoardItem = boardItems[displayedBoardIndex];
   const cardRef = useRef<HTMLElement>(null);
   const cardBounds = useRef<DOMRect | null>(null);
   const pendingPointer = useRef<{ x: number; y: number } | null>(null);
@@ -529,34 +531,39 @@ function ProjectCard({ project }: { project: Project }) {
     });
   }
 
+  function selectBoardItem(index: number | null) {
+    if (index !== null) setDisplayedBoardIndex(index);
+    setSelectedBoardIndex(index);
+  }
+
   return (
     <article id={`project-${project.id}`} ref={cardRef} className="project-card uniform-project-card focus-frame" onPointerEnter={cacheCardBounds} onPointerMove={trackCardPointer}>
-      <div className="project-copy">
-        <div className="project-meta"><span>{project.index}</span><span>{project.year}</span></div>
-        <p className="project-eyebrow">{project.eyebrow}</p>
-        <h3>{project.title}</h3>
-        <p className="project-description">{project.description}</p>
-        {project.details && <p className="project-details">{project.details}</p>}
-        {selectedBoardItem && (
-          <div className="project-insight-insert" key={selectedBoardItem.id}>
-            <div>
-              <section className="project-image-insight" aria-label={`Details for ${selectedBoardItem.title}`}>
-                <span>SELECTED MEDIA / FIG. {String((selectedBoardIndex ?? 0) + 1).padStart(2, "0")}</span>
-                <h4>{selectedBoardItem.title}</h4>
-                <p>{selectedBoardItem.description}</p>
-                {selectedBoardItem.details && <p>{selectedBoardItem.details}</p>}
-              </section>
+      <div className={`project-copy ${selectedBoardItem ? "is-detail" : "is-overview"}`}>
+        <div className="project-copy-stage">
+          <div className="project-copy-panel project-copy-overview" aria-hidden={selectedBoardItem ? true : undefined} inert={selectedBoardItem ? true : undefined}>
+            <div className="project-meta"><span>{project.index}</span><span>{project.year}</span></div>
+            <p className="project-eyebrow">{project.eyebrow}</p>
+            <h3>{project.title}</h3>
+            <p className="project-description">{project.description}</p>
+            {project.details && <p className="project-details">{project.details}</p>}
+            <ul className="tag-list" aria-label={`${project.title} technologies and disciplines`}>
+              {project.tags.map((tag) => <li key={tag}>{tag}</li>)}
+            </ul>
+            <div className="project-links">
+              {project.links.map((link) => <a key={link.href} href={link.href} target="_blank" rel="noreferrer">{link.label}<span aria-hidden="true">↗</span></a>)}
             </div>
           </div>
-        )}
-        <ul className="tag-list" aria-label={`${project.title} technologies and disciplines`}>
-          {project.tags.map((tag) => <li key={tag}>{tag}</li>)}
-        </ul>
-        <div className="project-links">
-          {project.links.map((link) => <a key={link.href} href={link.href} target="_blank" rel="noreferrer">{link.label}<span aria-hidden="true">↗</span></a>)}
+          <section className="project-copy-panel project-copy-detail" aria-label={`Details for ${displayedBoardItem.title}`} aria-hidden={!selectedBoardItem} inert={!selectedBoardItem}>
+            <div className="project-meta"><span>FIG. {String(displayedBoardIndex + 1).padStart(2, "0")}</span><span>MEDIA DETAIL</span></div>
+            <p className="project-eyebrow">{project.title} / SELECTED MEDIA</p>
+            <h3>{displayedBoardItem.title}</h3>
+            <p className="project-description">{displayedBoardItem.description}</p>
+            {displayedBoardItem.details && <p className="project-details">{displayedBoardItem.details}</p>}
+            <div className="project-detail-context"><span>PROJECT</span><strong>{project.title}</strong></div>
+          </section>
         </div>
       </div>
-      <ProjectBoard project={project} items={boardItems} selectedIndex={selectedBoardIndex} onSelect={setSelectedBoardIndex} />
+      <ProjectBoard project={project} items={boardItems} selectedIndex={selectedBoardIndex} displayedIndex={displayedBoardIndex} onSelect={selectBoardItem} />
     </article>
   );
 }

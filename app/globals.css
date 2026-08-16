@@ -560,6 +560,31 @@ button { font: inherit; }
 }
 .uniform-project-card:nth-child(2n) { border-right: 1px solid var(--line); }
 .uniform-project-card .project-copy { min-height: 480px; padding: 38px; }
+.project-copy { display: grid; align-items: stretch; }
+.project-copy-stage { width: 100%; min-height: 100%; display: grid; }
+.project-copy-panel {
+  min-width: 0;
+  width: 100%;
+  grid-area: 1 / 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  will-change: opacity, transform;
+  transition: opacity .34s cubic-bezier(.4,0,1,1), transform .46s cubic-bezier(.4,0,1,1), visibility 0s linear .46s;
+}
+.project-copy-overview { opacity: 1; transform: translateY(0) scale(1); visibility: visible; }
+.project-copy-detail { opacity: 0; transform: translateY(18px) scale(.985); visibility: hidden; pointer-events: none; }
+.project-copy.is-detail .project-copy-overview { opacity: 0; transform: translateY(-18px) scale(.985); visibility: hidden; pointer-events: none; }
+.project-copy.is-overview .project-copy-overview { transition: opacity .48s .08s cubic-bezier(.16,1,.3,1), transform .7s .04s cubic-bezier(.16,1,.3,1), visibility 0s; }
+.project-copy.is-detail .project-copy-detail {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  visibility: visible;
+  pointer-events: auto;
+  transition: opacity .48s .08s cubic-bezier(.16,1,.3,1), transform .7s .04s cubic-bezier(.16,1,.3,1), visibility 0s;
+}
+.project-detail-context { width: 100%; margin-top: auto; padding-top: 34px; display: flex; justify-content: space-between; gap: 18px; border-top: 1px solid var(--line); color: var(--muted); font: 8px/1 var(--font-geist-mono), monospace; letter-spacing: .1em; }
+.project-detail-context strong { color: var(--paper); font-weight: 480; }
 .uniform-project-card .project-meta { margin-bottom: 42px; }
 .uniform-project-card h3 { font-size: clamp(38px, 4vw, 62px); }
 .uniform-project-card > .system-visual,
@@ -603,6 +628,7 @@ button { font: inherit; }
   display: grid;
   grid-template-rows: 38px minmax(0, 1fr);
 }
+.board-stage { min-width: 0; min-height: 0; position: relative; overflow: hidden; }
 .project-board::before, .project-board::after {
   content: "";
   position: absolute;
@@ -634,9 +660,15 @@ button { font: inherit; }
   grid-auto-rows: minmax(0, 1fr);
   gap: 20px;
   align-content: center;
-  position: relative;
-  animation: boardViewIn .42s cubic-bezier(.16,1,.3,1) both;
+  position: absolute;
+  inset: 0;
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  visibility: visible;
+  will-change: opacity, transform;
+  transition: opacity .46s .06s cubic-bezier(.16,1,.3,1), transform .64s cubic-bezier(.16,1,.3,1), visibility 0s;
 }
+.project-board.is-detail .board-preview-grid { opacity: 0; transform: translateY(-10px) scale(.985); visibility: hidden; pointer-events: none; transition: opacity .28s cubic-bezier(.4,0,1,1), transform .42s cubic-bezier(.4,0,1,1), visibility 0s linear .42s; }
 .board-preview-grid.board-count-1 { grid-template-columns: minmax(0, 86%); justify-content: center; }
 .board-item {
   min-width: 0;
@@ -699,9 +731,16 @@ button { font: inherit; }
   height: 100%;
   padding: 42px 0 0;
   display: block;
-  position: relative;
-  animation: boardViewIn .42s cubic-bezier(.16,1,.3,1) both;
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transform: translateY(12px) scale(.985);
+  visibility: hidden;
+  pointer-events: none;
+  will-change: opacity, transform;
+  transition: opacity .28s cubic-bezier(.4,0,1,1), transform .42s cubic-bezier(.4,0,1,1), visibility 0s linear .42s;
 }
+.project-board.is-detail .board-detail { opacity: 1; transform: translateY(0) scale(1); visibility: visible; pointer-events: auto; transition: opacity .46s .06s cubic-bezier(.16,1,.3,1), transform .64s cubic-bezier(.16,1,.3,1), visibility 0s; }
 .board-back {
   position: absolute;
   z-index: 5;
@@ -732,17 +771,6 @@ button { font: inherit; }
 .board-detail-media img { width: 100%; height: 100%; display: block; object-fit: contain; object-position: center; }
 .board-detail-media.is-vector { background: #080b0c; }
 .board-detail-media .system-visual { width: 100%; height: 100%; min-height: 0; }
-@keyframes boardViewIn { from { opacity: 0; transform: translateY(8px) scale(.992); } to { opacity: 1; transform: translateY(0) scale(1); } }
-
-.project-insight-insert { width: 100%; display: grid; grid-template-rows: 0fr; animation: insightInsert .68s cubic-bezier(.16,1,.3,1) forwards; }
-.project-insight-insert > div { min-height: 0; overflow: hidden; }
-.project-image-insight { margin-top: 26px; padding: 22px 22px 24px; border: 1px solid var(--line); border-left: 2px solid var(--contour-strong); background: rgba(255,255,255,.018); opacity: 0; transform: translateY(-10px); animation: insightContentIn .52s .12s cubic-bezier(.16,1,.3,1) forwards; }
-.project-image-insight > span { display: block; margin-bottom: 15px; color: var(--contour-strong); font: 7px/1 var(--font-geist-mono), monospace; letter-spacing: .1em; }
-.project-image-insight h4 { margin: 0 0 14px; color: var(--paper); font-size: 19px; font-weight: 520; letter-spacing: -.025em; }
-.project-image-insight p { margin: 0; color: #c6cbc4; font-size: 13px; line-height: 1.65; }
-.project-image-insight p + p { margin-top: 12px; color: var(--muted); }
-@keyframes insightInsert { to { grid-template-rows: 1fr; } }
-@keyframes insightContentIn { to { opacity: 1; transform: translateY(0); } }
 
 .flow-diagram { width: 100%; height: 100%; min-height: 0; position: relative; overflow: hidden; background-color: #0a0e0f; background-image: radial-gradient(circle, rgba(233,236,228,.1) 0 1px, transparent 1.4px); background-size: 18px 18px; color: #dce1da; font-family: var(--font-geist-mono), monospace; }
 .flow-diagram::after { content: ""; position: absolute; inset: 12px; border: 1px solid rgba(233,236,228,.13); pointer-events: none; }

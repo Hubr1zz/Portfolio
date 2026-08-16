@@ -550,7 +550,7 @@ function ProjectCard({ project }: { project: Project }) {
               {project.tags.map((tag) => <li key={tag}>{tag}</li>)}
             </ul>
             <div className="project-links">
-              {project.links.map((link) => <a key={link.href} href={link.href} target="_blank" rel="noreferrer">{link.label}<span aria-hidden="true">↗</span></a>)}
+              {project.links.map((link) => <a key={link.href} href={link.href} target="_blank" rel="noreferrer"><span className="hover-shift-label"><span>{link.label}</span><span aria-hidden="true">↗</span></span></a>)}
             </div>
           </div>
           <section className="project-copy-panel project-copy-detail" aria-label={`Details for ${displayedBoardItem.title}`} aria-hidden={!selectedBoardItem} inert={!selectedBoardItem}>
@@ -764,8 +764,8 @@ function Navigation({ page, navRef }: { page: PageId; navRef: RefObject<HTMLElem
     <header className="site-header nav-visible at-page-top" ref={navRef}>
       <a className="brand" href="/" aria-label="Leon Zhou portfolio home"><span className="brand-mark">LZ</span><span className="brand-label">PORTFOLIO / 2026</span></a>
       <nav className="header-links" aria-label="Primary navigation">
-        <a href="/" aria-current={page === "home" ? "page" : undefined}>Home</a>
-        {tabs.map((tab) => <a key={tab.id} href={tab.path} aria-current={page === tab.id ? "page" : undefined}>{tab.id === "technical" ? "Technical" : tab.id === "games" ? "Games" : "Design"}</a>)}
+        <a href="/" aria-current={page === "home" ? "page" : undefined}><span className="hover-shift-label">Home</span></a>
+        {tabs.map((tab) => <a key={tab.id} href={tab.path} aria-current={page === tab.id ? "page" : undefined}><span className="hover-shift-label">{tab.id === "technical" ? "Technical" : tab.id === "games" ? "Games" : "Design"}</span></a>)}
       </nav>
       <span className="nav-proximity">MOVE TO TOP / NAV</span>
     </header>
@@ -792,7 +792,7 @@ function Footer() {
   return (
     <footer className="site-footer">
       <div><span className="footer-kicker">OPEN TO COLLABORATION</span><h2>Let’s make<br />something playable.</h2></div>
-      <div className="footer-links"><button className="footer-copy" type="button" onClick={copyEmail}><span>leonzhouziang@gmail.com</span><small aria-live="polite">{copyStatus}</small></button><a href="https://github.com/Hubr1zz" target="_blank" rel="noreferrer">GitHub <span>↗</span></a><a href="https://leon-zhou.itch.io/" target="_blank" rel="noreferrer">Itch.io <span>↗</span></a><a href="https://52ccdc57-ad3f-47d6-9b83-c35f8ad2c41f.filesusr.com/ugd/2967e1_9d3e636f150d4a08a49e78ff06525b6a.pdf" target="_blank" rel="noreferrer">Résumé <span>↗</span></a></div>
+      <div className="footer-links"><button className="footer-copy" type="button" onClick={copyEmail}><span className="hover-shift-label"><span>leonzhouziang@gmail.com</span><small aria-live="polite">{copyStatus}</small></span></button><a href="https://github.com/Hubr1zz" target="_blank" rel="noreferrer"><span className="hover-shift-label"><span>GitHub</span><span aria-hidden="true">↗</span></span></a><a href="https://leon-zhou.itch.io/" target="_blank" rel="noreferrer"><span className="hover-shift-label"><span>Itch.io</span><span aria-hidden="true">↗</span></span></a><a href="https://52ccdc57-ad3f-47d6-9b83-c35f8ad2c41f.filesusr.com/ugd/2967e1_9d3e636f150d4a08a49e78ff06525b6a.pdf" target="_blank" rel="noreferrer"><span className="hover-shift-label"><span>Résumé</span><span aria-hidden="true">↗</span></span></a></div>
       <div className="footer-base"><span>LEON ZHOU / PORTFOLIO</span><span>DESIGNED FOR CLARITY · BUILT WITH INTENT</span></div>
     </footer>
   );

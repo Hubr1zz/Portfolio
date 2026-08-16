@@ -571,6 +571,9 @@ function TopographicField() {
 
     const [red, green, blue] = [232, 156, 78];
     let resizeFrame = 0;
+    let resizeTimer = 0;
+    const surface = canvas.parentElement;
+    if (!surface) return;
 
     function hash(x: number, y: number) {
       let value = Math.imul(x, 374761393) + Math.imul(y, 668265263) + 731947;
@@ -624,9 +627,14 @@ function TopographicField() {
     }
 
     function renderContours() {
-      const width = window.innerWidth;
-      const height = window.innerHeight;
-      const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+      const surfaceRect = surface.getBoundingClientRect();
+      const width = Math.max(1, Math.ceil(surfaceRect.width));
+      const height = Math.max(window.innerHeight, Math.ceil(surfaceRect.height));
+      const maximumCanvasPixels = 14_000_000;
+      const maximumCanvasDimension = 16_384;
+      const ratioForPixelBudget = Math.sqrt(maximumCanvasPixels / (width * height));
+      const ratioForDimension = maximumCanvasDimension / Math.max(width, height);
+      const pixelRatio = Math.min(window.devicePixelRatio || 1, 1.5, ratioForPixelBudget, ratioForDimension);
       const spacing = width < 760 ? 9 : 12;
       const columns = Math.ceil(width / spacing) + 1;
       const rows = Math.ceil(height / spacing) + 1;
@@ -649,6 +657,8 @@ function TopographicField() {
       canvas.height = Math.round(height * pixelRatio);
       canvas.style.width = `${width}px`;
       canvas.style.height = `${height}px`;
+      canvas.dataset.worldWidth = `${width}`;
+      canvas.dataset.worldHeight = `${height}`;
       context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
       context.clearRect(0, 0, width, height);
       context.lineCap = "round";
@@ -722,10 +732,19 @@ function TopographicField() {
       });
     };
 
+    const resizeAfterLayoutSettles = () => {
+      window.clearTimeout(resizeTimer);
+      resizeTimer = window.setTimeout(resize, 180);
+    };
+
+    const resizeObserver = new ResizeObserver(resizeAfterLayoutSettles);
     renderContours();
+    resizeObserver.observe(surface);
     window.addEventListener("resize", resize, { passive: true });
     return () => {
+      resizeObserver.disconnect();
       window.removeEventListener("resize", resize);
+      window.clearTimeout(resizeTimer);
       window.cancelAnimationFrame(resizeFrame);
     };
   }, []);
@@ -857,6 +876,10 @@ export function Portfolio({ page = "home" }: { page?: PageId }) {
       const navigation = navRef.current;
       navigation?.classList.toggle("at-page-top", atPageTop);
       navigation?.classList.toggle("nav-visible", atPageTop || pointerY < 132);
+      if (reduceMotion && shellRef.current) {
+        shellRef.current.style.setProperty("--pointer-page-x", `${target.x + window.scrollX}px`);
+        shellRef.current.style.setProperty("--pointer-page-y", `${target.y + window.scrollY}px`);
+      }
     };
 
     const move = (event: globalThis.PointerEvent) => {
@@ -876,6 +899,8 @@ export function Portfolio({ page = "home" }: { page?: PageId }) {
       if (shell) {
         shell.style.setProperty("--pointer-x", `${current.x.toFixed(2)}px`);
         shell.style.setProperty("--pointer-y", `${current.y.toFixed(2)}px`);
+        shell.style.setProperty("--pointer-page-x", `${(current.x + window.scrollX).toFixed(2)}px`);
+        shell.style.setProperty("--pointer-page-y", `${(current.y + window.scrollY).toFixed(2)}px`);
         shell.style.setProperty("--pointer-rx", (current.x / window.innerWidth - .5).toFixed(4));
         shell.style.setProperty("--pointer-ry", (current.y / window.innerHeight - .5).toFixed(4));
       }
@@ -893,7 +918,7 @@ export function Portfolio({ page = "home" }: { page?: PageId }) {
   }, []);
 
   return (
-    <main ref={shellRef} className={`site-shell page-${page} theme-amber`} style={{ "--pointer-x": "72vw", "--pointer-y": "24vh", "--pointer-rx": ".22", "--pointer-ry": "-.26" } as CSSProperties}>
+    <main ref={shellRef} className={`site-shell page-${page} theme-amber`} style={{ "--pointer-x": "72vw", "--pointer-y": "24vh", "--pointer-page-x": "72vw", "--pointer-page-y": "24vh", "--pointer-rx": ".22", "--pointer-ry": "-.26" } as CSSProperties}>
       <div className="ambient-grid" aria-hidden="true" />
       <div className="ambient-scan" aria-hidden="true" />
       <TopographicField />

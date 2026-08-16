@@ -29,6 +29,8 @@ button { font: inherit; }
 .site-shell {
   --pointer-x: 75vw;
   --pointer-y: 20vh;
+  --pointer-page-x: 75vw;
+  --pointer-page-y: 20vh;
   min-height: 100vh;
   overflow: hidden;
   position: relative;
@@ -448,13 +450,14 @@ button { font: inherit; }
 .nav-proximity { position: absolute; left: 50%; bottom: -19px; transform: translateX(-50%); padding: 5px 10px; color: rgba(233,236,228,.36); background: rgba(8,11,12,.86); font: 7px/1 var(--font-geist-mono), monospace; letter-spacing: .12em; white-space: nowrap; }
 
 .topographic-canvas {
-  position: fixed;
-  inset: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
   z-index: -2;
   pointer-events: none;
   opacity: .92;
-  -webkit-mask-image: radial-gradient(circle 440px at var(--pointer-x) var(--pointer-y), #000 0, rgba(0,0,0,.88) 34%, rgba(0,0,0,.42) 68%, transparent 100%);
-  mask-image: radial-gradient(circle 440px at var(--pointer-x) var(--pointer-y), #000 0, rgba(0,0,0,.88) 34%, rgba(0,0,0,.42) 68%, transparent 100%);
+  -webkit-mask-image: radial-gradient(circle 440px at var(--pointer-page-x) var(--pointer-page-y), #000 0, rgba(0,0,0,.88) 34%, rgba(0,0,0,.42) 68%, transparent 100%);
+  mask-image: radial-gradient(circle 440px at var(--pointer-page-x) var(--pointer-page-y), #000 0, rgba(0,0,0,.88) 34%, rgba(0,0,0,.42) 68%, transparent 100%);
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
   transition: opacity .65s ease;

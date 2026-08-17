@@ -47,8 +47,8 @@ const tabs: { id: TabId; label: string; count: string; description: string; path
   {
     id: "games",
     label: "Game Works",
-    count: "04",
-    description: "Playable prototypes and small games where design decisions were validated through implementation.",
+    count: "05",
+    description: "Playable prototypes, game-jam productions, and systems-led experiments where design decisions were validated through implementation.",
     path: "/games",
   },
   {
@@ -156,62 +156,108 @@ const projects: Record<TabId, Project[]> = {
     {
       id: "punch-in-rush",
       index: "01",
-      title: "Punch In Rush",
+      title: "Punch-in Rush",
       eyebrow: "Movement prototype → parkour game",
       year: "2025",
       description:
-        "Originally conceived as a high-mobility combat prototype, the project was deliberately rescaled into a focused parkour experience.",
+        "A first-person parkour game about a frantic morning commute: wall-run, wall-grab, and dash across a stylized city to reach work on time.",
       details:
-        "The shift made the character controller the product rather than supporting infrastructure: responsiveness, momentum, and readable traversal became the primary design material.",
+        "The project began as a high-mobility combat study, then deliberately narrowed its scope around the character controller. Responsiveness, momentum, readable routes, and level iteration became the primary design material.",
       tags: ["Unity", "Character Controller", "Parkour", "Iteration"],
       links: [
-        { label: "Watch video", href: "https://www.youtube.com/watch?v=mOsh8QEO0Fo" },
+        { label: "Play on Itch.io", href: "https://leon-zhou.itch.io/punchinrush" },
+        { label: "Watch video", href: "https://youtu.be/HvlybNRaYVQ" },
         { label: "Read devlog", href: "https://leonzhouziang.notion.site/1c7ca7501690802cb125f737304092ee?v=1c7ca75016908036b2b5000c5f304776" },
       ],
-      visual: "prototype",
+      gallery: [
+        { src: "/images/portfolio/punch-overview.webp", alt: "Punch-in Rush overview and playable links" },
+        { src: "/images/portfolio/punch-concept.webp", alt: "Punch-in Rush concept, movement model, and design principles" },
+        { src: "/images/portfolio/punch-level-design.webp", alt: "Punch-in Rush level design iterations" },
+        { src: "/images/portfolio/punch-technical.webp", alt: "Punch-in Rush character controller and rendering studies" },
+      ],
       featured: true,
     },
     {
       id: "hunting-in-darkness",
       index: "02",
-      title: "Hunting in Darkness",
-      eyebrow: "One-week gameplay validation",
+      title: "Hunt in Darkness",
+      eyebrow: "Tactical card-RPG prototype",
       year: "2025",
       description:
-        "A compact prototype built in one week to test a small slice of a larger tactical game concept and collect actionable player feedback.",
-      tags: ["Rapid Prototyping", "Combat Design", "Playtesting"],
-      links: [{ label: "Play on Itch.io", href: "https://leon-zhou.itch.io/rpg-demo" }],
+        "A compact prototype built in one week to test the hunting and showdown loop of a larger, Kingdom Death: Monster-inspired tactical game design.",
+      details:
+        "Cards and dice combine uncertainty with preparation: players gather food, preparedness, and target tokens during the hunt, then spend limited energy to attack, dodge, or rest during the showdown.",
+      tags: ["Systems Design", "Card Combat", "Rapid Prototyping", "Playtesting"],
+      links: [
+        { label: "Play on Itch.io", href: "https://leon-zhou.itch.io/rpg-demo" },
+        { label: "Watch video", href: "https://youtu.be/JI4dIV5Zk6o" },
+      ],
+      gallery: [
+        { src: "/images/portfolio/hunt-overview.webp", alt: "Hunt in Darkness playable prototype" },
+        { src: "/images/portfolio/hunt-design.webp", alt: "Hunt in Darkness inspiration and design document" },
+        { src: "/images/portfolio/hunt-systems.webp", alt: "Hunt in Darkness combat actions, rules, and event balancing" },
+        { src: "/images/portfolio/hunt-production.webp", alt: "Hunt in Darkness Unity tooling and art pipeline" },
+      ],
     },
     {
       id: "outlaws-dead-end",
       index: "03",
-      title: "Outlaw’s Dead End",
+      title: "Outlaw’s Deadend",
       eyebrow: "GMTK Game Jam 2025",
       year: "2025",
       description:
-        "A puzzle game built around a preset action loop. Players place jump pads and roadblocks to guide an outlaw through the sequence to safety.",
+        "A puzzle game built around a preset action loop. Players alter the loop with jump pads and blockers to guide an outlaw to each destination.",
       details:
-        "As team lead, programmer, and designer, I translated the theme “Loop” into both the character’s constraint and the player’s planning space.",
-      tags: ["Team Lead", "Puzzle Design", "Unity", "Game Jam"],
+        "As team lead, programmer, and designer, I translated GMTK 2025’s theme “Loop” into both the character’s constraint and the player’s planning space, then supported the team with a custom level editor and shared asset workflow.",
+      tags: ["Team Lead", "Puzzle Design", "Unity Tools", "Game Jam"],
       links: [
         { label: "Play on Itch.io", href: "https://leon-zhou.itch.io/outlaws-dead-end" },
-        { label: "Watch video", href: "https://youtu.be/T-ioPNVUhss" },
+        { label: "Watch video", href: "https://youtu.be/LEBErr-W2pE" },
       ],
-      image: "/images/game-outlaws-deadend.webp",
-      imageAlt: "Outlaw's Dead End game jam project cover",
+      gallery: [
+        { src: "/images/portfolio/outlaws-overview.webp", alt: "Outlaw’s Deadend overview and core loop" },
+        { src: "/images/portfolio/outlaws-systems.webp", alt: "Outlaw’s Deadend puzzle rules and level editor" },
+        { src: "/images/portfolio/outlaws-teamwork.webp", alt: "Outlaw’s Deadend team roles and production workflow" },
+      ],
+    },
+    {
+      id: "alive",
+      index: "04",
+      title: "Alive",
+      eyebrow: "Team card / simulation game",
+      year: "2025",
+      description:
+        "A playful simulation built around the theme “Everything is Alive”: objects eat, produce new resources, and must be fed and raised by the player.",
+      details:
+        "The system turns familiar work and investment behaviors into living card relationships. As team lead, I organized the art pipeline, documented asset requirements, and shared the project’s 500-yuan prize with the team.",
+      tags: ["Team Lead", "Systems Design", "ScriptableObjects", "Simulation"],
+      links: [
+        { label: "Play on Itch.io", href: "https://leon-zhou.itch.io/alive" },
+        { label: "Watch video", href: "https://youtu.be/0MTk48wgJoM" },
+      ],
+      gallery: [
+        { src: "/images/portfolio/alive-overview.webp", alt: "Alive game overview and everything-is-alive theme" },
+        { src: "/images/portfolio/alive-systems.webp", alt: "Alive emergent systems and configurable card outputs" },
+        { src: "/images/portfolio/alive-teamwork.webp", alt: "Alive team leadership and production process" },
+      ],
     },
     {
       id: "top-hotpot",
-      index: "04",
+      index: "05",
       title: "Top Hotpot",
-      eyebrow: "Three-day experimental game",
+      eyebrow: "VR cooking simulation",
       year: "2024",
       description:
-        "A tactile timing-and-search game where ingredients disappear beneath the soup and continue moving, turning uncertainty into the central source of feedback and delight.",
+        "A VR hotpot simulation where ingredients cook, overcook, drift beneath the broth, and visibly change as they approach their ideal serving time.",
       details:
-        "I worked as designer, programmer, and art director. Hiding ingredients recreates the feeling of a real hotpot while their slow movement naturally explains why players must search carefully for the exact location.",
-      tags: ["Experimental Design", "Solo Development", "Positive Feedback"],
-      links: [{ label: "Itch.io profile", href: "https://leon-zhou.itch.io/" }],
+        "The project remakes an earlier 2D experimental game in 3D. Buoyancy and randomized forces simulate boiling water, material color interpolates through cooking states, and most food assets were modeled in Blender.",
+      tags: ["VR", "Physics", "Shader", "Blender"],
+      links: [{ label: "Watch video", href: "https://youtu.be/YI5XWamgaiQ" }],
+      gallery: [
+        { src: "/images/portfolio/top-hotpot-overview.webp", alt: "Top Hotpot VR cooking loop" },
+        { src: "/images/portfolio/top-hotpot-engineering.webp", alt: "Top Hotpot ingredient simulation and cooking state implementation" },
+        { src: "/images/portfolio/top-hotpot-art.webp", alt: "Top Hotpot water effects and Blender asset production" },
+      ],
     },
   ],
   design: [
@@ -228,8 +274,12 @@ const projects: Record<TabId, Project[]> = {
         { label: "GitHub design document", href: "https://github.com/Hubr1zz/GameDesignVault" },
         { label: "Legacy Notion document", href: "https://www.notion.so/leonzhouziang/KDM-inspired-tactic-game-design-63affac2d3d843b5bad6e01835a1fba1?p=2a0ca75016908091a97ac2a359c6e375&pm=s" },
       ],
-      image: "/images/design-document.webp",
-      imageAlt: "Diagram from Leon Zhou's tactical game design document",
+      gallery: [
+        { src: "/images/design-document.webp", alt: "System diagram from the tactical game design document" },
+        { src: "/images/portfolio/hunt-design.webp", alt: "Tactical game inspiration and living design document" },
+        { src: "/images/portfolio/hunt-systems.webp", alt: "Tactical game combat rules and numerical balancing" },
+        { src: "/images/portfolio/hunt-production.webp", alt: "Tactical prototype engineering and art workflow" },
+      ],
       featured: true,
     },
     {
@@ -413,6 +463,147 @@ function getBoardItems(project: Project): BoardItem[] {
         diagram: "interaction-typed",
       },
     ];
+  }
+
+  if (project.id === "punch-in-rush" && project.gallery) {
+    const explanations = [
+      {
+        title: "From combat study to morning commute",
+        description: "The finished prototype reframes high-speed traversal as a race through a stylized city to arrive at work on time.",
+        details: "The project originally targeted time-slowing combat and extreme mobility. I reduced the scope to the strongest component—the character controller—and used my daily commute as the theme. This made wall-running, wall-grabbing, route readability, and a clear time goal the center of the experience.",
+      },
+      {
+        title: "Movement model and design principles",
+        description: "Traversal is organized as a small state machine spanning grounded, airborne, wall-running, and wall-grabbing states.",
+        details: "Each transition checks speed, facing, look direction, fall velocity, and the relationship between movement and wall normals. The levels follow two rules: the next destination should remain legible at speed, and optional rewards should not pull players too far away from the main flow.",
+      },
+      {
+        title: "Level design through playtesting",
+        description: "Two levels progressed from layout and whitebox to art pass, playtest, and targeted iteration.",
+        details: "The opening level communicates a morning routine before introducing traversal. The second level expands into a vertical city with moving buses, elevators, and wall-grab sequences. Playtest feedback drove changes to choke points, platform spacing, landing readability, and the visual treatment of valid surfaces.",
+      },
+      {
+        title: "Controller and rendering experiments",
+        description: "The controller prototype was isolated in a test scene before being validated by multiple players and integrated into production levels.",
+        details: "Velocity updates use vector projections and state-specific formulas with explicit edge-case checks. I also studied ray-marched volumetric clouds and a Blender-baked wall-unfold animation; the latter was removed after testing because it conflicted with the final skybox and did not improve the experience.",
+      },
+    ];
+    return project.gallery.map((image, index) => ({ id: `punch-${index}`, ...explanations[index], image: image.src, imageAlt: image.alt }));
+  }
+
+  if (project.id === "hunting-in-darkness" && project.gallery) {
+    const explanations = [
+      {
+        title: "Playable tactical slice",
+        description: "A one-week prototype validates the core feel of a larger tactical card-RPG before the full design is committed to production.",
+        details: "The prototype focuses on two connected phases: prepare while hunting, then survive a showdown. It creates a fast feedback loop for checking whether the design is understandable, playable, and worth iterating through direct player feedback.",
+      },
+      {
+        title: "KDM-inspired structure",
+        description: "The design adapts the preparation, risk, and lasting consequence of Kingdom Death: Monster into a compact digital format.",
+        details: "Players explore a hostile world, collect resources, craft, develop characters, and face dangerous monsters. The current document is maintained as an evolving design rather than a fixed pitch: ideas move into prototypes so combat rhythm, resource pressure, and game feel can be tested early.",
+      },
+      {
+        title: "Cards, dice, and calculated uncertainty",
+        description: "Random outcomes are constrained by preparation so lucky rolls feel exciting without removing strategic control.",
+        details: "Food Stock sustains the hunt, Target Tokens advance toward the showdown, Preparedness absorbs risk, and Wounds define failure. During combat, limited Energy is spent on attack, dodge, or rest. Event probabilities and expected resource changes were modeled in spreadsheets, then adjusted through playtesting.",
+      },
+      {
+        title: "Data-driven production pipeline",
+        description: "Unity authoring tools keep card events, outcomes, animation flow, and presentation easy to revise as the design changes.",
+        details: "Odin Serializer powers an event configuration tool, while DOTween and UniTask coordinate card animation and game flow. The monochrome comic direction was developed with generative image tools and refined in Photoshop to keep line weight, shadow, and atmosphere consistent.",
+      },
+    ];
+    return project.gallery.map((image, index) => ({ id: `hunt-${index}`, ...explanations[index], image: image.src, imageAlt: image.alt }));
+  }
+
+  if (project.id === "outlaws-dead-end" && project.gallery) {
+    const explanations = [
+      {
+        title: "Loop as movement constraint",
+        description: "Every level gives the outlaw a preset action loop; the player cannot steer directly and must instead reshape the route.",
+        details: "Jump pads displace the character while blocker boxes cancel one attempted grid entry. By placing those components at the correct moments, players transform an otherwise repeating sequence into a path that reaches the destination.",
+      },
+      {
+        title: "Puzzle system and level editor",
+        description: "Thirteen levels are stored as ScriptableObjects and authored through a custom in-editor grid tool.",
+        details: "The editor made it practical to paint cells, place puzzle components, change the action loop, and tune level properties during the jam. Separating level data from scene setup let the team iterate quickly without rebuilding the world by hand.",
+      },
+      {
+        title: "Game-jam team pipeline",
+        description: "As team lead, programmer, and designer, I organized seven contributors around clear design, art, and technical responsibilities.",
+        details: "Designers discussed puzzles in Figma, requirements and levels were tracked in shared spreadsheets, and artists delivered 2D and 3D assets against explicit briefs. A technical artist worked directly in Unity with me while the level-editing tools kept content integration consistent.",
+      },
+    ];
+    return project.gallery.map((image, index) => ({ id: `outlaws-${index}`, ...explanations[index], image: image.src, imageAlt: image.alt }));
+  }
+
+  if (project.id === "alive" && project.gallery) {
+    const explanations = [
+      {
+        title: "Everything is Alive",
+        description: "Cards behave like living objects: they consume resources, produce outcomes, and ask the player to feed and raise an unstable little economy.",
+        details: "The theme becomes the mechanic rather than a surface treatment. Money bags, computers, livestock, and the player character all participate in the same playful ecosystem, making the board feel busy, reactive, and slightly absurd.",
+      },
+      {
+        title: "Emergent card relationships",
+        description: "Dragging one card onto another produces weighted outcomes that model work, investment, and social behavior.",
+        details: "For example, investing a Coin in an Indie Game may produce profit, public opinion, or nothing. Each card’s input, output, amount, and probability are configured as ScriptableObjects, allowing new relationships to be authored without changing the core interaction code.",
+      },
+      {
+        title: "Leadership and delivery",
+        description: "I led communication and asset coordination, translating game needs into a shared production list for the art team.",
+        details: "Asset descriptions were tracked in a spreadsheet and delivered through the team’s communication channel. The finished project received a 500-yuan prize, which I divided across the group—a small but meaningful conclusion to the team’s work.",
+      },
+    ];
+    return project.gallery.map((image, index) => ({ id: `alive-${index}`, ...explanations[index], image: image.src, imageAlt: image.alt }));
+  }
+
+  if (project.id === "top-hotpot" && project.gallery) {
+    const explanations = [
+      {
+        title: "A hotpot rebuilt for VR",
+        description: "Players place raw ingredients into the broth, retrieve them when cooked, and learn each ingredient’s timing and overcook tolerance through direct interaction.",
+        details: "The project revisits an earlier 2D experimental design in a spatial format. Hiding food beneath the soup combines timing with searching, while slow drifting makes the uncertainty feel natural instead of arbitrary.",
+      },
+      {
+        title: "Cooking state and boiling motion",
+        description: "Ingredient behavior is driven by data, elapsed cooking time, and a lightweight approximation of movement in boiling water.",
+        details: "Food objects read their cooking information from a data table. A constant buoyancy force and periodic randomized impulses keep them moving after release, and material color interpolates across cooking thresholds to provide readable state feedback.",
+      },
+      {
+        title: "Water, steam, bubbles, and food assets",
+        description: "The presentation combines a tiled liquid material with particle systems for steam and bubbles.",
+        details: "Polar-coordinate tiling and a normal map help the plane read as disturbed hotpot broth. Most ingredients and tableware were modeled in Blender, keeping the stylized asset language consistent across the VR scene.",
+      },
+    ];
+    return project.gallery.map((image, index) => ({ id: `hotpot-${index}`, ...explanations[index], image: image.src, imageAlt: image.alt }));
+  }
+
+  if (project.id === "tactics-design" && project.gallery) {
+    const explanations = [
+      {
+        title: "System map and design goals",
+        description: "The living document connects the hunting loop, showdown rules, resources, events, and progression so each feature can be evaluated against the intended experience.",
+        details: "The project is inspired by Kingdom Death: Monster but is not a direct digital conversion. Its goal is to preserve pressure, preparation, and consequence while building a format suited to a smaller digital tactical game. The current GitHub vault is the source of truth; Notion remains available as a legacy archive.",
+      },
+      {
+        title: "From reference to prototype",
+        description: "The document records the reference, the intended emotional structure, and the parts selected for early gameplay validation.",
+        details: "Rather than perfecting rules only on paper, I now move uncertain mechanics into playable slices. The Hunt in Darkness prototype is the current validation surface for the hunting phase, resource preparation, card actions, and showdown rhythm.",
+      },
+      {
+        title: "Rules and balance model",
+        description: "Combat actions, monster behavior, hunting events, and resource expectations are expressed as explicit, testable rules.",
+        details: "Expected-value calculations establish an initial difficulty target for Food Stock, Target Tokens, Preparedness, and Wounds. Playtests then challenge those assumptions, revealing where probabilities, pacing, or player understanding need revision.",
+      },
+      {
+        title: "Implementation as design evidence",
+        description: "The prototype’s data tools, animation flow, and visual pipeline turn document claims into observable behavior.",
+        details: "Authoring tools make event outcomes easy to modify, while the playable card flow exposes timing and comprehension problems that prose alone cannot reveal. This implementation evidence is fed back into the design vault as the next iteration begins.",
+      },
+    ];
+    return project.gallery.map((image, index) => ({ id: `tactics-${index}`, ...explanations[index], image: image.src, imageAlt: image.alt }));
   }
 
   if (project.id === "procedural-motion") {

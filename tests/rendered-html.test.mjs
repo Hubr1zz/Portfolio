@@ -52,7 +52,7 @@ test("assigns the GitHub design vault to the tactical design document", async ()
 test("renders isolated category pages with route-specific metadata", async () => {
   const cases = [
     ["/technical", "Technical Projects — Leon Zhou", "Published projects"],
-    ["/games", "Game Works — Leon Zhou", "Punch In Rush"],
+    ["/games", "Game Works — Leon Zhou", "Punch-in Rush"],
     ["/design", "Design Experience — Leon Zhou", "Tactical Game Design Document"],
   ];
 
@@ -62,6 +62,7 @@ test("renders isolated category pages with route-specific metadata", async () =>
     const html = await response.text();
     assert.match(html, new RegExp(`<title>${title}</title>`, "i"));
     assert.match(html, new RegExp(content));
+    if (path === "/games") assert.match(html, /Alive/);
     assert.match(html, /uniform-project-card/);
     assert.doesNotMatch(html, /<h2>Selected work<\/h2>/i);
     assert.doesNotMatch(html, /page-crosslinks/);

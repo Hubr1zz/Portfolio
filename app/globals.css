@@ -565,7 +565,7 @@ button { font: inherit; }
 .uniform-project-card:nth-child(2n) { border-right: 1px solid var(--line); }
 .uniform-project-card .project-copy { min-height: 480px; padding: 38px; }
 .project-copy { display: grid; align-items: stretch; }
-.project-copy-stage { width: 100%; min-height: 100%; display: grid; }
+.project-copy-stage { width: 100%; min-height: 100%; display: grid; position: relative; overflow: hidden; }
 .project-copy-panel {
   min-width: 0;
   width: 100%;
@@ -574,20 +574,16 @@ button { font: inherit; }
   flex-direction: column;
   align-items: flex-start;
   box-sizing: border-box;
-  will-change: opacity, transform, clip-path;
-  transition: opacity .3s cubic-bezier(.4,0,1,1), transform .46s cubic-bezier(.4,0,1,1), clip-path .46s cubic-bezier(.4,0,1,1), visibility 0s linear .46s;
 }
-.project-copy-overview { opacity: 1; transform: translateY(0) scale(1); visibility: visible; }
-.project-copy-detail { padding-left: 22px; border-left: 1px solid var(--contour-strong); background: linear-gradient(90deg, rgba(232,156,78,.055), transparent 38%); opacity: 0; transform: translate3d(-38px, 10px, 0); clip-path: inset(0 100% 0 0); visibility: hidden; pointer-events: none; }
-.project-copy.is-detail .project-copy-overview { opacity: 0; transform: translate3d(20px, -8px, 0) scale(.99); visibility: hidden; pointer-events: none; }
-.project-copy.is-overview .project-copy-overview { transition: opacity .48s .08s cubic-bezier(.16,1,.3,1), transform .7s .04s cubic-bezier(.16,1,.3,1), visibility 0s; }
+.project-copy-overview { z-index: 1; opacity: 1; transform: none; visibility: visible; }
+.project-copy-detail { z-index: 2; padding-left: 22px; border-left: 1px solid var(--contour-strong); background: #080b0c; opacity: 1; transform: translate3d(100%, 0, 0); visibility: hidden; pointer-events: none; will-change: transform; transition: transform .38s cubic-bezier(.4,0,1,1), visibility 0s linear .38s; }
+.project-copy.is-detail .project-copy-overview { opacity: 1; transform: none; visibility: visible; pointer-events: none; }
 .project-copy.is-detail .project-copy-detail {
   opacity: 1;
   transform: translate3d(0, 0, 0);
-  clip-path: inset(0 0 0 0);
   visibility: visible;
   pointer-events: auto;
-  transition: opacity .5s .06s cubic-bezier(.16,1,.3,1), transform .72s cubic-bezier(.16,1,.3,1), clip-path .78s cubic-bezier(.16,1,.3,1), visibility 0s;
+  transition: transform .72s cubic-bezier(.16,1,.3,1), visibility 0s;
 }
 .project-detail-context { width: 100%; margin-top: auto; padding-top: 34px; display: flex; justify-content: space-between; gap: 18px; border-top: 1px solid var(--line); color: var(--muted); font: 8px/1 var(--font-geist-mono), monospace; letter-spacing: .1em; }
 .project-detail-context strong { color: var(--paper); font-weight: 480; }

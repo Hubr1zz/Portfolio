@@ -1,8 +1,15 @@
-/* eslint-disable @next/next/no-html-link-for-pages */
 "use client";
 
 import { useEffect, useRef, useState, type CSSProperties, type PointerEvent, type RefObject } from "react";
 import Image from "next/image";
+import Link from "next/link";
+
+const assetBasePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+
+function assetPath(path: string) {
+  if (!assetBasePath || !path.startsWith("/")) return path;
+  return `${assetBasePath}${path}`;
+}
 
 type TabId = "technical" | "games" | "design";
 export type PageId = "home" | TabId;
@@ -317,7 +324,7 @@ function ProjectVisual({ project }: { project: Project }) {
     return (
       <div className="media-grid">
         {project.gallery.map((image, index) => (
-          <Image key={image.src} src={image.src} alt={image.alt} width={1200} height={720} sizes="(max-width: 760px) 100vw, 55vw" className={index === 0 ? "media-lead" : ""} unoptimized />
+          <Image key={image.src} src={assetPath(image.src)} alt={image.alt} width={1200} height={720} sizes="(max-width: 760px) 100vw, 55vw" className={index === 0 ? "media-lead" : ""} unoptimized />
         ))}
       </div>
     );
@@ -326,7 +333,7 @@ function ProjectVisual({ project }: { project: Project }) {
   if (project.image) {
     return (
       <figure className="project-image">
-        <Image src={project.image} alt={project.imageAlt ?? ""} width={1200} height={720} sizes="(max-width: 760px) 100vw, 50vw" unoptimized />
+        <Image src={assetPath(project.image)} alt={project.imageAlt ?? ""} width={1200} height={720} sizes="(max-width: 760px) 100vw, 50vw" unoptimized />
         <figcaption><span>FIELD_CAPTURE</span><span>{project.index} / {project.year}</span></figcaption>
       </figure>
     );
@@ -651,7 +658,7 @@ function getBoardItems(project: Project): BoardItem[] {
 
 function BoardArtwork({ item, project }: { item: BoardItem; project: Project }) {
   if (item.diagram) return <FlowDiagram id={item.diagram} />;
-  if (item.image) return <Image src={item.image} alt={item.imageAlt ?? item.title} width={1600} height={1000} sizes="(max-width: 760px) 96vw, 58vw" unoptimized />;
+  if (item.image) return <Image src={assetPath(item.image)} alt={item.imageAlt ?? item.title} width={1600} height={1000} sizes="(max-width: 760px) 96vw, 58vw" unoptimized />;
   return <ProjectVisual project={project} />;
 }
 
@@ -763,15 +770,19 @@ function TopographicField() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    const context = canvas?.getContext("2d");
-    if (!canvas || !context) return;
+    const canvasElement = canvasRef.current;
+    if (!canvasElement) return;
+    const drawingContext = canvasElement.getContext("2d");
+    if (!drawingContext) return;
+    const canvas: HTMLCanvasElement = canvasElement;
+    const context: CanvasRenderingContext2D = drawingContext;
 
     const [red, green, blue] = [232, 156, 78];
     let resizeFrame = 0;
     let resizeTimer = 0;
-    const surface = canvas.parentElement;
-    if (!surface) return;
+    const parentSurface = canvas.parentElement;
+    if (!parentSurface) return;
+    const surface: HTMLElement = parentSurface;
 
     function hash(x: number, y: number) {
       let value = Math.imul(x, 374761393) + Math.imul(y, 668265263) + 731947;
@@ -953,10 +964,10 @@ function TopographicField() {
 function Navigation({ page, navRef }: { page: PageId; navRef: RefObject<HTMLElement | null> }) {
   return (
     <header className="site-header nav-visible at-page-top" ref={navRef}>
-      <a className="brand" href="/" aria-label="Leon Zhou portfolio home"><span className="brand-mark">LZ</span><span className="brand-label">PORTFOLIO / 2026</span></a>
+      <Link className="brand" href="/" prefetch aria-label="Leon Zhou portfolio home"><span className="brand-mark">LZ</span><span className="brand-label">PORTFOLIO / 2026</span></Link>
       <nav className="header-links" aria-label="Primary navigation">
-        <a href="/" aria-current={page === "home" ? "page" : undefined}><span className="hover-shift-label">Home</span></a>
-        {tabs.map((tab) => <a key={tab.id} href={tab.path} aria-current={page === tab.id ? "page" : undefined}><span className="hover-shift-label">{tab.id === "technical" ? "Technical" : tab.id === "games" ? "Games" : "Design"}</span></a>)}
+        <Link href="/" prefetch aria-current={page === "home" ? "page" : undefined}><span className="hover-shift-label">Home</span></Link>
+        {tabs.map((tab) => <Link key={tab.id} href={tab.path} prefetch aria-current={page === tab.id ? "page" : undefined}><span className="hover-shift-label">{tab.id === "technical" ? "Technical" : tab.id === "games" ? "Games" : "Design"}</span></Link>)}
       </nav>
       <span className="nav-proximity">MOVE TO TOP / NAV</span>
     </header>
@@ -1016,8 +1027,8 @@ function HomePage() {
       <section className="home-work-portal page-enter" id="work">
         <div className="section-heading"><div><span className="section-index">INDEX / WORK</span><h2>Selected work</h2></div><p>Three signature works form the shortest route into my technical and design practice. Two are selected; the final position remains intentionally open.</p></div>
         <div className="portal-grid">
-          <a className="portal-card portal-technical focus-frame" href="/technical#project-zworkflow"><span>01 / TECHNICAL</span><h3>zWorkFlow</h3><p>An AI-assisted production workflow that turns design intent into reviewable changes, implementation, and traceable project knowledge.</p><strong>OPEN PROJECT ↗</strong></a>
-          <a className="portal-card portal-design focus-frame" href="/design#project-tactics-design"><span>02 / DESIGN</span><h3>Tactical Game Design Document</h3><p>An evolving systems-design project exploring preparation, pressure, progression, and consequence in a tactical game structure.</p><strong>OPEN PROJECT ↗</strong></a>
+          <Link className="portal-card portal-technical focus-frame" href="/technical#project-zworkflow" prefetch><span>01 / TECHNICAL</span><h3>zWorkFlow</h3><p>An AI-assisted production workflow that turns design intent into reviewable changes, implementation, and traceable project knowledge.</p><strong>OPEN PROJECT ↗</strong></Link>
+          <Link className="portal-card portal-design focus-frame" href="/design#project-tactics-design" prefetch><span>02 / DESIGN</span><h3>Tactical Game Design Document</h3><p>An evolving systems-design project exploring preparation, pressure, progression, and consequence in a tactical game structure.</p><strong>OPEN PROJECT ↗</strong></Link>
           <div className="portal-card portal-pending" aria-label="Third signature project not yet selected"><span>03 / RESERVED</span><h3>Next signature work</h3><p>The third position remains open until another project represents the portfolio at the same level.</p><strong>SELECTION PENDING</strong></div>
         </div>
       </section>
@@ -1121,7 +1132,7 @@ export function Portfolio({ page = "home" }: { page?: PageId }) {
       <div className="ambient-scan" aria-hidden="true" />
       <TopographicField />
       <Navigation page={page} navRef={navRef} />
-      {page === "home" ? <HomePage /> : <WorkPage page={page} />}
+      {page === "home" ? <HomePage /> : <WorkPage key={page} page={page} />}
       <Footer />
     </main>
   );

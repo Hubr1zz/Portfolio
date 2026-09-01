@@ -1,14 +1,26 @@
 "use client";
 
-import { useEffect, useRef, useState, type CSSProperties, type PointerEvent, type RefObject } from "react";
+import { useEffect, useRef, useState, type AriaAttributes, type CSSProperties, type PointerEvent, type ReactNode, type RefObject } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
 const assetBasePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+const isGitHubPagesExport = process.env.NEXT_PUBLIC_GITHUB_PAGES === "true";
 
 function assetPath(path: string) {
   if (!assetBasePath || !path.startsWith("/")) return path;
   return `${assetBasePath}${path}`;
+}
+
+function staticPageHref(href: string) {
+  const [pathname, fragment] = href.split("#");
+  const pagePath = pathname === "/" ? "/" : `${pathname.replace(/\/+$/g, "")}/`;
+  return `${assetBasePath}${pagePath}${fragment ? `#${fragment}` : ""}`;
+}
+
+function InternalLink({ href, className, children, "aria-current": ariaCurrent, "aria-label": ariaLabel }: { href: string; className?: string; children: ReactNode; "aria-current"?: AriaAttributes["aria-current"]; "aria-label"?: string }) {
+  if (isGitHubPagesExport) return <a className={className} href={staticPageHref(href)} aria-current={ariaCurrent} aria-label={ariaLabel}>{children}</a>;
+  return <Link className={className} href={href} prefetch aria-current={ariaCurrent} aria-label={ariaLabel}>{children}</Link>;
 }
 
 type TabId = "technical" | "games" | "design";
@@ -964,10 +976,10 @@ function TopographicField() {
 function Navigation({ page, navRef }: { page: PageId; navRef: RefObject<HTMLElement | null> }) {
   return (
     <header className="site-header nav-visible at-page-top" ref={navRef}>
-      <Link className="brand" href="/" prefetch aria-label="Leon Zhou portfolio home"><span className="brand-mark">LZ</span><span className="brand-label">PORTFOLIO / 2026</span></Link>
+      <InternalLink className="brand" href="/" aria-label="Leon Zhou portfolio home"><span className="brand-mark">LZ</span><span className="brand-label">PORTFOLIO / 2026</span></InternalLink>
       <nav className="header-links" aria-label="Primary navigation">
-        <Link href="/" prefetch aria-current={page === "home" ? "page" : undefined}><span className="hover-shift-label">Home</span></Link>
-        {tabs.map((tab) => <Link key={tab.id} href={tab.path} prefetch aria-current={page === tab.id ? "page" : undefined}><span className="hover-shift-label">{tab.id === "technical" ? "Technical" : tab.id === "games" ? "Games" : "Design"}</span></Link>)}
+        <InternalLink href="/" aria-current={page === "home" ? "page" : undefined}><span className="hover-shift-label">Home</span></InternalLink>
+        {tabs.map((tab) => <InternalLink key={tab.id} href={tab.path} aria-current={page === tab.id ? "page" : undefined}><span className="hover-shift-label">{tab.id === "technical" ? "Technical" : tab.id === "games" ? "Games" : "Design"}</span></InternalLink>)}
       </nav>
       <span className="nav-proximity">MOVE TO TOP / NAV</span>
     </header>
@@ -1027,8 +1039,8 @@ function HomePage() {
       <section className="home-work-portal page-enter" id="work">
         <div className="section-heading"><div><span className="section-index">INDEX / WORK</span><h2>Selected work</h2></div><p>Three signature works form the shortest route into my technical and design practice. Two are selected; the final position remains intentionally open.</p></div>
         <div className="portal-grid">
-          <Link className="portal-card portal-technical focus-frame" href="/technical#project-zworkflow" prefetch><span>01 / TECHNICAL</span><h3>zWorkFlow</h3><p>An AI-assisted production workflow that turns design intent into reviewable changes, implementation, and traceable project knowledge.</p><strong>OPEN PROJECT ↗</strong></Link>
-          <Link className="portal-card portal-design focus-frame" href="/design#project-tactics-design" prefetch><span>02 / DESIGN</span><h3>Tactical Game Design Document</h3><p>An evolving systems-design project exploring preparation, pressure, progression, and consequence in a tactical game structure.</p><strong>OPEN PROJECT ↗</strong></Link>
+          <InternalLink className="portal-card portal-technical focus-frame" href="/technical#project-zworkflow"><span>01 / TECHNICAL</span><h3>zWorkFlow</h3><p>An AI-assisted production workflow that turns design intent into reviewable changes, implementation, and traceable project knowledge.</p><strong>OPEN PROJECT ↗</strong></InternalLink>
+          <InternalLink className="portal-card portal-design focus-frame" href="/design#project-tactics-design"><span>02 / DESIGN</span><h3>Tactical Game Design Document</h3><p>An evolving systems-design project exploring preparation, pressure, progression, and consequence in a tactical game structure.</p><strong>OPEN PROJECT ↗</strong></InternalLink>
           <div className="portal-card portal-pending" aria-label="Third signature project not yet selected"><span>03 / RESERVED</span><h3>Next signature work</h3><p>The third position remains open until another project represents the portfolio at the same level.</p><strong>SELECTION PENDING</strong></div>
         </div>
       </section>

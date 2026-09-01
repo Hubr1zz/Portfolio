@@ -40,6 +40,7 @@ jobs:
             site_url="https://${owner_name}.github.io${base_path}"
           fi
           echo "GITHUB_PAGES=true" >> "$GITHUB_ENV"
+          echo "NEXT_PUBLIC_GITHUB_PAGES=true" >> "$GITHUB_ENV"
           echo "NEXT_PUBLIC_BASE_PATH=${base_path}" >> "$GITHUB_ENV"
           echo "NEXT_PUBLIC_SITE_URL=${site_url}" >> "$GITHUB_ENV"
 

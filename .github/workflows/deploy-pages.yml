@@ -44,7 +44,7 @@ jobs:
           echo "NEXT_PUBLIC_SITE_URL=${site_url}" >> "$GITHUB_ENV"
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install --ignore-scripts --no-audit --no-fund
 
       - name: Build static site
         run: npm run build:pages

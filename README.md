@@ -1,15 +1,45 @@
 # Leon Zhou — Technical Designer Portfolio
 
-A focused portfolio for Leon Zhou's technical design, gameplay systems, game projects, and design writing.
+[![Portfolio](https://img.shields.io/badge/VIEW_PORTFOLIO-hubr1zz.github.io%2FPortfolio-E9A23B?style=for-the-badge&labelColor=10110F)](https://hubr1zz.github.io/Portfolio/)
+
+![Leon Zhou portfolio preview](./public/og.png)
+
+A personal portfolio presenting my work across technical design, gameplay programming, game development, and systems design. The site connects design intent with implementation through selected projects, process breakdowns, and interactive visual presentations.
+
+## Explore the portfolio
+
+- **Technical Projects** — Unity tools, gameplay architecture, procedural animation, and real-time rendering studies.
+- **Game Projects** — Shipped and experimental games with notes on design, engineering, production, and collaboration.
+- **Design Experience** — Systems-design documents, mechanics analysis, and development methodology.
+
+Visit the live site: **[hubr1zz.github.io/Portfolio](https://hubr1zz.github.io/Portfolio/)**
+
+## Selected work
+
+- [zWorkFlow](https://github.com/Hubr1zz/zWorkFlow) — An AI-assisted game-production workflow that turns design documents into reviewable specifications, implementation plans, and traceable decisions.
+- [Interaction System](https://github.com/Hubr1zz/InteractionSystem) — A reusable Unity interaction layer that unifies focus, click, and drag behavior across 3D objects and UI.
+- [Tactical Game Design Document](https://github.com/Hubr1zz/GameDesignVault) — A living systems-design document managed through GitHub as an evolving source of truth.
+
+## Built with
+
+- React and TypeScript
+- Next-compatible routing with Vinext
+- CSS and Canvas-based interaction and motion
+- GitHub Actions and GitHub Pages
+- OpenAI Sites as a secondary deployment target
+
+The same source supports both a Worker build and a GitHub Pages static export. GitHub Pages paths are generated automatically from the repository name.
 
 ## Local development
 
-Requires Node.js `>=22.13.0`.
+Node.js `22.13.0` or newer is required.
 
 ```bash
 npm install
 npm run dev
 ```
+
+Then open the local URL shown in the terminal.
 
 ## Validation
 
@@ -18,27 +48,22 @@ npm run lint
 npm test
 ```
 
-The site is built with React, Next-compatible routing through vinext, and CSS animations with reduced-motion support.
-
 ## Deployment
 
-The same source supports two deployment targets:
+Every push to `main` runs the [GitHub Pages deployment workflow](./.github/workflows/deploy-pages.yml). The repository must use **Settings → Pages → Source: GitHub Actions**.
 
-- OpenAI Sites uses the default Worker build.
-- GitHub Pages uses a conditional static export and deploys through `.github/workflows/deploy-pages.yml` after every push to `main`.
-
-To enable GitHub Pages for the first time, open the repository's **Settings → Pages**, set **Source** to **GitHub Actions**, and run the **Deploy GitHub Pages** workflow. The workflow derives its base path and public URL from the repository name.
-
-With the current `MyLibrary` repository name, the default project URL is:
+The production address for this repository is:
 
 ```text
-https://hubr1zz.github.io/MyLibrary/
+https://hubr1zz.github.io/Portfolio/
 ```
 
-After renaming the repository to `portfolio`, the next workflow run automatically builds for:
+## Contact
 
-```text
-https://hubr1zz.github.io/portfolio/
-```
+- Email: [leonzhouziang@gmail.com](mailto:leonzhouziang@gmail.com)
+- GitHub: [@Hubr1zz](https://github.com/Hubr1zz)
+- Itch.io: [leon-zhou.itch.io](https://leon-zhou.itch.io/)
 
-No source-code path changes are required after that rename.
+## Content and usage
+
+Portfolio text, design documents, project media, and visual assets are © Leon Zhou unless otherwise noted. The repository is publicly viewable for portfolio and technical-reference purposes; no license for reuse or redistribution is granted unless stated in an individual project.

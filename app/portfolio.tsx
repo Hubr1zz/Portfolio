@@ -1,335 +1,101 @@
 "use client";
 
-import { useEffect, useRef, useState, type AriaAttributes, type CSSProperties, type PointerEvent, type ReactNode, type RefObject } from "react";
+import { useEffect, useMemo, useRef, useState, type MouseEvent, type ReactNode } from "react";
 import Image from "next/image";
-import Link from "next/link";
+import { assetPath, InternalLink } from "./portfolio-links";
+import { MarginContours, MarginContoursWell } from "./presentation-extras";
+import { getBoardItems, projects, tabs, type BoardItem, type DiagramId, type PageId, type Project, type TabId } from "./portfolio-data";
 
-const assetBasePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
-const isGitHubPagesExport = process.env.NEXT_PUBLIC_GITHUB_PAGES === "true";
+export type { PageId } from "./portfolio-data";
+export type ShellPage = PageId | "other";
 
-function assetPath(path: string) {
-  if (!assetBasePath || !path.startsWith("/")) return path;
-  return `${assetBasePath}${path}`;
+const originStorageKey = "portfolio-origin";
+const resumeHref = assetPath("/resume/Ziang-Zhou-Resume.pdf");
+
+function rememberProjectOrigin(event: MouseEvent<HTMLAnchorElement>, projectId: string) {
+  if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
+    return;
+  try {
+    sessionStorage.setItem(originStorageKey, JSON.stringify({ path: window.location.pathname, scrollY: window.scrollY, projectCardId: "project-" + projectId }));
+  } catch {
+    return;
+  }
 }
 
-function staticPageHref(href: string) {
-  const [pathname, fragment] = href.split("#");
-  const pagePath = pathname === "/" ? "/" : `${pathname.replace(/\/+$/g, "")}/`;
-  return `${assetBasePath}${pagePath}${fragment ? `#${fragment}` : ""}`;
+function useRestoreOrigin() {
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem(originStorageKey);
+      if (!raw)
+        return;
+      const origin = JSON.parse(raw) as { path?: string; scrollY?: number; projectCardId?: string };
+      if (typeof origin.path !== "string" || normalizePortfolioPath(origin.path) !== normalizePortfolioPath(window.location.pathname))
+        return;
+      if (!origin.projectCardId || window.location.hash !== "#" + origin.projectCardId) {
+        sessionStorage.removeItem(originStorageKey);
+        return;
+      }
+      sessionStorage.removeItem(originStorageKey);
+      if (typeof origin.scrollY !== "number")
+        return;
+      window.scrollTo({ top: origin.scrollY, behavior: "auto" });
+      window.requestAnimationFrame(() => {
+        if (!origin.projectCardId)
+          return;
+        const card = document.getElementById(origin.projectCardId);
+        if (!(card instanceof HTMLElement))
+          return;
+        card.focus({ preventScroll: true });
+      });
+    } catch {
+      return;
+    }
+  }, []);
 }
 
-function InternalLink({ href, className, children, "aria-current": ariaCurrent, "aria-label": ariaLabel }: { href: string; className?: string; children: ReactNode; "aria-current"?: AriaAttributes["aria-current"]; "aria-label"?: string }) {
-  if (isGitHubPagesExport) return <a className={className} href={staticPageHref(href)} aria-current={ariaCurrent} aria-label={ariaLabel}>{children}</a>;
-  return <Link className={className} href={href} prefetch aria-current={ariaCurrent} aria-label={ariaLabel}>{children}</Link>;
+function normalizePortfolioPath(path: string) {
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+  const withoutBase = basePath && path.startsWith(basePath) ? path.slice(basePath.length) : path;
+  return withoutBase.replace(/\/+$/g, "") || "/";
 }
 
-type TabId = "technical" | "games" | "design";
-export type PageId = "home" | TabId;
-type ProjectLink = { label: string; href: string };
-type Project = {
-  id: string;
-  index: string;
-  title: string;
-  eyebrow: string;
-  year: string;
-  description: string;
-  details?: string;
-  tags: string[];
-  links: ProjectLink[];
-  image?: string;
-  imageAlt?: string;
-  gallery?: { src: string; alt: string }[];
-  visual?: "workflow" | "interaction" | "editor" | "prototype";
-  featured?: boolean;
-  tier?: "release" | "study";
-};
-type DiagramId = "workflow-lifecycle" | "workflow-knowledge" | "interaction-routing" | "interaction-typed";
-type BoardItem = {
-  id: string;
-  title: string;
-  description: string;
-  details?: string;
-  image?: string;
-  imageAlt?: string;
-  diagram?: DiagramId;
-  visual?: boolean;
-};
+function isPortfolioPath(path: string) {
+  const normalizedPath = normalizePortfolioPath(path);
+  return normalizedPath === "/" || tabs.some((tab) => normalizePortfolioPath(tab.path) === normalizedPath);
+}
 
-const tabs: { id: TabId; label: string; count: string; description: string; path: string }[] = [
-  {
-    id: "technical",
-    label: "Technical Projects",
-    count: "05",
-    description: "Production tools, gameplay architecture, procedural motion, and real-time rendering studies.",
-    path: "/technical",
-  },
-  {
-    id: "games",
-    label: "Game Works",
-    count: "05",
-    description: "Playable prototypes, game-jam productions, and systems-led experiments where design decisions were validated through implementation.",
-    path: "/games",
-  },
-  {
-    id: "design",
-    label: "Design Experience",
-    count: "03",
-    description: "System design documents, comparative analysis, and an evolving library of design breakdowns.",
-    path: "/design",
-  },
-];
+function categoryMeta(category: TabId) {
+  return tabs.find((tab) => tab.id === category) ?? tabs[0];
+}
 
-const projects: Record<TabId, Project[]> = {
-  technical: [
-    {
-      id: "zworkflow",
-      index: "01",
-      title: "zWorkFlow",
-      eyebrow: "AI-assisted game production",
-      year: "2026",
-      description:
-        "A shared workflow that turns game design documents into reviewable specifications, implementation plans, and traceable technical decisions.",
-      details:
-        "The system coordinates multiple AI coding tools around one source of truth, keeps design intent separate from implementation, and exposes dependency graphs, blockers, and change history through a Unity-based workbench.",
-      tags: ["Unity", "OpenSpec", "Tooling", "Bilingual"],
-      links: [{ label: "GitHub repository", href: "https://github.com/Hubr1zz/zWorkFlow" }],
-      visual: "workflow",
-      featured: true,
-      tier: "release",
-    },
-    {
-      id: "interaction",
-      index: "02",
-      title: "Interaction System",
-      eyebrow: "Reusable Unity architecture",
-      year: "2026",
-      description:
-        "A unified interaction layer for 3D objects and UI. Focus, click, and drag behaviors use one dispatch model while remaining composable.",
-      details:
-        "The architecture separates interaction logic from MonoBehaviours, supports typed drag targets, and caches generic dispatch mappings so runtime interaction avoids reflection overhead.",
-      tags: ["Unity", "C#", "UGUI", "Architecture"],
-      links: [{ label: "GitHub repository", href: "https://github.com/Hubr1zz/InteractionSystem" }],
-      visual: "interaction",
-      tier: "release",
-    },
-    {
-      id: "editor-tools",
-      index: "03",
-      title: "Unity Editor Tools",
-      eyebrow: "Editor workflow toolkit",
-      year: "2026",
-      description:
-        "A collection of Unity editor extensions for faster project navigation, hierarchy work, inspection, favorites, and tab management.",
-      details:
-        "The toolkit explores how small, persistent interface improvements can reduce context switching during day-to-day Unity production.",
-      tags: ["Unity Editor", "C#", "UX", "Productivity"],
-      links: [{ label: "GitHub repository", href: "https://github.com/Hubr1zz/UnityEditorTools" }],
-      visual: "editor",
-      tier: "study",
-    },
-    {
-      id: "procedural-motion",
-      index: "04",
-      title: "Procedural Locomotion",
-      eyebrow: "Gameplay animation study",
-      year: "2023",
-      description:
-        "A multi-legged locomotion prototype using sphere casts and raycasts to search for valid footholds around obstacles.",
-      details:
-        "Phase offsets keep the legs from moving together, while body position interpolates between average foot placement and a predicted movement target. If no valid foothold is available, movement stops instead of producing an unstable pose.",
-      tags: ["Unity", "3D Math", "Physics", "Cinemachine"],
-      links: [
-        { label: "Technical case", href: "https://leonzhouziang.wixsite.com/leonzhou/technical-cases" },
-        { label: "GitHub profile", href: "https://github.com/Hubr1zz" },
-      ],
-      image: "/images/tech-03.webp",
-      imageAlt: "Unity editor showing a procedural multi-legged locomotion prototype",
-      tier: "study",
-    },
-    {
-      id: "rendering-studies",
-      index: "05",
-      title: "Stylized Rendering Studies",
-      eyebrow: "Real-time graphics",
-      year: "2023—24",
-      description:
-        "A series of shader studies spanning animated grass, wind-shaped sand, depth-based water edges, and world-space caustics.",
-      details:
-        "The grass combines authored geometry, baked normals, and vertex animation. The water reconstructs world position from the depth buffer to place caustics, while the sand study uses HLSL and particle-driven wind cues to pursue the visual rhythm of Journey.",
-      tags: ["Shader Graph", "HLSL", "Blender", "Depth Buffer"],
-      links: [
-        { label: "Technical case", href: "https://leonzhouziang.wixsite.com/leonzhou/technical-cases" },
-        { label: "GitHub profile", href: "https://github.com/Hubr1zz" },
-      ],
-      gallery: [
-        { src: "/images/tech-05.webp", alt: "Stylized animated grass in Unity" },
-        { src: "/images/tech-04.webp", alt: "Depth-based stylized water shader" },
-        { src: "/images/tech-06.webp", alt: "Warm stylized desert rendering study" },
-        { src: "/images/tech-01.webp", alt: "Grass geometry authored with Blender geometry nodes" },
-      ],
-      featured: true,
-      tier: "study",
-    },
-  ],
-  games: [
-    {
-      id: "punch-in-rush",
-      index: "01",
-      title: "Punch-in Rush",
-      eyebrow: "Movement prototype → parkour game",
-      year: "2025",
-      description:
-        "A first-person parkour game about a frantic morning commute: wall-run, wall-grab, and dash across a stylized city to reach work on time.",
-      details:
-        "The project began as a high-mobility combat study, then deliberately narrowed its scope around the character controller. Responsiveness, momentum, readable routes, and level iteration became the primary design material.",
-      tags: ["Unity", "Character Controller", "Parkour", "Iteration"],
-      links: [
-        { label: "Play on Itch.io", href: "https://leon-zhou.itch.io/punchinrush" },
-        { label: "Watch video", href: "https://youtu.be/HvlybNRaYVQ" },
-        { label: "Read devlog", href: "https://leonzhouziang.notion.site/1c7ca7501690802cb125f737304092ee?v=1c7ca75016908036b2b5000c5f304776" },
-      ],
-      gallery: [
-        { src: "/images/portfolio/punch-overview.webp", alt: "Punch-in Rush overview and playable links" },
-        { src: "/images/portfolio/punch-concept.webp", alt: "Punch-in Rush concept, movement model, and design principles" },
-        { src: "/images/portfolio/punch-level-design.webp", alt: "Punch-in Rush level design iterations" },
-        { src: "/images/portfolio/punch-technical.webp", alt: "Punch-in Rush character controller and rendering studies" },
-      ],
-      featured: true,
-    },
-    {
-      id: "hunting-in-darkness",
-      index: "02",
-      title: "Hunt in Darkness",
-      eyebrow: "Tactical card-RPG prototype",
-      year: "2025",
-      description:
-        "A compact prototype built in one week to test the hunting and showdown loop of a larger, Kingdom Death: Monster-inspired tactical game design.",
-      details:
-        "Cards and dice combine uncertainty with preparation: players gather food, preparedness, and target tokens during the hunt, then spend limited energy to attack, dodge, or rest during the showdown.",
-      tags: ["Systems Design", "Card Combat", "Rapid Prototyping", "Playtesting"],
-      links: [
-        { label: "Play on Itch.io", href: "https://leon-zhou.itch.io/rpg-demo" },
-        { label: "Watch video", href: "https://youtu.be/JI4dIV5Zk6o" },
-      ],
-      gallery: [
-        { src: "/images/portfolio/hunt-overview.webp", alt: "Hunt in Darkness playable prototype" },
-        { src: "/images/portfolio/hunt-design.webp", alt: "Hunt in Darkness inspiration and design document" },
-        { src: "/images/portfolio/hunt-systems.webp", alt: "Hunt in Darkness combat actions, rules, and event balancing" },
-        { src: "/images/portfolio/hunt-production.webp", alt: "Hunt in Darkness Unity tooling and art pipeline" },
-      ],
-    },
-    {
-      id: "outlaws-dead-end",
-      index: "03",
-      title: "Outlaw’s Deadend",
-      eyebrow: "GMTK Game Jam 2025",
-      year: "2025",
-      description:
-        "A puzzle game built around a preset action loop. Players alter the loop with jump pads and blockers to guide an outlaw to each destination.",
-      details:
-        "As team lead, programmer, and designer, I translated GMTK 2025’s theme “Loop” into both the character’s constraint and the player’s planning space, then supported the team with a custom level editor and shared asset workflow.",
-      tags: ["Team Lead", "Puzzle Design", "Unity Tools", "Game Jam"],
-      links: [
-        { label: "Play on Itch.io", href: "https://leon-zhou.itch.io/outlaws-dead-end" },
-        { label: "Watch video", href: "https://youtu.be/LEBErr-W2pE" },
-      ],
-      gallery: [
-        { src: "/images/portfolio/outlaws-overview.webp", alt: "Outlaw’s Deadend overview and core loop" },
-        { src: "/images/portfolio/outlaws-systems.webp", alt: "Outlaw’s Deadend puzzle rules and level editor" },
-        { src: "/images/portfolio/outlaws-teamwork.webp", alt: "Outlaw’s Deadend team roles and production workflow" },
-      ],
-    },
-    {
-      id: "alive",
-      index: "04",
-      title: "Alive",
-      eyebrow: "Team card / simulation game",
-      year: "2025",
-      description:
-        "A playful simulation built around the theme “Everything is Alive”: objects eat, produce new resources, and must be fed and raised by the player.",
-      details:
-        "The system turns familiar work and investment behaviors into living card relationships. As team lead, I organized the art pipeline, documented asset requirements, and shared the project’s 500-yuan prize with the team.",
-      tags: ["Team Lead", "Systems Design", "ScriptableObjects", "Simulation"],
-      links: [
-        { label: "Play on Itch.io", href: "https://leon-zhou.itch.io/alive" },
-        { label: "Watch video", href: "https://youtu.be/0MTk48wgJoM" },
-      ],
-      gallery: [
-        { src: "/images/portfolio/alive-overview.webp", alt: "Alive game overview and everything-is-alive theme" },
-        { src: "/images/portfolio/alive-systems.webp", alt: "Alive emergent systems and configurable card outputs" },
-        { src: "/images/portfolio/alive-teamwork.webp", alt: "Alive team leadership and production process" },
-      ],
-    },
-    {
-      id: "top-hotpot",
-      index: "05",
-      title: "Top Hotpot",
-      eyebrow: "VR cooking simulation",
-      year: "2024",
-      description:
-        "A VR hotpot simulation where ingredients cook, overcook, drift beneath the broth, and visibly change as they approach their ideal serving time.",
-      details:
-        "The project remakes an earlier 2D experimental game in 3D. Buoyancy and randomized forces simulate boiling water, material color interpolates through cooking states, and most food assets were modeled in Blender.",
-      tags: ["VR", "Physics", "Shader", "Blender"],
-      links: [{ label: "Watch video", href: "https://youtu.be/YI5XWamgaiQ" }],
-      gallery: [
-        { src: "/images/portfolio/top-hotpot-overview.webp", alt: "Top Hotpot VR cooking loop" },
-        { src: "/images/portfolio/top-hotpot-engineering.webp", alt: "Top Hotpot ingredient simulation and cooking state implementation" },
-        { src: "/images/portfolio/top-hotpot-art.webp", alt: "Top Hotpot water effects and Blender asset production" },
-      ],
-    },
-  ],
-  design: [
-    {
-      id: "tactics-design",
-      index: "01",
-      title: "Tactical Game Design Document",
-      eyebrow: "Personal system-design project",
-      year: "2025—26",
-      description:
-        "An evolving tactics-game design inspired by the pressure, preparation, and consequence structures of Kingdom Death: Monster.",
-      tags: ["Systems Design", "Combat Economy", "Progression", "Documentation"],
-      links: [
-        { label: "GitHub design document", href: "https://github.com/Hubr1zz/GameDesignVault" },
-        { label: "Legacy Notion document", href: "https://www.notion.so/leonzhouziang/KDM-inspired-tactic-game-design-63affac2d3d843b5bad6e01835a1fba1?p=2a0ca75016908091a97ac2a359c6e375&pm=s" },
-      ],
-      gallery: [
-        { src: "/images/design-document.webp", alt: "System diagram from the tactical game design document" },
-        { src: "/images/portfolio/hunt-design.webp", alt: "Tactical game inspiration and living design document" },
-        { src: "/images/portfolio/hunt-systems.webp", alt: "Tactical game combat rules and numerical balancing" },
-        { src: "/images/portfolio/hunt-production.webp", alt: "Tactical prototype engineering and art workflow" },
-      ],
-      featured: true,
-    },
-    {
-      id: "comparative-writing",
-      index: "02",
-      title: "Comparative Game Analysis",
-      eyebrow: "Gameplay-oriented essays",
-      year: "2025",
-      description:
-        "Short-form essays examining how games position themselves, screen players, and produce different strategic behaviors through small systemic changes.",
-      details:
-        "Current subjects include Elden Ring’s relationship to traditional Souls-like games and a comparison of League of Legends with Dota. Mandarin editions are currently available; English translations are in progress.",
-      tags: ["Critical Analysis", "Player Segmentation", "Systems"],
-      links: [
-        { label: "Elden Ring essay", href: "https://docs.qq.com/doc/DWkdJTnVvUURTRHpU" },
-        { label: "LoL / Dota essay", href: "https://docs.qq.com/doc/DWm5td0ZHUVBDem9v" },
-      ],
-    },
-    {
-      id: "design-vault",
-      index: "03",
-      title: "Design Breakdown Notes",
-      eyebrow: "Ongoing design journal",
-      year: "Ongoing",
-      description:
-        "A working library of good and bad design examples, broken down to preserve reusable lessons rather than isolated opinions.",
-      tags: ["Design Research", "Breakdowns", "Knowledge Base"],
-      links: [{ label: "Notion notebook", href: "https://www.notion.so/leonzhouziang/Game-design-analysis-212ca7501690809586fbd4c37af7e12c?source=copy_link" }],
-    },
-  ],
-};
+function categoryPath(category: TabId) {
+  return categoryMeta(category).path;
+}
+
+function BackLink({ category, projectId, className, children }: { category: TabId; projectId: string; className?: string; children: ReactNode }) {
+  const defaultHref = categoryPath(category) + "#project-" + projectId;
+  const [href, setHref] = useState(defaultHref);
+  const [originPath, setOriginPath] = useState<string | null>(null);
+
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem(originStorageKey);
+      if (!raw)
+        return;
+      const origin = JSON.parse(raw) as { path?: string; projectCardId?: string };
+      if (!origin.path || !isPortfolioPath(origin.path) || origin.projectCardId !== "project-" + projectId)
+        return;
+      const normalizedOriginPath = normalizePortfolioPath(origin.path);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setOriginPath(normalizedOriginPath);
+      setHref(normalizedOriginPath + "#" + origin.projectCardId);
+    } catch {
+      return;
+    }
+  }, [projectId]);
+
+  return <InternalLink className={className} href={href}>{originPath !== null && normalizePortfolioPath(originPath) === "/" ? <span className="case-navigation-card"><small>RETURN TO SELECTED WORK</small><strong>Back to selected work</strong><i aria-hidden="true">↗</i></span> : children}</InternalLink>;
+}
 
 function ProjectVisual({ project }: { project: Project }) {
   if (project.gallery) {
@@ -400,6 +166,64 @@ function ProjectVisual({ project }: { project: Project }) {
 }
 
 function FlowDiagram({ id }: { id: DiagramId }) {
+  if (id === "workflow-overview") {
+    return (
+      <div className="flow-diagram flow-overview" aria-label="zWorkFlow production workflow diagram">
+        <span className="flow-kicker">WORKFLOW_OVERVIEW</span>
+        <span className="flow-workbench">WORKBENCH</span>
+        <div className="flow-overview-steps"><b>Design documents</b><b>Draft modules</b><b>Review &amp; approve</b><b>Implement &amp; verify</b><b>Sync &amp; archive</b></div>
+        <div className="flow-context-rail"><span>Project skills</span><span>OpenSpec</span><span>Code evidence</span></div>
+      </div>
+    );
+  }
+
+  if (id === "editor-overview") {
+    return (
+      <div className="flow-diagram editor-overview" aria-label="zEditor workspace and scene tools overview">
+        <span className="flow-kicker">EDITOR_TOOLKIT / OVERVIEW</span>
+        <div className="editor-overview-columns"><section><small>01 / WORKSPACE</small><strong>zEditor workspace</strong><span>Favorites / Folders &amp; Hierarchy / Inspector &amp; Tabs</span></section><section><small>02 / SCENE TOOLS</small><strong>Scene Tools</strong><span>Camera follow / Rotation root / Saved expansion</span></section></div>
+      </div>
+    );
+  }
+
+  if (id === "editor-navigation") {
+    return (
+      <div className="flow-diagram editor-navigation" aria-label="zEditor navigation schematic">
+        <span className="flow-kicker">EDITOR_NAVIGATION</span>
+        <div className="editor-nav-grid"><section><small>PROJECT / FAVORITES</small><b>Space · Alt · Tab quick popup</b></section><section><small>HIERARCHY</small><b>Icons · colors · scene context</b></section><section><small>INSPECTOR</small><b>Multi-select component tabs · floating panel</b></section></div>
+        <p>Shared Settings rail keeps navigation choices consistent.</p>
+        <small className="editor-footnote">zEditor adapts the original vSeries tools.</small>
+      </div>
+    );
+  }
+
+  if (id === "editor-scene") {
+    return (
+      <div className="flow-diagram editor-scene" aria-label="zEditor scene tools diagram">
+        <span className="flow-kicker">SCENE_TOOLS / PERSISTENT_STATE</span>
+        <div className="editor-scene-grid"><section><b>Camera follow &amp; LookAt</b><small>Scene focus</small></section><section><b>Selected rotation root</b><small>Transform control</small></section><section><b>Save &amp; restore hierarchy</b><small>Scene · prefab · folder states</small></section></div>
+      </div>
+    );
+  }
+
+  if (id === "vault-map") {
+    return (
+      <div className="flow-diagram vault-map" aria-label="Living design vault overview">
+        <span className="flow-kicker">LIVING DESIGN VAULT</span>
+        <div className="vault-map-groups"><section><small>01 / PRINCIPLES</small><b>Principles &amp; world</b></section><section><small>02 / LOOP</small><b>Hunt / Showdown / Settlement</b></section><section><small>03 / SHARED</small><b>Shared rules / Terms / References</b></section></div>
+      </div>
+    );
+  }
+
+  if (id === "vault-loop") {
+    return (
+      <div className="flow-diagram vault-loop" aria-label="Living design vault tactical loop">
+        <span className="flow-kicker">TACTICAL_LOOP</span>
+        <div className="vault-loop-steps"><section><b>Hunt</b><small>Information &amp; risk</small></section><i>→</i><section><b>Showdown</b><small>Tactical commitment</small></section><i>→</i><section><b>Settlement</b><small>Lasting consequences</small></section><i>→</i><section><b>Preparation</b><small>Ready the next hunt</small></section></div>
+      </div>
+    );
+  }
+
   if (id === "workflow-lifecycle") {
     return (
       <div className="flow-diagram flow-lifecycle" aria-label="zWorkFlow change lifecycle diagram">
@@ -438,552 +262,44 @@ function FlowDiagram({ id }: { id: DiagramId }) {
     <div className="flow-diagram flow-typed" aria-label="Interaction System typed drag communication diagram">
       <span className="flow-kicker">TYPED_DRAG_COMMUNICATION</span>
       <div className="typed-node"><small>SOURCE</small><b>IDraggable&lt;T&gt;</b><span>Card</span></div>
-      <i>→</i><div className="typed-cache"><small>CACHED MAP</small><strong>T</strong><span>zero runtime reflection</span></div>
+      <i>→</i><div className="typed-cache"><small>CACHED MAP</small><strong>T</strong><span>cached method mappings</span></div>
       <i>→</i><div className="typed-node"><small>TARGET</small><b>IFocusable&lt;T&gt;</b><span>Slot</span></div>
       <p>ENTER · STAY · RELEASE · LEAVE</p>
     </div>
   );
 }
 
-function getBoardItems(project: Project): BoardItem[] {
-  if (project.id === "zworkflow") {
-    return [
-      {
-        id: "change-lifecycle",
-        title: "Reviewed change lifecycle",
-        description: "Design intent is converted into a Draft Change, reviewed by a person, then approved before implementation begins.",
-        details: "Apply updates code and validation records without silently rewriting the formal specification. A deliberate sync merges the approved delta into the project contract, and only completed, synchronized work can be archived.",
-        diagram: "workflow-lifecycle",
-      },
-      {
-        id: "shared-context",
-        title: "Shared project context",
-        description: "Different AI tools work from the same OpenSpec records, project skills, code evidence, and design documents.",
-        details: "Thin tool-specific adapters point Codex, Claude Code, Cursor, and other supported agents at one shared source of truth. The Unity Workbench exposes review status, dependencies, blockers, translations, and implementation evidence without duplicating the workflow.",
-        diagram: "workflow-knowledge",
-      },
-    ];
-  }
-
-  if (project.id === "interaction") {
-    return [
-      {
-        id: "unified-routing",
-        title: "Unified 3D and UI routing",
-        description: "Physics raycasts and Unity EventSystem events converge on the same IInteractableTarget contract.",
-        details: "InteractionSystem does not need to know whether a target originated in world space or UI. It dispatches both paths to composable Behaviour classes that implement Focus, Click, or Drag responsibilities.",
-        diagram: "interaction-routing",
-      },
-      {
-        id: "typed-drag",
-        title: "Typed drag communication",
-        description: "Generic drag and focus interfaces let a source and target exchange strongly typed context—for example, a card and its receiving slot.",
-        details: "Generic method mappings are discovered and cached at startup. Runtime dispatch then avoids reflection while still delivering enter, stay, release, and leave callbacks with the correct target data.",
-        diagram: "interaction-typed",
-      },
-    ];
-  }
-
-  if (project.id === "punch-in-rush" && project.gallery) {
-    const explanations = [
-      {
-        title: "From combat study to morning commute",
-        description: "The finished prototype reframes high-speed traversal as a race through a stylized city to arrive at work on time.",
-        details: "The project originally targeted time-slowing combat and extreme mobility. I reduced the scope to the strongest component—the character controller—and used my daily commute as the theme. This made wall-running, wall-grabbing, route readability, and a clear time goal the center of the experience.",
-      },
-      {
-        title: "Movement model and design principles",
-        description: "Traversal is organized as a small state machine spanning grounded, airborne, wall-running, and wall-grabbing states.",
-        details: "Each transition checks speed, facing, look direction, fall velocity, and the relationship between movement and wall normals. The levels follow two rules: the next destination should remain legible at speed, and optional rewards should not pull players too far away from the main flow.",
-      },
-      {
-        title: "Level design through playtesting",
-        description: "Two levels progressed from layout and whitebox to art pass, playtest, and targeted iteration.",
-        details: "The opening level communicates a morning routine before introducing traversal. The second level expands into a vertical city with moving buses, elevators, and wall-grab sequences. Playtest feedback drove changes to choke points, platform spacing, landing readability, and the visual treatment of valid surfaces.",
-      },
-      {
-        title: "Controller and rendering experiments",
-        description: "The controller prototype was isolated in a test scene before being validated by multiple players and integrated into production levels.",
-        details: "Velocity updates use vector projections and state-specific formulas with explicit edge-case checks. I also studied ray-marched volumetric clouds and a Blender-baked wall-unfold animation; the latter was removed after testing because it conflicted with the final skybox and did not improve the experience.",
-      },
-    ];
-    return project.gallery.map((image, index) => ({ id: `punch-${index}`, ...explanations[index], image: image.src, imageAlt: image.alt }));
-  }
-
-  if (project.id === "hunting-in-darkness" && project.gallery) {
-    const explanations = [
-      {
-        title: "Playable tactical slice",
-        description: "A one-week prototype validates the core feel of a larger tactical card-RPG before the full design is committed to production.",
-        details: "The prototype focuses on two connected phases: prepare while hunting, then survive a showdown. It creates a fast feedback loop for checking whether the design is understandable, playable, and worth iterating through direct player feedback.",
-      },
-      {
-        title: "KDM-inspired structure",
-        description: "The design adapts the preparation, risk, and lasting consequence of Kingdom Death: Monster into a compact digital format.",
-        details: "Players explore a hostile world, collect resources, craft, develop characters, and face dangerous monsters. The current document is maintained as an evolving design rather than a fixed pitch: ideas move into prototypes so combat rhythm, resource pressure, and game feel can be tested early.",
-      },
-      {
-        title: "Cards, dice, and calculated uncertainty",
-        description: "Random outcomes are constrained by preparation so lucky rolls feel exciting without removing strategic control.",
-        details: "Food Stock sustains the hunt, Target Tokens advance toward the showdown, Preparedness absorbs risk, and Wounds define failure. During combat, limited Energy is spent on attack, dodge, or rest. Event probabilities and expected resource changes were modeled in spreadsheets, then adjusted through playtesting.",
-      },
-      {
-        title: "Data-driven production pipeline",
-        description: "Unity authoring tools keep card events, outcomes, animation flow, and presentation easy to revise as the design changes.",
-        details: "Odin Serializer powers an event configuration tool, while DOTween and UniTask coordinate card animation and game flow. The monochrome comic direction was developed with generative image tools and refined in Photoshop to keep line weight, shadow, and atmosphere consistent.",
-      },
-    ];
-    return project.gallery.map((image, index) => ({ id: `hunt-${index}`, ...explanations[index], image: image.src, imageAlt: image.alt }));
-  }
-
-  if (project.id === "outlaws-dead-end" && project.gallery) {
-    const explanations = [
-      {
-        title: "Loop as movement constraint",
-        description: "Every level gives the outlaw a preset action loop; the player cannot steer directly and must instead reshape the route.",
-        details: "Jump pads displace the character while blocker boxes cancel one attempted grid entry. By placing those components at the correct moments, players transform an otherwise repeating sequence into a path that reaches the destination.",
-      },
-      {
-        title: "Puzzle system and level editor",
-        description: "Thirteen levels are stored as ScriptableObjects and authored through a custom in-editor grid tool.",
-        details: "The editor made it practical to paint cells, place puzzle components, change the action loop, and tune level properties during the jam. Separating level data from scene setup let the team iterate quickly without rebuilding the world by hand.",
-      },
-      {
-        title: "Game-jam team pipeline",
-        description: "As team lead, programmer, and designer, I organized seven contributors around clear design, art, and technical responsibilities.",
-        details: "Designers discussed puzzles in Figma, requirements and levels were tracked in shared spreadsheets, and artists delivered 2D and 3D assets against explicit briefs. A technical artist worked directly in Unity with me while the level-editing tools kept content integration consistent.",
-      },
-    ];
-    return project.gallery.map((image, index) => ({ id: `outlaws-${index}`, ...explanations[index], image: image.src, imageAlt: image.alt }));
-  }
-
-  if (project.id === "alive" && project.gallery) {
-    const explanations = [
-      {
-        title: "Everything is Alive",
-        description: "Cards behave like living objects: they consume resources, produce outcomes, and ask the player to feed and raise an unstable little economy.",
-        details: "The theme becomes the mechanic rather than a surface treatment. Money bags, computers, livestock, and the player character all participate in the same playful ecosystem, making the board feel busy, reactive, and slightly absurd.",
-      },
-      {
-        title: "Emergent card relationships",
-        description: "Dragging one card onto another produces weighted outcomes that model work, investment, and social behavior.",
-        details: "For example, investing a Coin in an Indie Game may produce profit, public opinion, or nothing. Each card’s input, output, amount, and probability are configured as ScriptableObjects, allowing new relationships to be authored without changing the core interaction code.",
-      },
-      {
-        title: "Leadership and delivery",
-        description: "I led communication and asset coordination, translating game needs into a shared production list for the art team.",
-        details: "Asset descriptions were tracked in a spreadsheet and delivered through the team’s communication channel. The finished project received a 500-yuan prize, which I divided across the group—a small but meaningful conclusion to the team’s work.",
-      },
-    ];
-    return project.gallery.map((image, index) => ({ id: `alive-${index}`, ...explanations[index], image: image.src, imageAlt: image.alt }));
-  }
-
-  if (project.id === "top-hotpot" && project.gallery) {
-    const explanations = [
-      {
-        title: "A hotpot rebuilt for VR",
-        description: "Players place raw ingredients into the broth, retrieve them when cooked, and learn each ingredient’s timing and overcook tolerance through direct interaction.",
-        details: "The project revisits an earlier 2D experimental design in a spatial format. Hiding food beneath the soup combines timing with searching, while slow drifting makes the uncertainty feel natural instead of arbitrary.",
-      },
-      {
-        title: "Cooking state and boiling motion",
-        description: "Ingredient behavior is driven by data, elapsed cooking time, and a lightweight approximation of movement in boiling water.",
-        details: "Food objects read their cooking information from a data table. A constant buoyancy force and periodic randomized impulses keep them moving after release, and material color interpolates across cooking thresholds to provide readable state feedback.",
-      },
-      {
-        title: "Water, steam, bubbles, and food assets",
-        description: "The presentation combines a tiled liquid material with particle systems for steam and bubbles.",
-        details: "Polar-coordinate tiling and a normal map help the plane read as disturbed hotpot broth. Most ingredients and tableware were modeled in Blender, keeping the stylized asset language consistent across the VR scene.",
-      },
-    ];
-    return project.gallery.map((image, index) => ({ id: `hotpot-${index}`, ...explanations[index], image: image.src, imageAlt: image.alt }));
-  }
-
-  if (project.id === "tactics-design" && project.gallery) {
-    const explanations = [
-      {
-        title: "System map and design goals",
-        description: "The living document connects the hunting loop, showdown rules, resources, events, and progression so each feature can be evaluated against the intended experience.",
-        details: "The project is inspired by Kingdom Death: Monster but is not a direct digital conversion. Its goal is to preserve pressure, preparation, and consequence while building a format suited to a smaller digital tactical game. The current GitHub vault is the source of truth; Notion remains available as a legacy archive.",
-      },
-      {
-        title: "From reference to prototype",
-        description: "The document records the reference, the intended emotional structure, and the parts selected for early gameplay validation.",
-        details: "Rather than perfecting rules only on paper, I now move uncertain mechanics into playable slices. The Hunt in Darkness prototype is the current validation surface for the hunting phase, resource preparation, card actions, and showdown rhythm.",
-      },
-      {
-        title: "Rules and balance model",
-        description: "Combat actions, monster behavior, hunting events, and resource expectations are expressed as explicit, testable rules.",
-        details: "Expected-value calculations establish an initial difficulty target for Food Stock, Target Tokens, Preparedness, and Wounds. Playtests then challenge those assumptions, revealing where probabilities, pacing, or player understanding need revision.",
-      },
-      {
-        title: "Implementation as design evidence",
-        description: "The prototype’s data tools, animation flow, and visual pipeline turn document claims into observable behavior.",
-        details: "Authoring tools make event outcomes easy to modify, while the playable card flow exposes timing and comprehension problems that prose alone cannot reveal. This implementation evidence is fed back into the design vault as the next iteration begins.",
-      },
-    ];
-    return project.gallery.map((image, index) => ({ id: `tactics-${index}`, ...explanations[index], image: image.src, imageAlt: image.alt }));
-  }
-
-  if (project.id === "procedural-motion") {
-    return [{
-      id: "locomotion-capture",
-      title: "Procedural locomotion prototype",
-      description: "A locomotion test that combines sphere casts, fixed raycasts, phase offsets, and Cinemachine camera control.",
-      details: "A sphere cast searches for a foot landing area and a raycast rejects positions blocked by obstacles. The search rotates through alternative angles until it finds a valid foothold; if none exists, movement stops. Per-leg phase differences prevent simultaneous steps, while the body interpolates between the average foot position and a predicted movement position.",
-      image: project.image,
-      imageAlt: project.imageAlt,
-    }];
-  }
-
-  if (project.id === "rendering-studies" && project.gallery) {
-    const explanations = [
-      {
-        title: "Stylized grass in Unity",
-        description: "A Shader Graph recreation of the stylized lawn study, including vertex animation and authored lighting response.",
-        details: "The source grass was built in Blender with Geometry Nodes and baked normals so the lawn would not read as a flat sheet under lighting. The Unity version rebuilds the look as a real-time shader; later exploration targets GPU instancing and a mask-painting workflow.",
-      },
-      {
-        title: "Depth-based water and caustics",
-        description: "A stylized water surface built by comparing screen-space depth with reconstructed world-space distance.",
-        details: "World coordinates are reconstructed from the depth buffer and used to sample noise for the caustics. This lets shoreline edges, depth transitions, and the projected light pattern respond to the scene rather than to a fixed texture placement.",
-      },
-      {
-        title: "Wind-shaped desert",
-        description: "A Journey-inspired sand study using a custom HLSL shader and particle-driven wind cues.",
-        details: "The broad terrain undulation is authored in Blender. A custom sand shader and vertex animation add the smaller moving response, while particles provide readable wind direction and rhythm across the scene.",
-      },
-      {
-        title: "Geometry Nodes grass source",
-        description: "The authored Blender source used to study grass distribution, silhouette, and lighting before rebuilding the effect in Unity.",
-        details: "Geometry Nodes distributes the grass procedurally, while baked normals soften the lighting across individual blades. This source establishes the visual target for the later Shader Graph implementation.",
-      },
-    ];
-
-    return project.gallery.map((image, index) => ({ id: `image-${index}`, ...explanations[index], image: image.src, imageAlt: image.alt }));
-  }
-
-  if (project.gallery) return project.gallery.map((image, index) => ({ id: `image-${index}`, title: image.alt, description: image.alt, image: image.src, imageAlt: image.alt }));
-  if (project.image) return [{ id: "image-0", title: project.imageAlt ?? project.title, description: project.imageAlt ?? "", image: project.image, imageAlt: project.imageAlt ?? project.title }];
-  return [{ id: "system-visual", title: project.eyebrow, description: project.description, details: project.details, visual: true }];
+function TacticsMap() {
+  return <FlowDiagram id="vault-map" />;
 }
 
-function BoardArtwork({ item, project }: { item: BoardItem; project: Project }) {
-  if (item.diagram) return <FlowDiagram id={item.diagram} />;
-  if (item.image) return <Image src={assetPath(item.image)} alt={item.imageAlt ?? item.title} width={1600} height={1000} sizes="(max-width: 760px) 96vw, 58vw" unoptimized />;
+function ProjectCover({ project }: { project: Project }) {
+  const coverDiagram = coverDiagramByProject[project.id];
+  if (coverDiagram)
+    return <FlowDiagram id={coverDiagram} />;
+  const image = project.gallery?.[0];
+  if (image)
+    return <Image src={assetPath(image.src)} alt={image.alt} width={1200} height={720} sizes="(max-width: 760px) 100vw, 50vw" unoptimized />;
+  if (project.image)
+    return <Image src={assetPath(project.image)} alt={project.imageAlt ?? ""} width={1200} height={720} sizes="(max-width: 760px) 100vw, 50vw" unoptimized />;
   return <ProjectVisual project={project} />;
 }
 
-function ProjectBoard({ project, items, selectedIndex, displayedIndex, onSelect }: { project: Project; items: BoardItem[]; selectedIndex: number | null; displayedIndex: number; onSelect: (index: number | null) => void }) {
-  const selectedItem = selectedIndex === null ? null : items[selectedIndex];
-  const displayedItem = items[displayedIndex];
+const coverDiagramByProject: Partial<Record<string, DiagramId>> = {
+  zworkflow: "workflow-overview",
+  interaction: "interaction-routing",
+  "editor-tools": "editor-overview",
+  "tactics-design": "vault-map",
+};
 
-  return (
-    <div className="project-board-shell">
-      <div className={`project-board ${selectedItem ? "is-detail" : "is-preview"}`}>
-        <div className="board-toolbar">
-          <span>PROJECT_BOARD / {project.index}</span>
-          <span>{items.length} ITEM{items.length === 1 ? "" : "S"}</span>
-        </div>
-
-        <div className="board-stage">
-          <div className={`board-preview-grid board-count-${Math.min(items.length, 4)}`} aria-hidden={selectedItem ? true : undefined} inert={selectedItem ? true : undefined}>
-            {items.map((item, index) => (
-              <button className={`board-item ${item.image ? "" : "board-vector-item"}`} type="button" key={item.id} onClick={() => onSelect(index)} aria-label={`Enlarge image: ${item.title}`}>
-                <div className="board-artwork"><BoardArtwork item={item} project={project} /></div>
-                <span><b>FIG. {String(index + 1).padStart(2, "0")}</b>{item.title}</span>
-              </button>
-            ))}
-            <p className="board-hint">SELECT IMAGE TO INSPECT</p>
-          </div>
-          <div className="board-detail" aria-hidden={!selectedItem} inert={!selectedItem}>
-            <button className="board-back" type="button" onClick={() => onSelect(null)} aria-label="Back to project board">
-              <span aria-hidden="true">←</span> BACK TO BOARD
-            </button>
-            <div className={`board-detail-media ${displayedItem.image ? "" : "is-vector"}`}><BoardArtwork item={displayedItem} project={project} /></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+function FeatureCard({ project, category, index }: { project: Project; category: TabId; index: string }) {
+  const visual = project.id === "tactics-design" ? <TacticsMap /> : <ProjectCover project={project} />;
+  return <InternalLink id={"project-" + project.id} className="featured-card" href={"/projects/" + project.id} onClick={(event) => rememberProjectOrigin(event, project.id)}><div className="feature-media">{visual}</div><div className="feature-meta"><span>{index} / {categoryMeta(category).label.toUpperCase()}</span><span>{project.year}</span></div><h3>{project.title}</h3><p className="feature-description">{project.description}</p><span className="feature-link">View details ↗</span></InternalLink>;
 }
 
-function ProjectCard({ project }: { project: Project }) {
-  const boardItems = getBoardItems(project);
-  const [selectedBoardIndex, setSelectedBoardIndex] = useState<number | null>(null);
-  const [displayedBoardIndex, setDisplayedBoardIndex] = useState(0);
-  const selectedBoardItem = selectedBoardIndex === null ? null : boardItems[displayedBoardIndex];
-  const displayedBoardItem = boardItems[displayedBoardIndex];
-  const cardRef = useRef<HTMLElement>(null);
-  const cardBounds = useRef<DOMRect | null>(null);
-  const pendingPointer = useRef<{ x: number; y: number } | null>(null);
-  const pointerFrame = useRef(0);
-
-  useEffect(() => () => window.cancelAnimationFrame(pointerFrame.current), []);
-
-  function cacheCardBounds(event: PointerEvent<HTMLElement>) {
-    cardBounds.current = event.currentTarget.getBoundingClientRect();
-  }
-
-  function trackCardPointer(event: PointerEvent<HTMLElement>) {
-    pendingPointer.current = { x: event.clientX, y: event.clientY };
-    if (pointerFrame.current) return;
-
-    pointerFrame.current = window.requestAnimationFrame(() => {
-      pointerFrame.current = 0;
-      const bounds = cardBounds.current;
-      const pointer = pendingPointer.current;
-      const card = cardRef.current;
-      if (!bounds || !pointer || !card) return;
-
-      card.style.setProperty("--local-x", `${pointer.x - bounds.left}px`);
-      card.style.setProperty("--local-y", `${pointer.y - bounds.top}px`);
-    });
-  }
-
-  function selectBoardItem(index: number | null) {
-    if (index !== null) setDisplayedBoardIndex(index);
-    setSelectedBoardIndex(index);
-  }
-
-  return (
-    <article id={`project-${project.id}`} ref={cardRef} className="project-card uniform-project-card focus-frame" onPointerEnter={cacheCardBounds} onPointerMove={trackCardPointer}>
-      <div className={`project-copy ${selectedBoardItem ? "is-detail" : "is-overview"}`}>
-        <div className="project-copy-stage">
-          <div className="project-copy-panel project-copy-overview" aria-hidden={selectedBoardItem ? true : undefined} inert={selectedBoardItem ? true : undefined}>
-            <div className="project-meta"><span>{project.index}</span><span>{project.year}</span></div>
-            <p className="project-eyebrow">{project.eyebrow}</p>
-            <h3>{project.title}</h3>
-            <p className="project-description">{project.description}</p>
-            {project.details && <p className="project-details">{project.details}</p>}
-            <ul className="tag-list" aria-label={`${project.title} technologies and disciplines`}>
-              {project.tags.map((tag) => <li key={tag}>{tag}</li>)}
-            </ul>
-            <div className="project-links">
-              {project.links.map((link) => <a key={link.href} href={link.href} target="_blank" rel="noreferrer"><span className="hover-shift-label"><span>{link.label}</span><span aria-hidden="true">↗</span></span></a>)}
-            </div>
-          </div>
-          <section className="project-copy-panel project-copy-detail" aria-label={`Details for ${displayedBoardItem.title}`} aria-hidden={!selectedBoardItem} inert={!selectedBoardItem}>
-            <div className="project-meta"><span>FIG. {String(displayedBoardIndex + 1).padStart(2, "0")}</span><span>MEDIA DETAIL</span></div>
-            <p className="project-eyebrow">{project.title} / SELECTED MEDIA</p>
-            <h3>{displayedBoardItem.title}</h3>
-            <p className="project-description">{displayedBoardItem.description}</p>
-            {displayedBoardItem.details && <p className="project-details">{displayedBoardItem.details}</p>}
-            <div className="project-detail-context"><span>PROJECT</span><strong>{project.title}</strong></div>
-          </section>
-        </div>
-      </div>
-      <ProjectBoard project={project} items={boardItems} selectedIndex={selectedBoardIndex} displayedIndex={displayedBoardIndex} onSelect={selectBoardItem} />
-    </article>
-  );
-}
-
-function TopographicField() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  useEffect(() => {
-    const canvasElement = canvasRef.current;
-    if (!canvasElement) return;
-    const drawingContext = canvasElement.getContext("2d");
-    if (!drawingContext) return;
-    const canvas: HTMLCanvasElement = canvasElement;
-    const context: CanvasRenderingContext2D = drawingContext;
-
-    const [red, green, blue] = [232, 156, 78];
-    let resizeFrame = 0;
-    let resizeTimer = 0;
-    const parentSurface = canvas.parentElement;
-    if (!parentSurface) return;
-    const surface: HTMLElement = parentSurface;
-
-    function hash(x: number, y: number) {
-      let value = Math.imul(x, 374761393) + Math.imul(y, 668265263) + 731947;
-      value = Math.imul(value ^ value >>> 13, 1274126177);
-      return ((value ^ value >>> 16) >>> 0) / 4294967295;
-    }
-
-    function smooth(value: number) {
-      return value * value * (3 - 2 * value);
-    }
-
-    function valueNoise(x: number, y: number) {
-      const x0 = Math.floor(x);
-      const y0 = Math.floor(y);
-      const tx = smooth(x - x0);
-      const ty = smooth(y - y0);
-      const a = hash(x0, y0);
-      const b = hash(x0 + 1, y0);
-      const c = hash(x0, y0 + 1);
-      const d = hash(x0 + 1, y0 + 1);
-      const top = a + (b - a) * tx;
-      const bottom = c + (d - c) * tx;
-      return top + (bottom - top) * ty;
-    }
-
-    function fractalNoise(x: number, y: number) {
-      let value = 0;
-      let amplitude = .54;
-      let frequency = 1;
-      let total = 0;
-      for (let octave = 0; octave < 5; octave += 1) {
-        value += valueNoise(x * frequency, y * frequency) * amplitude;
-        total += amplitude;
-        amplitude *= .5;
-        frequency *= 2.03;
-      }
-      return value / total;
-    }
-
-    type Point = { x: number; y: number };
-
-    function interpolate(a: Point, b: Point, valueA: number, valueB: number, level: number): Point {
-      const denominator = valueB - valueA;
-      const amount = Math.abs(denominator) < .000001 ? .5 : Math.max(0, Math.min(1, (level - valueA) / denominator));
-      return { x: a.x + (b.x - a.x) * amount, y: a.y + (b.y - a.y) * amount };
-    }
-
-    function segment(path: Path2D, start: Point, end: Point) {
-      path.moveTo(start.x, start.y);
-      path.lineTo(end.x, end.y);
-    }
-
-    function renderContours() {
-      const surfaceRect = surface.getBoundingClientRect();
-      const width = Math.max(1, Math.ceil(surfaceRect.width));
-      const height = Math.max(window.innerHeight, Math.ceil(surfaceRect.height));
-      const maximumCanvasPixels = 14_000_000;
-      const maximumCanvasDimension = 16_384;
-      const ratioForPixelBudget = Math.sqrt(maximumCanvasPixels / (width * height));
-      const ratioForDimension = maximumCanvasDimension / Math.max(width, height);
-      const pixelRatio = Math.min(window.devicePixelRatio || 1, 1.5, ratioForPixelBudget, ratioForDimension);
-      const spacing = width < 760 ? 9 : 12;
-      const columns = Math.ceil(width / spacing) + 1;
-      const rows = Math.ceil(height / spacing) + 1;
-      const values = new Float32Array(columns * rows);
-      let minimum = Number.POSITIVE_INFINITY;
-      let maximum = Number.NEGATIVE_INFINITY;
-
-      for (let row = 0; row < rows; row += 1) {
-        for (let column = 0; column < columns; column += 1) {
-          const nx = column * spacing / width;
-          const ny = row * spacing / width;
-          const value = fractalNoise(nx * 3.4 + .7, ny * 3.4 + 1.9);
-          values[row * columns + column] = value;
-          minimum = Math.min(minimum, value);
-          maximum = Math.max(maximum, value);
-        }
-      }
-
-      canvas.width = Math.round(width * pixelRatio);
-      canvas.height = Math.round(height * pixelRatio);
-      canvas.style.width = `${width}px`;
-      canvas.style.height = `${height}px`;
-      canvas.dataset.worldWidth = `${width}`;
-      canvas.dataset.worldHeight = `${height}`;
-      context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
-      context.clearRect(0, 0, width, height);
-      context.lineCap = "round";
-      context.lineJoin = "round";
-
-      const levelCount = 28;
-      const range = maximum - minimum;
-      for (let levelIndex = 1; levelIndex < levelCount; levelIndex += 1) {
-        const level = minimum + range * levelIndex / levelCount;
-        const path = new Path2D();
-
-        for (let row = 0; row < rows - 1; row += 1) {
-          for (let column = 0; column < columns - 1; column += 1) {
-            const topLeftValue = values[row * columns + column];
-            const topRightValue = values[row * columns + column + 1];
-            const bottomRightValue = values[(row + 1) * columns + column + 1];
-            const bottomLeftValue = values[(row + 1) * columns + column];
-            const state = (topLeftValue >= level ? 1 : 0) | (topRightValue >= level ? 2 : 0) | (bottomRightValue >= level ? 4 : 0) | (bottomLeftValue >= level ? 8 : 0);
-            if (state === 0 || state === 15) continue;
-
-            const x = column * spacing;
-            const y = row * spacing;
-            const topLeft = { x, y };
-            const topRight = { x: x + spacing, y };
-            const bottomRight = { x: x + spacing, y: y + spacing };
-            const bottomLeft = { x, y: y + spacing };
-            const top = interpolate(topLeft, topRight, topLeftValue, topRightValue, level);
-            const right = interpolate(topRight, bottomRight, topRightValue, bottomRightValue, level);
-            const bottom = interpolate(bottomLeft, bottomRight, bottomLeftValue, bottomRightValue, level);
-            const left = interpolate(topLeft, bottomLeft, topLeftValue, bottomLeftValue, level);
-            const centerIsHigh = (topLeftValue + topRightValue + bottomRightValue + bottomLeftValue) * .25 >= level;
-
-            if (state === 1 || state === 14) segment(path, left, top);
-            else if (state === 2 || state === 13) segment(path, top, right);
-            else if (state === 3 || state === 12) segment(path, left, right);
-            else if (state === 4 || state === 11) segment(path, right, bottom);
-            else if (state === 6 || state === 9) segment(path, top, bottom);
-            else if (state === 7 || state === 8) segment(path, left, bottom);
-            else if (state === 5) {
-              if (centerIsHigh) {
-                segment(path, top, right);
-                segment(path, bottom, left);
-              } else {
-                segment(path, top, left);
-                segment(path, right, bottom);
-              }
-            } else if (state === 10) {
-              if (centerIsHigh) {
-                segment(path, top, left);
-                segment(path, right, bottom);
-              } else {
-                segment(path, top, right);
-                segment(path, bottom, left);
-              }
-            }
-          }
-        }
-
-        const emphasis = levelIndex % 4 === 0 ? 1.5 : 1;
-        const alpha = emphasis === 1.5 ? .42 : .25;
-        context.lineWidth = emphasis;
-        context.strokeStyle = `rgba(${red}, ${green}, ${blue}, ${alpha})`;
-        context.stroke(path);
-      }
-    }
-
-    const resize = () => {
-      window.cancelAnimationFrame(resizeFrame);
-      resizeFrame = window.requestAnimationFrame(() => {
-        renderContours();
-      });
-    };
-
-    const resizeAfterLayoutSettles = () => {
-      window.clearTimeout(resizeTimer);
-      resizeTimer = window.setTimeout(resize, 180);
-    };
-
-    const resizeObserver = new ResizeObserver(resizeAfterLayoutSettles);
-    renderContours();
-    resizeObserver.observe(surface);
-    window.addEventListener("resize", resize, { passive: true });
-    return () => {
-      resizeObserver.disconnect();
-      window.removeEventListener("resize", resize);
-      window.clearTimeout(resizeTimer);
-      window.cancelAnimationFrame(resizeFrame);
-    };
-  }, []);
-
-  return <canvas ref={canvasRef} className="topographic-canvas" aria-hidden="true" />;
-}
-
-function Navigation({ page, navRef }: { page: PageId; navRef: RefObject<HTMLElement | null> }) {
-  return (
-    <header className="site-header nav-visible at-page-top" ref={navRef}>
-      <InternalLink className="brand" href="/" aria-label="Leon Zhou portfolio home"><span className="brand-mark">LZ</span><span className="brand-label">PORTFOLIO / 2026</span></InternalLink>
-      <nav className="header-links" aria-label="Primary navigation">
-        <InternalLink href="/" aria-current={page === "home" ? "page" : undefined}><span className="hover-shift-label">Home</span></InternalLink>
-        {tabs.map((tab) => <InternalLink key={tab.id} href={tab.path} aria-current={page === tab.id ? "page" : undefined}><span className="hover-shift-label">{tab.id === "technical" ? "Technical" : tab.id === "games" ? "Games" : "Design"}</span></InternalLink>)}
-      </nav>
-      <span className="nav-proximity">MOVE TO TOP / NAV</span>
-    </header>
-  );
+function Navigation({ page }: { page: ShellPage }) {
+  const navTabs = [tabs.find((tab) => tab.id === "technical"), tabs.find((tab) => tab.id === "design"), tabs.find((tab) => tab.id === "games")].filter((tab): tab is (typeof tabs)[number] => Boolean(tab));
+  return <header className="site-header"><InternalLink className="brand" href="/" aria-label="Leon Zhou portfolio home"><span className="brand-label">LEON ZHOU</span><small>PORTFOLIO / 2026</small></InternalLink><nav className="header-links" aria-label="Primary navigation"><InternalLink href="/" aria-current={page === "home" ? "page" : undefined}><span className="hover-shift-label">Home</span></InternalLink>{navTabs.map((tab) => <InternalLink key={tab.id} href={tab.path} aria-current={page === tab.id ? "page" : undefined}><span className="hover-shift-label">{tab.id === "technical" ? "Technical" : tab.id === "games" ? "Games" : "Design"}</span></InternalLink>)}<InternalLink href="/other" aria-current={page === "other" ? "page" : undefined}><span className="hover-shift-label">Other</span></InternalLink></nav></header>;
 }
 
 function Footer() {
@@ -1003,149 +319,440 @@ function Footer() {
     }
   }
 
-  return (
-    <footer className="site-footer">
-      <div><span className="footer-kicker">OPEN TO COLLABORATION</span><h2>Let’s make<br />something playable.</h2></div>
-      <div className="footer-links"><button className="footer-copy" type="button" onClick={copyEmail}><span className="hover-shift-label"><span>leonzhouziang@gmail.com</span><small aria-live="polite">{copyStatus}</small></span></button><a href="https://github.com/Hubr1zz" target="_blank" rel="noreferrer"><span className="hover-shift-label"><span>GitHub</span><span aria-hidden="true">↗</span></span></a><a href="https://leon-zhou.itch.io/" target="_blank" rel="noreferrer"><span className="hover-shift-label"><span>Itch.io</span><span aria-hidden="true">↗</span></span></a><a href="https://52ccdc57-ad3f-47d6-9b83-c35f8ad2c41f.filesusr.com/ugd/2967e1_9d3e636f150d4a08a49e78ff06525b6a.pdf" target="_blank" rel="noreferrer"><span className="hover-shift-label"><span>Résumé</span><span aria-hidden="true">↗</span></span></a></div>
-      <div className="footer-base"><span>LEON ZHOU / PORTFOLIO</span><span>DESIGNED FOR CLARITY · BUILT WITH INTENT</span></div>
-    </footer>
-  );
+  return <footer className="site-footer"><div><span className="footer-kicker">OPEN TO COLLABORATION</span><h2>Let’s make<br />something playable.</h2></div><div className="footer-links"><button className="footer-copy" type="button" onClick={copyEmail}><span className="hover-shift-label"><span>leonzhouziang@gmail.com</span><small aria-live="polite">{copyStatus}</small></span></button><a href="https://github.com/Hubr1zz" target="_blank" rel="noreferrer"><span className="hover-shift-label"><span>GitHub</span><span aria-hidden="true">↗</span></span></a><a href="https://leon-zhou.itch.io/" target="_blank" rel="noreferrer"><span className="hover-shift-label"><span>Itch.io</span><span aria-hidden="true">↗</span></span></a><a href={resumeHref} target="_blank" rel="noreferrer"><span className="hover-shift-label"><span>Résumé</span><span aria-hidden="true">↗</span></span></a></div><div className="footer-base"><span>LEON ZHOU / PORTFOLIO</span><span>DESIGNED FOR CLARITY · BUILT WITH INTENT</span></div></footer>;
+}
+
+export function PortfolioShell({ page, children }: { page: ShellPage; children: ReactNode }) {
+  useRestoreOrigin();
+  return <main className={"site-shell page-" + page + " theme-amber"}><a className="skip-link" href="#main-content">Skip to content</a><MarginContours /><Navigation page={page} /><div id="main-content">{children}</div><Footer /></main>;
 }
 
 function HomePage() {
+  const zworkflow = projects.technical[0];
+  const tactics = projects.design[0];
+
   return (
     <>
-      <section className="hero page-enter" id="top">
-        <div className="contour-field" aria-hidden="true"><span /><span /><span /><span /></div>
-        <div className="hero-kicker"><span>PROFILE_001</span><span>LOS ANGELES / CA</span></div>
-        <div className="hero-copy">
-          <p className="role-label">Technical Designer · Gameplay Programmer</p>
-          <h1 aria-label="Leon Zhou"><span className="name-leon">Leon</span><span className="name-zhou">Zhou</span></h1>
-          <p className="hero-intro">I design gameplay systems and build the technology that makes them tangible—bridging mechanics, tools, and real-time visuals.</p>
+      <section className="home-intro page-enter" id="top">
+        <MarginContoursWell variant="hero" />
+        <div className="intro-kicker">
+          <span>Technical Designer · Gameplay Programmer</span>
+          <span>LOS ANGELES / CA</span>
         </div>
-        <aside className="hero-profile focus-frame">
+        <h1 className="intro-title">
+          <span>Designing play.</span>
+          <span>Building systems.</span>
+        </h1>
+        <div className="intro-bottom">
+          <p className="intro-summary">I design gameplay systems and build the technology that makes them tangible—bridging mechanics, tools, and real-time visuals.</p>
+          <div className="intro-actions">
+            <a href="#work">Explore selected work</a>
+            <a href={resumeHref} target="_blank" rel="noreferrer">Résumé</a>
+          </div>
+        </div>
+      </section>
+      <section className="featured-section page-enter" id="work">
+        <div className="section-heading">
+          <div>
+            <span className="section-index">01 / SELECTED WORK</span>
+            <h2>Ideas, made tangible.</h2>
+          </div>
+          <p>Three projects across workflow tools, game design, and resolution framework</p>
+        </div>
+        <div className="featured-grid">
+          <FeatureCard project={zworkflow} category="technical" index="01" />
+          <FeatureCard project={tactics} category="design" index="02" />
+          <article className="featured-card is-pending" aria-label="ActionQueue case study coming soon">
+            <div className="feature-media pending-art" aria-hidden="true"><i /><i /><i /></div>
+            <div className="feature-meta">
+              <span>03 / UPCOMING</span>
+              <span>IN PREPARATION</span>
+            </div>
+            <h3>ActionQueue</h3>
+            <p className="feature-description">Case study coming soon.</p>
+            <span className="feature-link">In preparation</span>
+          </article>
+        </div>
+      </section>
+      <nav className="discipline-nav" aria-label="Explore by discipline">
+        {tabs.map((tab, index) => (
+          <InternalLink key={tab.id} className="discipline-link" href={tab.path}>
+            <span className="index">{String(index + 1).padStart(2, "0")}</span>
+            <h3>{tab.label}</h3>
+            <p>{tab.description}</p>
+            <span className="arrow" aria-hidden="true">↗</span>
+          </InternalLink>
+        ))}
+      </nav>
+      <InternalLink className="other-teaser" href="/other">
+        <span>OFF THE CLOCK</span>
+        <h3>What I play. What I make.</h3>
+        <p>Games, small tools, and side experiments.</p>
+        <span className="arrow" aria-hidden="true">↗</span>
+      </InternalLink>
+      <section className="profile-section">
+        <div className="section-heading">
+          <div>
+            <span className="section-index">PROFILE / NOTES</span>
+            <h2>How I work</h2>
+          </div>
+        </div>
+        <div className="profile-copy">
           <p className="profile-lead">Game designer, gameplay programmer, but most importantly, game player.</p>
           <p>I graduated from Rensselaer Polytechnic Institute’s Games &amp; Simulation Arts &amp; Sciences program, connecting computer science, game design, and real-time visual practice.</p>
           <p>I care about how mechanics, systems, and feedback shape player experience. Programming and 3D math let me turn ambiguous ideas into playable, testable systems.</p>
           <p className="profile-goal">Seeking Technical Designer, Systems Designer, or Gameplay Engineer opportunities.</p>
-          <div className="hero-status"><span className="status-dot" /><span>Current focus</span><strong>Gameplay systems &amp; production tooling</strong></div>
-        </aside>
-        <div className="hero-controls">
-          <a className="scroll-cue" href="#work"><span>Explore selected work</span><i aria-hidden="true" /></a>
-          <span className="fixed-accent">CONTOUR SIGNAL / AMBER</span>
-        </div>
-      </section>
-
-      <section className="home-work-portal page-enter" id="work">
-        <div className="section-heading"><div><span className="section-index">INDEX / WORK</span><h2>Selected work</h2></div><p>Three signature works form the shortest route into my technical and design practice. Two are selected; the final position remains intentionally open.</p></div>
-        <div className="portal-grid">
-          <InternalLink className="portal-card portal-technical focus-frame" href="/technical#project-zworkflow"><span>01 / TECHNICAL</span><h3>zWorkFlow</h3><p>An AI-assisted production workflow that turns design intent into reviewable changes, implementation, and traceable project knowledge.</p><strong>OPEN PROJECT ↗</strong></InternalLink>
-          <InternalLink className="portal-card portal-design focus-frame" href="/design#project-tactics-design"><span>02 / DESIGN</span><h3>Tactical Game Design Document</h3><p>An evolving systems-design project exploring preparation, pressure, progression, and consequence in a tactical game structure.</p><strong>OPEN PROJECT ↗</strong></InternalLink>
-          <div className="portal-card portal-pending" aria-label="Third signature project not yet selected"><span>03 / RESERVED</span><h3>Next signature work</h3><p>The third position remains open until another project represents the portfolio at the same level.</p><strong>SELECTION PENDING</strong></div>
         </div>
       </section>
     </>
   );
 }
 
-function WorkPage({ page }: { page: TabId }) {
-  const meta = tabs.find((tab) => tab.id === page) ?? tabs[0];
+function ProjectPreview({ project }: { project: Project }) {
+  return (
+    <article id={"project-" + project.id} className="project-preview" tabIndex={-1}>
+      <InternalLink className="project-preview-link" href={"/projects/" + project.id} onClick={(event) => rememberProjectOrigin(event, project.id)}>
+        <div className="preview-media"><ProjectCover project={project} /></div>
+        <div className="preview-copy">
+          <div className="preview-meta">
+            <span>{project.index}</span>
+            <span>{project.year}</span>
+          </div>
+          <h2>{project.title}</h2>
+          <p className="preview-description">{project.description}</p>
+          <ul className="tag-list" aria-label={project.title + " technologies and disciplines"}>
+            {project.tags.slice(0, 3).map((tag) => <li key={tag}>{tag}</li>)}
+          </ul>
+          <span className="preview-link">View details ↗</span>
+        </div>
+      </InternalLink>
+    </article>
+  );
+}
+
+function RenderingGallery({ project, standalone = false }: { project?: Project; standalone?: boolean }) {
+  const items = useMemo(() => project ? getBoardItems(project) : [], [project]);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const activeIndex = Math.min(selectedIndex, Math.max(0, items.length - 1));
+  const selected = items[activeIndex] ?? items[0];
+
+  if (!project || !selected)
+    return null;
+
+  const selectPrevious = () => setSelectedIndex((current) => Math.max(0, current - 1));
+  const selectNext = () => setSelectedIndex((current) => Math.min(items.length - 1, current + 1));
+
+  return (
+    <section id="project-rendering-studies" className={"rendering-gallery" + (standalone ? " rendering-gallery-standalone" : "")} tabIndex={-1} aria-labelledby="rendering-gallery-heading">
+      <div className="archive-group-heading">
+        <span>03 / RENDERING</span>
+        <div>
+          <h2 id="rendering-gallery-heading">Rendering studies</h2>
+          <p>A focused set of shader and procedural graphics studies, with each image paired to the technique it tests.</p>
+        </div>
+      </div>
+      <div className="rendering-gallery-controls">
+        <button type="button" onClick={selectPrevious} disabled={activeIndex === 0} aria-label="Previous rendering study">← Previous</button>
+        <button type="button" onClick={selectNext} disabled={activeIndex === items.length - 1} aria-label="Next rendering study">Next →</button>
+      </div>
+      <div className="rendering-gallery-strip" aria-label="Rendering studies">
+        {items.map((item, index) => <button key={item.id} type="button" aria-pressed={activeIndex === index} onClick={() => setSelectedIndex(index)}>
+          {item.image && <Image src={assetPath(item.image)} alt="" width={240} height={150} sizes="120px" unoptimized />}
+          <span>{item.title}</span>
+        </button>)}
+      </div>
+      <div className="rendering-gallery-stage">
+        <div className="rendering-stage-media">
+          {selected.image ? <Image src={assetPath(selected.image)} alt={selected.imageAlt ?? selected.title} width={1600} height={1000} sizes="(max-width: 760px) 100vw, 62vw" unoptimized /> : <ProjectVisual project={project} />}
+        </div>
+        <div className="rendering-stage-copy">
+          <span>{String(activeIndex + 1).padStart(2, "0")} / {String(items.length).padStart(2, "0")}</span>
+          <h3 aria-live="polite">{selected.title}</h3>
+          <p>{selected.description}</p>
+          {selected.details && <p>{selected.details}</p>}
+        </div>
+      </div>
+      {!standalone && <InternalLink className="rendering-gallery-link" href="/projects/rendering-studies" onClick={(event) => rememberProjectOrigin(event, "rendering-studies")}>View full gallery ↗</InternalLink>}
+    </section>
+  );
+}
+
+function ArchivePage({ page }: { page: TabId }) {
+  const meta = categoryMeta(page);
+  const categoryProjects = projects[page];
   const releasedProjects = projects.technical.filter((project) => project.tier === "release");
-  const studyProjects = projects.technical.filter((project) => project.tier === "study");
+  const studyProjects = projects.technical.filter((project) => project.tier === "study" && project.id !== "rendering-studies");
 
   return (
     <>
-      <section className="work-page-head page-enter">
-        <div className="page-field" aria-hidden="true"><i /><i /><i /><i /><i /></div>
-        <span className="section-index">WORK INDEX / {meta.count}</span>
+      <header className="archive-header page-enter">
+        <MarginContoursWell variant="archive" />
+        <span className="section-index">WORK / ARCHIVE</span>
         <h1>{meta.label}</h1>
         <p>{meta.description}</p>
-      </section>
-
-      <section className="work-page-body project-surface page-enter">
+      </header>
+      <section className="archive-body page-enter">
         {page === "technical" ? (
           <>
-            <section className="project-tier release-tier" aria-labelledby="released-heading">
-              <div className="tier-heading"><span>01 / RELEASED</span><div><h2 id="released-heading">Published projects</h2><p>Maintained tools and systems intended for use beyond a single prototype.</p></div></div>
-              <div className="release-list">{releasedProjects.map((project) => <ProjectCard project={project} key={project.id} />)}</div>
-              <a className="roadmap-slot focus-frame" href="https://github.com/Hubr1zz/ZFramework" target="_blank" rel="noreferrer"><span>NEXT_RELEASE</span><strong>ZFramework</strong><small>IN DEVELOPMENT ↗</small></a>
+            <section className="archive-group" aria-labelledby="published-heading">
+              <div className="archive-group-heading">
+                <span>01 / RELEASED</span>
+                <div>
+                  <h2 id="published-heading">Published projects</h2>
+                  <p>Maintained tools and systems intended for use beyond a single prototype.</p>
+                </div>
+              </div>
+              <div className="project-grid">
+                {releasedProjects.map((project) => <ProjectPreview key={project.id} project={project} />)}
+              </div>
+              <a className="roadmap-slot focus-frame" href="https://github.com/Hubr1zz/ZFramework" target="_blank" rel="noreferrer">
+                <span>NEXT_RELEASE</span>
+                <strong>ZFramework</strong>
+                <small>IN DEVELOPMENT ↗</small>
+              </a>
             </section>
-            <section className="project-tier study-tier" aria-labelledby="studies-heading">
-              <div className="tier-heading"><span>02 / PRACTICE</span><div><h2 id="studies-heading">Studies &amp; experiments</h2><p>Focused exercises used to investigate animation, rendering, and editor workflow problems.</p></div></div>
-              <div className="study-grid">{studyProjects.map((project) => <ProjectCard project={project} key={project.id} />)}</div>
+            <section className="archive-group" aria-labelledby="studies-heading">
+              <div className="archive-group-heading">
+                <span>02 / PRACTICE</span>
+                <div>
+                  <h2 id="studies-heading">Studies &amp; experiments</h2>
+                  <p>Focused exercises used to investigate animation, rendering, and editor workflow problems.</p>
+                </div>
+              </div>
+              <div className="project-grid">
+                {studyProjects.map((project) => <ProjectPreview key={project.id} project={project} />)}
+              </div>
             </section>
+            <RenderingGallery project={projects.technical.find((project) => project.id === "rendering-studies")} />
           </>
-        ) : <div className="standard-grid">{projects[page].map((project) => <ProjectCard project={project} key={project.id} />)}</div>}
+        ) : (
+          <section className="archive-group" aria-labelledby="archive-projects-heading">
+            <div className="archive-group-heading">
+              <span>01 / ARCHIVE</span>
+              <div>
+                <h2 id="archive-projects-heading">{meta.label}</h2>
+                <p>{meta.description}</p>
+              </div>
+            </div>
+            <div className="project-grid">
+              {categoryProjects.map((project) => <ProjectPreview key={project.id} project={project} />)}
+            </div>
+          </section>
+        )}
       </section>
     </>
   );
 }
 
-export function Portfolio({ page = "home" }: { page?: PageId }) {
-  const shellRef = useRef<HTMLElement>(null);
-  const navRef = useRef<HTMLElement>(null);
+function CaseMedia({ item, project, onExpand }: { item: BoardItem; project: Project; onExpand: (event: MouseEvent<HTMLButtonElement>, item: BoardItem) => void }) {
+  if (item.image)
+    return <div className="case-media"><Image src={assetPath(item.image)} alt={item.imageAlt ?? item.title} width={1600} height={1000} sizes="(max-width: 900px) 100vw, 65vw" unoptimized /><button className="media-expand" type="button" onClick={(event) => onExpand(event, item)} aria-label={"Enlarge image: " + item.title}>Enlarge image ↗</button></div>;
+  if (item.diagram)
+    return <div className="case-media"><FlowDiagram id={item.diagram} /></div>;
+  if (item.visual)
+    return <div className="case-media"><ProjectVisual project={project} /></div>;
+  return null;
+}
+
+const relatedProjectIds: Partial<Record<string, string[]>> = { "tactics-design": ["hunting-in-darkness"], "hunting-in-darkness": ["tactics-design"], zworkflow: ["interaction"], interaction: ["zworkflow"] };
+
+function relatedProjects(project: Project & { category: TabId }) {
+  const preferred = relatedProjectIds[project.id] ?? [];
+  const sameCategory = projects[project.category].filter((candidate) => candidate.id !== project.id).map((candidate) => candidate.id);
+  const ids = [...preferred, ...sameCategory].filter((id, index, list) => list.indexOf(id) === index).slice(0, 2);
+  return ids.map((id) => projects[project.category].find((candidate) => candidate.id === id) ?? Object.values(projects).flat().find((candidate) => candidate.id === id)).filter((candidate): candidate is Project => Boolean(candidate));
+}
+
+function ImageDialog({ item, onClose }: { item: BoardItem | null; onClose: () => void }) {
+  const dialogRef = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
-    const target = { x: window.innerWidth * .72, y: window.innerHeight * .24 };
-    const current = { ...target };
-    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    let frame = 0;
-    let pointerY = target.y;
-
-    const updateNavigation = () => {
-      const atPageTop = window.scrollY < 48;
-      const navigation = navRef.current;
-      navigation?.classList.toggle("at-page-top", atPageTop);
-      navigation?.classList.toggle("nav-visible", atPageTop || pointerY < 132);
-      if (reduceMotion && shellRef.current) {
-        shellRef.current.style.setProperty("--pointer-page-x", `${target.x + window.scrollX}px`);
-        shellRef.current.style.setProperty("--pointer-page-y", `${target.y + window.scrollY}px`);
-      }
-    };
-
-    const move = (event: globalThis.PointerEvent) => {
-      target.x = event.clientX;
-      target.y = event.clientY;
-      pointerY = event.clientY;
-      updateNavigation();
-      if (reduceMotion && shellRef.current) {
-        shellRef.current.style.setProperty("--pointer-x", `${target.x}px`);
-        shellRef.current.style.setProperty("--pointer-y", `${target.y}px`);
-      }
-    };
-    const animate = () => {
-      current.x += (target.x - current.x) * .095;
-      current.y += (target.y - current.y) * .095;
-      const shell = shellRef.current;
-      if (shell) {
-        shell.style.setProperty("--pointer-x", `${current.x.toFixed(2)}px`);
-        shell.style.setProperty("--pointer-y", `${current.y.toFixed(2)}px`);
-        shell.style.setProperty("--pointer-page-x", `${(current.x + window.scrollX).toFixed(2)}px`);
-        shell.style.setProperty("--pointer-page-y", `${(current.y + window.scrollY).toFixed(2)}px`);
-        shell.style.setProperty("--pointer-rx", (current.x / window.innerWidth - .5).toFixed(4));
-        shell.style.setProperty("--pointer-ry", (current.y / window.innerHeight - .5).toFixed(4));
-      }
-      frame = window.requestAnimationFrame(animate);
-    };
-    window.addEventListener("pointermove", move, { passive: true });
-    window.addEventListener("scroll", updateNavigation, { passive: true });
-    updateNavigation();
-    if (!reduceMotion) frame = window.requestAnimationFrame(animate);
+    const dialog = dialogRef.current;
+    if (!dialog)
+      return;
+    if (!item) {
+      if (dialog.open)
+        dialog.close();
+      return;
+    }
+    if (!dialog.open)
+      dialog.showModal();
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
     return () => {
-      window.removeEventListener("pointermove", move);
-      window.removeEventListener("scroll", updateNavigation);
-      window.cancelAnimationFrame(frame);
+      document.body.style.overflow = previousOverflow;
     };
-  }, []);
+  }, [item]);
+
+  // Native cancel and Close button provide keyboard closing; backdrop dismissal is pointer-only.
+  // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions
+  return <dialog className="image-dialog" ref={dialogRef} aria-labelledby="image-dialog-title" onCancel={(event) => { event.preventDefault(); onClose(); }} onClick={(event) => { if (event.target === event.currentTarget) onClose(); }}>{item && <><div className="image-dialog-header"><h2 id="image-dialog-title">{item.title}</h2><button type="button" className="dialog-close" onClick={onClose}>Close ×</button></div><div className="image-dialog-media"><Image src={assetPath(item.image ?? "")} alt={item.imageAlt ?? item.title} width={2000} height={1400} sizes="90vw" unoptimized /></div><div className="image-dialog-caption"><span>{item.imageAlt ?? item.title}</span><a href={assetPath(item.image ?? "")} target="_blank" rel="noreferrer">Open original ↗</a></div></>}</dialog>;
+}
+
+function ProjectDetailContent({ project, category }: { project: Project & { category: TabId }; category: TabId }) {
+  const hasCaseMedia = Boolean(project.gallery?.length || project.image || project.visual);
+  const isRenderingStudies = project.id === "rendering-studies";
+  const articles = useMemo(() => project.articles ?? [], [project.articles]);
+  const isComparative = articles.length > 0;
+  const hasBoardContent = hasCaseMedia || project.id === "tactics-design";
+  const items = useMemo(() => hasBoardContent ? getBoardItems(project) : [], [hasBoardContent, project]);
+  const [activeSection, setActiveSection] = useState(items[0]?.id ?? articles[0]?.id ?? "overview");
+  const [dialogItem, setDialogItem] = useState<BoardItem | null>(null);
+  const triggerRef = useRef<HTMLElement | null>(null);
+  const meta = categoryMeta(category);
+  const tocEntries = useMemo(() => items.length ? items.map((item) => ({ id: item.id, title: item.title })) : articles.length ? articles.map((article) => ({ id: article.id, title: article.title })) : project.details ? [{ id: "overview", title: "Overview" }] : [], [articles, items, project.details]);
+
+  useEffect(() => {
+    if (isRenderingStudies || !tocEntries.length)
+      return;
+    const sections = tocEntries.map((entry) => document.getElementById(entry.id === "overview" ? "overview" : "chapter-" + entry.id)).filter((section): section is HTMLElement => section instanceof HTMLElement);
+    let frame = 0;
+    const updateActive = () => {
+      frame = 0;
+      const rootStyle = getComputedStyle(document.documentElement);
+      const sectionStyle = sections[0] ? getComputedStyle(sections[0]) : null;
+      const offset = (parseFloat(rootStyle.scrollPaddingTop) || 0) + (parseFloat(sectionStyle?.scrollMarginTop ?? "0") || 0) + 2;
+      const current = sections.filter((section) => section.getBoundingClientRect().top <= offset).at(-1) ?? sections[0];
+      if (current)
+        setActiveSection(current.id.replace("chapter-", ""));
+    };
+    const scheduleUpdate = () => {
+      if (frame)
+        return;
+      frame = window.requestAnimationFrame(updateActive);
+    };
+    window.addEventListener("scroll", scheduleUpdate, { passive: true });
+    window.addEventListener("resize", scheduleUpdate);
+    window.addEventListener("hashchange", scheduleUpdate);
+    scheduleUpdate();
+    return () => {
+      if (frame)
+        window.cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", scheduleUpdate);
+      window.removeEventListener("resize", scheduleUpdate);
+      window.removeEventListener("hashchange", scheduleUpdate);
+    };
+  }, [isRenderingStudies, tocEntries]);
+
+  function openImage(event: MouseEvent<HTMLButtonElement>, item: BoardItem) {
+    triggerRef.current = event.currentTarget;
+    setDialogItem(item);
+  }
+
+  function closeImage() {
+    setDialogItem(null);
+  }
+
+  useEffect(() => {
+    if (dialogItem)
+      return;
+    const trigger = triggerRef.current;
+    if (!trigger)
+      return;
+    window.requestAnimationFrame(() => trigger.focus());
+  }, [dialogItem]);
 
   return (
-    <main ref={shellRef} className={`site-shell page-${page} theme-amber`} style={{ "--pointer-x": "72vw", "--pointer-y": "24vh", "--pointer-page-x": "72vw", "--pointer-page-y": "24vh", "--pointer-rx": ".22", "--pointer-ry": "-.26" } as CSSProperties}>
-      <div className="ambient-grid" aria-hidden="true" />
-      <div className="ambient-scan" aria-hidden="true" />
-      <TopographicField />
-      <Navigation page={page} navRef={navRef} />
-      {page === "home" ? <HomePage /> : <WorkPage key={page} page={page} />}
-      <Footer />
-    </main>
+    <>
+      <header className="case-header page-enter">
+        <nav className="case-breadcrumb" aria-label="Breadcrumb">
+          <InternalLink href={meta.path}>{meta.label}</InternalLink>
+          <span aria-hidden="true">/</span>
+          <span>{project.title}</span>
+        </nav>
+        <div className="case-heading">
+          <span className="section-index">{meta.label.toUpperCase()} / {project.year}</span>
+          <h1>{project.title}</h1>
+          <p className="case-intro">{project.description}</p>
+          <ul className="tag-list" aria-label={project.title + " technologies and disciplines"}>
+            {project.tags.map((tag) => <li key={tag}>{tag}</li>)}
+          </ul>
+        </div>
+        {!isComparative && project.links.length > 0 && (
+          <div className="project-links">
+            {project.links.map((link) => <a key={link.href} href={link.href} target="_blank" rel="noreferrer"><span className="hover-shift-label"><span>{link.label}</span><span aria-hidden="true">↗</span></span></a>)}
+          </div>
+        )}
+        {!isComparative && !isRenderingStudies && project.details && items.length > 0 && <p className="case-summary">{project.details}</p>}
+      </header>
+      {!isRenderingStudies && tocEntries.length > 0 && (
+        <details className="mobile-toc">
+          <summary>On this page</summary>
+          <nav className="toc-links" aria-label="Project sections">
+            {tocEntries.map((entry, index) => (
+              <a key={entry.id} className="toc-link" onClick={(event) => { setActiveSection(entry.id); const menu = event.currentTarget.closest("details"); if (menu instanceof HTMLDetailsElement) menu.open = false; }} aria-current={activeSection === entry.id ? "location" : undefined} href={entry.id === "overview" ? "#overview" : "#chapter-" + entry.id}>
+                <span>{String(index + 1).padStart(2, "0")}</span>
+                {entry.title}
+              </a>
+            ))}
+          </nav>
+        </details>
+      )}
+      {isRenderingStudies ? <RenderingGallery project={project} standalone /> : !tocEntries.length ? null : (
+        <div className="case-layout">
+          <div className="case-content">
+            {items.length ? items.map((item, index) => (
+              <section tabIndex={-1} className="case-section" id={"chapter-" + item.id} key={item.id}>
+                <header className="case-section-heading">
+                  <span>{String(index + 1).padStart(2, "0")}</span>
+                  <h2>{item.title}</h2>
+                </header>
+                <CaseMedia item={item} project={project} onExpand={openImage} />
+                <div className="case-copy">
+                  <p>{item.description}</p>
+                  {item.details && <p>{item.details}</p>}
+                  {item.href && <a className="case-source-link" href={item.href} target="_blank" rel="noreferrer">{item.linkLabel ?? "View source"} ↗</a>}
+                </div>
+              </section>
+            )) : articles.length ? articles.map((article, index) => (
+              <section tabIndex={-1} className="case-section article-case-section" id={"chapter-" + article.id} key={article.id}>
+                <div className="article-card">
+                  <header className="case-section-heading">
+                    <span>{String(index + 1).padStart(2, "0")}</span>
+                    <h2>{article.title}</h2>
+                  </header>
+                  <div className="article-card-copy"><p>{article.summary}</p><span>{article.language}</span><a href={article.href} target="_blank" rel="noreferrer">Read article ↗</a></div>
+                </div>
+              </section>
+            )) : project.details ? (
+              <section tabIndex={-1} className="case-section" id="overview">
+                <header className="case-section-heading">
+                  <span>01</span>
+                  <h2>Overview</h2>
+                </header>
+                <div className="case-copy"><p>{project.details}</p></div>
+              </section>
+            ) : null}
+          </div>
+          <aside className="case-toc">
+            <p>IN THIS PROJECT</p>
+            <nav className="toc-links" aria-label="Project sections">
+              {tocEntries.map((entry, index) => (
+                <a key={entry.id} className="toc-link" onClick={() => setActiveSection(entry.id)} aria-current={activeSection === entry.id ? "location" : undefined} href={entry.id === "overview" ? "#overview" : "#chapter-" + entry.id}>
+                  <span>{String(index + 1).padStart(2, "0")}</span>
+                  {entry.title}
+                </a>
+              ))}
+            </nav>
+          </aside>
+        </div>
+      )}
+      {hasCaseMedia && !isRenderingStudies && !isComparative && <ImageDialog item={dialogItem} onClose={closeImage} />}
+      <nav className="case-navigation" aria-label="Project navigation">
+        <div className="case-navigation-heading"><span>CONTINUE EXPLORING</span><span>{meta.label.toUpperCase()}</span></div>
+        <div className="case-navigation-links">
+          <BackLink category={category} projectId={project.id}><span className="case-navigation-card"><small>RETURN TO ARCHIVE</small><strong>Back to {meta.label}</strong><i aria-hidden="true">↗</i></span></BackLink>
+          {relatedProjects(project).map((candidate) => <InternalLink key={candidate.id} href={"/projects/" + candidate.id} onClick={(event) => rememberProjectOrigin(event, candidate.id)}><span className="case-navigation-card"><small>NEXT PROJECT</small><strong>{candidate.title}</strong><i aria-hidden="true">↗</i></span></InternalLink>)}
+        </div>
+      </nav>
+    </>
   );
+}
+
+export function ProjectDetail({ project, category }: { project: Project & { category: TabId }; category: TabId }) {
+  return <PortfolioShell page={category}><ProjectDetailContent project={project} category={category} /></PortfolioShell>;
+}
+
+export function Portfolio({ page = "home" }: { page?: PageId }) {
+  return <PortfolioShell page={page}>{page === "home" ? <HomePage /> : <ArchivePage page={page} />}</PortfolioShell>;
 }

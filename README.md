@@ -17,14 +17,18 @@ Visit the live site: **[hubr1zz.github.io/Portfolio](https://hubr1zz.github.io/P
 ## Selected work
 
 - [zWorkFlow](https://github.com/Hubr1zz/zWorkFlow) — An AI-assisted game-production workflow that turns design documents into reviewable specifications, implementation plans, and traceable decisions.
-- [Interaction System](https://github.com/Hubr1zz/InteractionSystem) — A reusable Unity interaction layer that unifies focus, click, and drag behavior across 3D objects and UI.
 - [Tactical Game Design Document](https://github.com/Hubr1zz/GameDesignVault) — A living systems-design document managed through GitHub as an evolving source of truth.
+- **ActionQueue** — In preparation as a future featured project.
+
+## Other
+
+The Other area includes [Games I Played](https://hubr1zz.github.io/Portfolio/other/games/), with a primary play-history view and an additional family-library collection, plus smaller projects and experiments outside the main portfolio categories.
 
 ## Built with
 
 - React and TypeScript
 - Next-compatible routing with Vinext
-- CSS and Canvas-based interaction and motion
+- CSS and procedural SVG interaction and motion
 - GitHub Actions and GitHub Pages
 - OpenAI Sites as a secondary deployment target
 

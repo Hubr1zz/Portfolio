@@ -1,0 +1,18 @@
+{
+  "version": 2,
+  "updatedAt": null,
+  "profileUrl": "https://steamcommunity.com/profiles/76561198388597018",
+  "profiles": [
+    {
+      "steamId": "76561198388597018",
+      "role": "primary",
+      "url": "https://steamcommunity.com/profiles/76561198388597018"
+    },
+    {
+      "steamId": "76561198851590196",
+      "role": "family",
+      "url": "https://steamcommunity.com/profiles/76561198851590196"
+    }
+  ],
+  "games": []
+}

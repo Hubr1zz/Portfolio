@@ -9,9 +9,10 @@
     "dev": "vinext dev",
     "build": "vinext build",
     "build:pages": "next build",
+    "steam:sync": "node scripts/sync-steam-library.mjs",
     "verify:pages": "node scripts/verify-pages-export.mjs",
     "start": "vinext start",
-    "test": "npm run build && node --test tests/rendered-html.test.mjs",
+    "test": "npm run build && node --test tests/rendered-html.test.mjs tests/steam-sync.test.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "db:generate": "drizzle-kit generate"
   },

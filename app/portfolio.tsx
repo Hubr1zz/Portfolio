@@ -294,15 +294,15 @@ const coverDiagramByProject: Partial<Record<string, DiagramId>> = {
 
 function FeatureCard({ project, index }: { project: Project; index: string }) {
   const visual = project.id === "tactics-design" ? <TacticsMap /> : <ProjectCover project={project} />;
-  return <InternalLink id={"project-" + project.id} className="featured-card" href={"/projects/" + project.id} onClick={(event) => rememberProjectOrigin(event, project.id)}><div className="feature-media">{visual}</div><div className="feature-title-row"><span className="feature-number">{index}</span><h3>{project.title}</h3></div><div className="feature-meta"><span>{project.year}</span></div><p className="feature-description">{project.description}</p><span className="feature-link">View details ↗</span></InternalLink>;
+  return <InternalLink id={"project-" + project.id} className="featured-card" href={"/projects/" + project.id} onClick={(event) => rememberProjectOrigin(event, project.id)}><div className="feature-media">{visual}</div><div className="feature-copy reading-surface"><div className="feature-title-row"><span className="feature-number">{index}</span><h3>{project.title}</h3></div><div className="feature-meta"><span>{project.year}</span></div><p className="feature-description">{project.description}</p><span className="feature-link">View details ↗</span></div></InternalLink>;
 }
 
 function ArchiveDecoration({ page }: { page: TabId }) {
   if (page === "technical")
-    return <svg className="archive-decoration archive-decoration-technical" viewBox="0 0 420 260" aria-hidden="true" focusable="false"><path d="M16 224V154h92V82h98V34h190" /><path d="M108 154h72v54h102V112h114" /><path d="M206 82v76h94" /><circle cx="16" cy="224" r="4" /><circle cx="108" cy="154" r="4" /><circle cx="206" cy="82" r="4" /><circle cx="306" cy="112" r="4" /><circle cx="396" cy="34" r="4" /></svg>;
+    return <svg className="archive-decoration archive-decoration-technical" viewBox="0 0 420 260" aria-hidden="true" focusable="false"><path pathLength="1" d="M16 224V154h92V82h98V34h190" /><path pathLength="1" d="M108 154h72v54h102V112h114" /><path pathLength="1" d="M206 82v76h94" /><circle cx="16" cy="224" r="4" /><circle cx="108" cy="154" r="4" /><circle cx="206" cy="82" r="4" /><circle cx="306" cy="112" r="4" /><circle cx="396" cy="34" r="4" /></svg>;
   if (page === "design")
-    return <svg className="archive-decoration archive-decoration-design" viewBox="0 0 420 260" aria-hidden="true" focusable="false"><path d="M94 34h172l46 46v148H94z" /><path d="M266 34v46h46" /><path d="M58 70h172l46 46v110H58z" /><path d="M230 70v46h46" /><path d="M34 40v18m-9-9h18M374 190v18m-9-9h18M342 46v14m-7-7h14" /></svg>;
-  return <svg className="archive-decoration archive-decoration-games" viewBox="0 0 420 260" aria-hidden="true" focusable="false"><path d="M12 214C84 72 146 52 206 122s88 102 202-80" /><path d="M12 246C84 104 146 84 206 154s88 102 202-80" /><circle cx="12" cy="214" r="4" /><circle cx="206" cy="122" r="4" /><circle cx="408" cy="42" r="4" /><circle cx="146" cy="84" r="3" /></svg>;
+    return <svg className="archive-decoration archive-decoration-design" viewBox="0 0 420 260" aria-hidden="true" focusable="false"><path pathLength="1" d="M94 34h172l46 46v148H94z" /><path pathLength="1" d="M266 34v46h46" /><path pathLength="1" d="M58 70h172l46 46v110H58z" /><path pathLength="1" d="M230 70v46h46" /><path pathLength="1" d="M34 40v18m-9-9h18M374 190v18m-9-9h18M342 46v14m-7-7h14" /></svg>;
+  return <svg className="archive-decoration archive-decoration-games" viewBox="0 0 420 260" aria-hidden="true" focusable="false"><path pathLength="1" d="M12 214C84 72 146 52 206 122s88 102 202-80" /><path pathLength="1" d="M12 246C84 104 146 84 206 154s88 102 202-80" /><circle cx="12" cy="214" r="4" /><circle cx="206" cy="122" r="4" /><circle cx="408" cy="42" r="4" /><circle cx="146" cy="84" r="3" /></svg>;
 }
 
 function Navigation({ page }: { page: ShellPage }) {
@@ -342,25 +342,26 @@ function HomePage() {
   return (
     <>
       <section className="home-intro page-enter" id="top">
-        <div className="intro-kicker">
+        <div className="intro-kicker reading-surface">
           <span>Technical Designer · Gameplay Programmer</span>
           <span>LOS ANGELES / CA</span>
         </div>
-        <h1 className="intro-title">
+        <h1 className="intro-title reading-surface">
           <span>Designing play.</span>
           <span>Building systems.</span>
         </h1>
         <div className="intro-bottom">
-          <p className="intro-summary">I design gameplay systems and build the technology that makes them tangible—bridging mechanics, tools, and real-time visuals.</p>
-          <div className="intro-actions">
-            <a href="#work">Explore selected work</a>
+          <p className="intro-summary reading-surface">I design gameplay systems and build the technology that makes them tangible—bridging mechanics, tools, and real-time visuals.</p>
+          <div className="intro-actions reading-surface">
+            <svg className="intro-registration" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path pathLength="1" d="M4 4H20V20" /></svg>
             <a className="resume-action" href={resumeHref} target="_blank" rel="noreferrer"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 3.5h8l4 4V20.5H6z" /><path d="M14 3.5v4h4M9 12h6M9 15.5h6" /></svg><span>Résumé</span><small>PDF</small></a>
+            <a className="explore-action" href="#work">Explore selected work</a>
           </div>
         </div>
       </section>
       <section className="featured-section page-enter" id="work">
-        <div className="section-heading">
-          <div className="numbered-heading"><span className="section-index">01</span><h2>Selected work</h2></div>
+        <div className="section-heading reading-surface">
+          <div className="selected-heading"><h2>Selected work</h2></div>
           <p>Three projects across workflow tools, game design, and resolution framework</p>
         </div>
         <div className="featured-grid">
@@ -368,10 +369,7 @@ function HomePage() {
           <FeatureCard project={tactics} index="02" />
           <article className="featured-card is-pending" aria-label="ActionQueue case study coming soon">
             <div className="feature-media pending-art" aria-hidden="true"><i /><i /><i /></div>
-            <div className="feature-title-row"><span className="feature-number">03</span><h3>ActionQueue</h3></div>
-            <div className="feature-meta"><span>IN PREPARATION</span></div>
-            <p className="feature-description">Case study coming soon.</p>
-            <span className="feature-link">In preparation</span>
+            <div className="feature-copy reading-surface"><div className="feature-title-row"><span className="feature-number">03</span><h3>ActionQueue</h3></div><div className="feature-meta"><span>IN PREPARATION</span></div><p className="feature-description">Case study coming soon.</p><span className="feature-link">In preparation</span></div>
           </article>
         </div>
       </section>
@@ -385,20 +383,16 @@ function HomePage() {
           </InternalLink>
         ))}
       </nav>
-      <InternalLink className="other-teaser" href="/other">
-        <span>OFF THE CLOCK</span>
-        <h3>What I play. What I make.</h3>
-        <p>Games, small tools, and side experiments.</p>
-        <span className="arrow" aria-hidden="true">↗</span>
-      </InternalLink>
       <section className="profile-section">
-        <div className="section-heading">
-          <div>
-            <span className="section-index">PROFILE / NOTES</span>
-            <h2>How I work</h2>
+        <div className="profile-title-group reading-surface">
+          <div className="section-heading">
+            <div>
+              <h2>About Me</h2>
+              <p className="profile-name">Leon Zhou</p>
+            </div>
           </div>
         </div>
-        <div className="profile-copy">
+        <div className="profile-copy reading-surface">
           <p className="profile-lead">Game designer, gameplay programmer, but most importantly, game player.</p>
           <p>I graduated from Rensselaer Polytechnic Institute’s Games &amp; Simulation Arts &amp; Sciences program, connecting computer science, game design, and real-time visual practice.</p>
           <p>I care about how mechanics, systems, and feedback shape player experience. Programming and 3D math let me turn ambiguous ideas into playable, testable systems.</p>
@@ -414,7 +408,7 @@ function ProjectPreview({ project }: { project: Project }) {
     <article id={"project-" + project.id} className="project-preview" tabIndex={-1}>
       <InternalLink className="project-preview-link" href={"/projects/" + project.id} onClick={(event) => rememberProjectOrigin(event, project.id)}>
         <div className="preview-media"><ProjectCover project={project} /></div>
-        <div className="preview-copy">
+        <div className="preview-copy reading-surface">
           <div className="preview-meta">
             <span>{project.index}</span>
             <span>{project.year}</span>
@@ -447,7 +441,7 @@ function RenderingGallery({ project, standalone = false }: { project?: Project; 
     <section id="project-rendering-studies" className={"rendering-gallery" + (standalone ? " rendering-gallery-standalone" : "")} tabIndex={-1} aria-labelledby="rendering-gallery-heading">
       <div className="archive-group-heading">
         <span>{standalone ? "01" : "03"}</span>
-        <div>
+        <div className="reading-surface">
           <h2 id="rendering-gallery-heading">Rendering studies</h2>
           <p>A focused set of shader and procedural graphics studies, with each image paired to the technique it tests.</p>
         </div>
@@ -459,14 +453,14 @@ function RenderingGallery({ project, standalone = false }: { project?: Project; 
       <div className="rendering-gallery-strip" aria-label="Rendering studies">
         {items.map((item, index) => <button key={item.id} type="button" aria-pressed={activeIndex === index} onClick={() => setSelectedIndex(index)}>
           {item.image && <Image src={assetPath(item.image)} alt="" width={240} height={150} sizes="120px" unoptimized />}
-          <span>{item.title}</span>
+          <span className="reading-surface">{item.title}</span>
         </button>)}
       </div>
       <div className="rendering-gallery-stage">
         <div className="rendering-stage-media">
           {selected.image ? <Image src={assetPath(selected.image)} alt={selected.imageAlt ?? selected.title} width={1600} height={1000} sizes="(max-width: 760px) 100vw, 62vw" unoptimized /> : <ProjectVisual project={project} />}
         </div>
-        <div className="rendering-stage-copy">
+        <div className="rendering-stage-copy reading-surface">
           <span>{String(activeIndex + 1).padStart(2, "0")} / {String(items.length).padStart(2, "0")}</span>
           <h3 aria-live="polite">{selected.title}</h3>
           <p>{selected.description}</p>
@@ -494,9 +488,9 @@ function ArchivePage({ page }: { page: TabId }) {
   return (
     <>
       <header className="archive-header page-enter">
-        <span className="section-index">WORK / ARCHIVE</span>
-        <h1>{meta.label}</h1>
-        <p>{meta.description}</p>
+        <span className="section-index reading-surface">WORK / ARCHIVE</span>
+        <h1 className="reading-surface">{meta.label}</h1>
+        <p className="reading-surface">{meta.description}</p>
         <ArchiveDecoration page={page} />
       </header>
       <section className="archive-body page-enter">
@@ -505,7 +499,7 @@ function ArchivePage({ page }: { page: TabId }) {
             <section className="archive-group" aria-labelledby="published-heading">
               <div className="archive-group-heading">
                 <span>01</span>
-                <div>
+                <div className="reading-surface">
                   <h2 id="published-heading">Published projects</h2>
                   <p>Maintained tools and systems intended for use beyond a single prototype.</p>
                 </div>
@@ -522,7 +516,7 @@ function ArchivePage({ page }: { page: TabId }) {
             <section className="archive-group" aria-labelledby="studies-heading">
               <div className="archive-group-heading">
                 <span>02</span>
-                <div>
+                <div className="reading-surface">
                   <h2 id="studies-heading">Studies &amp; experiments</h2>
                   <p>Focused exercises used to investigate animation, rendering, and editor workflow problems.</p>
                 </div>
@@ -537,7 +531,7 @@ function ArchivePage({ page }: { page: TabId }) {
           <section className="archive-group" aria-labelledby="archive-projects-heading">
             <div className="archive-group-heading">
               <span>01</span>
-              <div>
+              <div className="reading-surface">
                 <h2 id="archive-projects-heading">{groupCopy.title}</h2>
                 <p>{groupCopy.description}</p>
               </div>
@@ -671,12 +665,12 @@ function ProjectDetailContent({ project, category }: { project: Project & { cate
   return (
     <>
       <header className="case-header page-enter">
-        <nav className="case-breadcrumb" aria-label="Breadcrumb">
+        <nav className="case-breadcrumb reading-surface" aria-label="Breadcrumb">
           <InternalLink href={meta.path}>{meta.label}</InternalLink>
           <span aria-hidden="true">/</span>
           <span>{project.title}</span>
         </nav>
-        <div className="case-heading">
+        <div className="case-heading reading-surface">
           <span className="section-index">{meta.label.toUpperCase()} / {project.year}</span>
           <h1>{project.title}</h1>
           <p className="case-intro">{project.description}</p>
@@ -686,14 +680,14 @@ function ProjectDetailContent({ project, category }: { project: Project & { cate
         </div>
         {project.attribution && <aside className="source-credit" aria-label={project.attribution.title}><div><span>{project.attribution.title}</span><p>{project.attribution.text}</p></div><div className="source-credit-links">{project.attribution.links.map((link) => <a key={link.href} href={link.href} target="_blank" rel="noreferrer">{link.label} ↗</a>)}</div></aside>}
         {!isComparative && project.links.length > 0 && (
-          <div className="project-links">
+          <div className="project-links reading-surface">
             {project.links.map((link) => <a key={link.href} href={link.href} target="_blank" rel="noreferrer"><span className="hover-shift-label"><span>{link.label}</span><span aria-hidden="true">↗</span></span></a>)}
           </div>
         )}
-        {!isComparative && !isRenderingStudies && project.details && items.length > 0 && <p className="case-summary">{project.details}</p>}
+        {!isComparative && !isRenderingStudies && project.details && items.length > 0 && <p className="case-summary reading-surface">{project.details}</p>}
       </header>
       {!isRenderingStudies && tocEntries.length > 0 && (
-        <details className="mobile-toc">
+        <details className="mobile-toc reading-surface">
           <summary>On this page</summary>
           <nav className="toc-links" aria-label="Project sections">
             {tocEntries.map((entry, index) => (
@@ -710,12 +704,12 @@ function ProjectDetailContent({ project, category }: { project: Project & { cate
           <div className="case-content">
             {items.length ? items.map((item, index) => (
               <section tabIndex={-1} className={"case-section case-section-" + (item.layout ?? "prose")} id={"chapter-" + item.id} key={item.id}>
-                <header className="case-section-heading">
+                <header className="case-section-heading reading-surface">
                   <span>{String(index + 1).padStart(2, "0")}</span>
                   <h2>{item.title}</h2>
                 </header>
                 <CaseMedia item={item} project={project} onExpand={openImage} />
-                <div className="case-copy">
+                <div className="case-copy reading-surface">
                   <p>{item.description}</p>
                   <CaseCopyContent item={item} />
                   {item.href && <a className="case-source-link" href={item.href} target="_blank" rel="noreferrer">{item.linkLabel ?? "View source"} ↗</a>}
@@ -725,7 +719,7 @@ function ProjectDetailContent({ project, category }: { project: Project & { cate
             )) : articles.length ? articles.map((article, index) => (
               <section tabIndex={-1} className="case-section article-case-section" id={"chapter-" + article.id} key={article.id}>
                 <div className="article-card">
-                  <header className="case-section-heading">
+                  <header className="case-section-heading reading-surface">
                     <span>{String(index + 1).padStart(2, "0")}</span>
                     <h2>{article.title}</h2>
                   </header>
@@ -734,15 +728,15 @@ function ProjectDetailContent({ project, category }: { project: Project & { cate
               </section>
             )) : project.details ? (
               <section tabIndex={-1} className="case-section" id="overview">
-                <header className="case-section-heading">
+                <header className="case-section-heading reading-surface">
                   <span>01</span>
                   <h2>Overview</h2>
                 </header>
-                <div className="case-copy"><p>{project.details}</p></div>
+                <div className="case-copy reading-surface"><p>{project.details}</p></div>
               </section>
             ) : null}
           </div>
-          <aside className="case-toc">
+          <aside className="case-toc reading-surface">
             <p>IN THIS PROJECT</p>
             <nav className="toc-links" aria-label="Project sections">
               {tocEntries.map((entry, index) => (

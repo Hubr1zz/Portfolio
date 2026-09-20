@@ -29,11 +29,18 @@ test("server-renders the redesigned portfolio home", async () => {
   assert.match(html, /ActionQueue/);
   assert.doesNotMatch(html, /href="\/projects\/actionqueue\/?"/);
   assert.match(html, /class="featured-card is-pending"/);
+  assert.doesNotMatch(html, /class="other-teaser"/);
   assert.match(html, /href="\/other\/?"/);
   assert.match(html, /class="site-footer"/);
   assert.match(html, /leonzhouziang@gmail\.com/);
   assert.match(html, /href="\/resume\/Ziang-Zhou-Resume\.pdf"/);
   assert.match(html, /class="resume-action"/);
+  assert.match(html, /class="explore-action"/);
+  assert.match(html, /class="intro-registration"/);
+  assert.match(html, /class="profile-name">Leon Zhou<\/p>/);
+  assert.match(html, />About Me<\/h2>/);
+  assert.doesNotMatch(html, /PROFILE \/ NOTES|How I work/);
+  assert.ok(html.indexOf('class="resume-action"') < html.indexOf('class="explore-action"'), "Resume should precede Explore");
   assert.match(html, /<svg[^>]+viewBox="0 0 24 24"/);
   assert.match(html, />Selected work</);
   assert.doesNotMatch(html, />Ideas, made tangible\.</);

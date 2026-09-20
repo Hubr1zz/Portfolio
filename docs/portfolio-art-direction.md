@@ -161,8 +161,20 @@ technical 详情先给图片区，配架构关键点、本人职责、解决的�
 
 这次迭代继续把参考实现中的空间秩序、层级和可中断状态转译为平面作品集语言，不复制参考项目内容。具体源码事实与参考来源仍以 [RhineLabUI DESIGN.md](https://github.com/LBEILC/RhineLabUI/blob/main/DESIGN.md) 及文中列出的 [RhineLabUI GitHub](https://github.com/LBEILC/RhineLabUI) 文件为准；本地实现的项目内容和证据链接以 [Portfolio GitHub](https://github.com/Hubr1zz/Portfolio) 为准。
 
-本轮内容层级让编号紧邻真实标题：Technical 分为 `01 Published projects`、`02 Studies & experiments`、`03 Rendering studies`，标题左齐，说明从标题起始线展开。卡片 metadata 只保留编号与年份，首页精选使用 `01 Selected work`，Résumé 与 Explore 同行但以暖金 outlined 按钮作为次级入口。标签改为细线 capsule，完整单词保持在同一标签内；vault-map 的三条上下堆叠，分别说明 Principles & world、Hunt / Showdown / Settlement、Shared rules / Terms / References。
+本轮内容层级让编号紧邻真实标题：Technical 分为 `01 Published projects`、`02 Studies & experiments`、`03 Rendering studies`，标题左齐，说明从标题起始线展开。卡片 metadata 只保留编号与年份，首页精选标题直接左齐，Résumé 位于右侧斜切区上方、Explore 位于其下方，并以暖金 outlined 按钮作为次级入口。标签改为细线 capsule，完整单词保持在同一标签内；vault-map 的三条上下堆叠，分别说明 Principles & world、Hunt / Showdown / Settlement、Shared rules / Terms / References。
 
 案例章节按内容差异选择 prose 或同权重 bullet。Scene Tools 说明 Camera follow & LookAt、Rotation root、Saved expansion 三项；Interaction input-control 保留 Input phases、Targeting、Control 三项。Unity Editor Tools 明确区分 Favorites 重构、Inspector workflows、Unity 兼容性与 Scene Tools，并在详情 header 使用 `Built on vSeries` 归属面板列出五个原作链接；章节下方安静列出对应 commit 证据。
 
-全屏纹理调参入口由 contour controls 提供：在本地页面按 `Alt+Shift+C`，或使用 `?contours=1` 打开面板，可调整 seed、scale、octaves、roughness、spacing、width、base opacity、pointer intensity 和 pointer radius。参数只保存在当前浏览器的 localStorage；发布时若要改变默认值，需要更新源码，不能依赖访客浏览器中的调参状态。
+全屏纹理调参入口由 contour controls 提供：在本地页面按 `Alt+Shift+C`，或使用 `?contours=1` 打开面板，可调整 seed、scale、octaves、roughness、Warp、spacing、width、base opacity、pointer intensity 和 pointer radius。参数只保存在当前浏览器的 localStorage；发布时若要改变默认值，需要更新源码，不能依赖访客浏览器中的调参状态。
+
+## 2026-09-20 首页构图、阅读层与动效实现摘要
+
+本轮首页移除了 `Other` teaser 行，导航仍保留 Other；首屏保留原主文案，Resume 位于 Explore selected work 上方。Selected work 的标题直接左齐，不再为首页标题预留编号空列。Profile 区改为 `About Me`，左侧以独立的大字号 `Leon Zhou` 标识，右侧保留完整介绍原文；桌面使用 480px 以上的双栏阅读区，窄屏改为自然单列。
+
+首页下半段使用全宽双栏网格，摘要限制在 620px；右侧 actions 使用暖金斜切 plane、直角注册 SVG、Resume 暖金 outline 和深色 Explore。按钮保持明确顺序与触控高度，320px 宽度下也不会溢出。正文相关内容使用连续的暖白 `reading-surface` 和柔化纸面边缘（`background: var(--paper)` 与 `box-shadow: 0 0 14px 10px var(--paper)`），没有把所有段落变成独立卡片；图片、流程图和深色 Continue 区保留原有表面。
+
+入场效果是 CSS/SVG 的短序列：职位行使用约 380ms 的 `steps(40)` clip reveal，首页标题两行以 360ms、70ms 间隔从左侧进入，actions plane 约 420ms 滑入，按钮不超过 100ms 级联；archive/case header 使用 220–300ms 的侧向 reveal，档案 SVG 路径使用 `pathLength=1` 的 460ms 描边绘制，圆点只淡入一次。所有动画只运行一次，没有视频、WebGL 或无穷循环；`prefers-reduced-motion` 会立即清除 delay、clip、opacity、transform 和描边偏移，完整 DOM 文本始终可读。页面入场使用 `backwards`，动画结束后不会留下破坏 sticky 或文本渲染的 transform。
+
+本轮实际纹理不再是“仅边缘线”或静态占位描述：背景由 warped simplex 噪声与 quadratic contours 组成，contour controls 的 `key v2` 面板提供 Warp 滑块，默认 scale、roughness、octaves 与 Warp 已更新。该纹理仍只位于全屏留白和板块间隙，阅读层通过纸面连续底保持清晰；参数只保存在当前浏览器的 localStorage。
+
+动效转译继续以 RhineLabUI 的公开源码为参考事实：[`boot.ts`](https://github.com/LBEILC/RhineLabUI/blob/main/src/boot.ts) 负责 DOM/SVG 启动入口，[`boot-motion.ts`](https://github.com/LBEILC/RhineLabUI/blob/main/src/boot-motion.ts) 提供自定义时间轴、clipPath 面板和 transform 滑入思路，[`style.css`](https://github.com/LBEILC/RhineLabUI/blob/main/src/style.css) 提供线条、label 与 atmosphere 的层级参考。作品集只采用这些可迁移的时序和几何原则，不复制参考项目的品牌、内容或长启动门槛。

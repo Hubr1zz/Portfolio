@@ -4,13 +4,14 @@ import { useCallback, useEffect, useRef, useState, type CSSProperties, type RefO
 import "./contour-controls.css";
 import { DEFAULT_CONTOUR_SETTINGS, generateContourField, normalizeContourSettings, type ContourFieldGeometry, type ContourSettings } from "./contour-field";
 
-const contourStorageKey = "portfolio-contour-settings-v1";
+const contourStorageKey = "portfolio-contour-settings-v2";
 
 const settingControls: ReadonlyArray<{ key: keyof ContourSettings; label: string; min: number; max: number; step: number }> = [
   { key: "seed", label: "Seed", min: 1, max: 999, step: 1 },
-  { key: "noiseScale", label: "Scale", min: 80, max: 420, step: 1 },
-  { key: "octaves", label: "Octaves", min: 1, max: 5, step: 1 },
-  { key: "persistence", label: "Roughness", min: .2, max: .8, step: .01 },
+  { key: "noiseScale", label: "Scale", min: 80, max: 600, step: 1 },
+  { key: "octaves", label: "Octaves", min: 1, max: 4, step: 1 },
+  { key: "persistence", label: "Roughness", min: .05, max: .65, step: .01 },
+  { key: "warpIntensity", label: "Warp", min: 0, max: .65, step: .01 },
   { key: "contourGap", label: "Spacing", min: .03, max: .13, step: .001 },
   { key: "lineWidth", label: "Line width", min: .5, max: 1.5, step: .1 },
   { key: "baseOpacity", label: "Base opacity", min: .015, max: .14, step: .005 },
@@ -64,7 +65,7 @@ function isTextInput(target: EventTarget | null) {
 
 function ContourControls({ settings, onChange, onReset, onCopy, status, closeButtonRef, onClose }: { settings: ContourSettings; onChange: (key: keyof ContourSettings, value: string) => void; onReset: () => void; onCopy: () => void; status: string; closeButtonRef: RefObject<HTMLButtonElement | null>; onClose: () => void }) {
   return <aside className="contour-controls" aria-label="Contour settings">
-    <div className="contour-controls-heading"><strong>CONTOUR SETTINGS</strong><button ref={closeButtonRef} type="button" className="contour-controls-close" onClick={onClose} aria-label="Close contour settings">×</button></div>
+    <div className="contour-controls-heading"><div><strong>CONTOUR SETTINGS</strong><small>Warped simplex · smooth contours</small></div><button ref={closeButtonRef} type="button" className="contour-controls-close" onClick={onClose} aria-label="Close contour settings">×</button></div>
     <div className="contour-controls-fields">
       {settingControls.map((control) => <div key={control.key} className="contour-control"><label className="contour-control-label" htmlFor={`contour-${control.key}`}><span>{control.label}</span><output>{formatSettingValue(control.key, settings[control.key])}</output></label><input id={`contour-${control.key}`} aria-label={control.label} type="range" min={control.min} max={control.max} step={control.step} value={settings[control.key]} onChange={(event) => onChange(control.key, event.currentTarget.value)} /></div>)}
     </div>
@@ -105,7 +106,7 @@ export function MarginContours() {
 
   useEffect(() => {
     scheduleGeometry();
-  }, [scheduleGeometry, settings.seed, settings.noiseScale, settings.octaves, settings.persistence, settings.contourGap]);
+  }, [scheduleGeometry, settings.seed, settings.noiseScale, settings.octaves, settings.persistence, settings.contourGap, settings.warpIntensity]);
 
   useEffect(() => {
     const onResize = () => scheduleGeometry();

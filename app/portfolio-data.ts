@@ -1,6 +1,7 @@
 export type TabId = "technical" | "games" | "design";
 export type PageId = "home" | TabId;
 export type ProjectLink = { label: string; href: string };
+export type ProjectAttribution = { title: string; text: string; links: ProjectLink[] };
 export type Project = {
   id: string;
   index: string;
@@ -11,6 +12,7 @@ export type Project = {
   details?: string;
   tags: string[];
   links: ProjectLink[];
+  attribution?: ProjectAttribution;
   articles?: { id: string; title: string; summary: string; href: string; language: string }[];
   image?: string;
   imageAlt?: string;
@@ -25,6 +27,9 @@ export type BoardItem = {
   title: string;
   description: string;
   details?: string;
+  bullets?: { title: string; text: string }[];
+  layout?: "features" | "prose";
+  sources?: ProjectLink[];
   href?: string;
   linkLabel?: string;
   image?: string;
@@ -97,11 +102,20 @@ export const projects: Record<TabId, Project[]> = {
       eyebrow: "Editor extensions & workflow adaptations",
       year: "2026",
       description:
-        "Two installable Unity packages: a customized editor workspace and optional tools for Scene View navigation and saved hierarchy state.",
-      details:
-        "My focus is reducing context switching through shared settings, component tabs, and scene navigation. The zEditor package adapts vFavorites, vFolders, vHierarchy, vInspector, and vTabs; those foundations are credited to their original author.",
+        "I reworked Favorites and extended Inspector workflows in a customized editor workspace, with Scene Tools as an independent companion package.",
       tags: ["Unity 2022.3+", "Editor UX", "UPM"],
       links: [{ label: "GitHub repository", href: "https://github.com/Hubr1zz/UnityEditorTools" }],
+      attribution: {
+        title: "Built on vSeries",
+        text: "My work extends the original vSeries tools: Favorites interaction and interface changes, Inspector workflows, and compatibility updates. The original plugins remain the foundation—please support their author.",
+        links: [
+          { label: "vFavorites2", href: "https://assetstore.unity.com/packages/tools/utilities/vfavorites-2-263643" },
+          { label: "vFolders2", href: "https://assetstore.unity.com/packages/tools/utilities/vfolders-2-255470" },
+          { label: "vHierarchy2", href: "https://assetstore.unity.com/packages/tools/utilities/vhierarchy-2-253397" },
+          { label: "vInspector2", href: "https://assetstore.unity.com/packages/tools/utilities/vinspector-2-252297" },
+          { label: "vTabs2", href: "https://assetstore.unity.com/packages/tools/utilities/vtabs-2-253396" },
+        ],
+      },
       visual: "editor",
       tier: "study",
     },
@@ -365,8 +379,13 @@ export function getBoardItems(project: Project): BoardItem[] {
       {
         id: "input-control",
         title: "Input, targeting, and control",
-        description: "Pressed, Held, and Released bindings make input phases explicit across 3D targets and the Unity EventSystem for UI.",
-        details: "Configurable drag thresholds keep movement intentional. A nonalloc raycast runs first, with a spherecast fallback; the currently dragged object is skipped, and global or per-object behaviours can be toggled as needed.",
+        description: "Input phases stay explicit across 3D targets and the Unity EventSystem for UI.",
+        bullets: [
+          { title: "Input phases", text: "Pressed, Held, and Released bindings make input phases explicit across 3D targets and the Unity EventSystem for UI." },
+          { title: "Targeting", text: "Configurable drag thresholds keep movement intentional; a nonalloc raycast runs first with a spherecast fallback." },
+          { title: "Control", text: "The currently dragged object is skipped, while global or per-object behaviours can be toggled as needed." },
+        ],
+        layout: "features",
       },
       {
         id: "integration-status",
@@ -381,21 +400,56 @@ export function getBoardItems(project: Project): BoardItem[] {
     return [
       {
         id: "editor-navigation",
-        title: "A workspace that stays within reach",
-        description: "Favorites open a quick popup from a configurable Space, Alt, or Tab shortcut, while folders and hierarchy colors and icons keep projects legible.",
-        details: "Inspector component tabs, multiselect support, and floating panels keep related work visible. The unified Tools/EditorTools/Settings menu provides the configuration surface, and the model preview background is configurable. Version 0.1.5 includes the September 16 toolbar fix, and the adaptations are based on the vSeries tools.",
+        title: "Reworking the Favorites workflow",
+        description: "I reworked the Favorites interface so the Project overlay and standalone window share the same interaction model.",
+        bullets: [
+          { title: "Shared interface", text: "Reuse the window UI inside Project, keeping grid/list views and page navigation consistent." },
+          { title: "Input and lifecycle", text: "Consume overlay interactions, clean up detached windows, and release the embedded renderer when the overlay closes." },
+          { title: "Predictable activation", text: "Choose Space, Alt, or Tab and track key-down/up with focus-loss cleanup." },
+        ],
+        layout: "features",
         diagram: "editor-navigation",
-        href: "https://github.com/Hubr1zz/UnityEditorTools/blob/main/zEditor%28vSeries%29/readme.txt",
-        linkLabel: "Features & original-tool credits",
+        sources: [
+          { label: "Interface & lifecycle changes", href: "https://github.com/Hubr1zz/UnityEditorTools/commit/f0563d2117b3cbbe425136bd5d7796ac8256423c" },
+          { label: "Activation & settings changes", href: "https://github.com/Hubr1zz/UnityEditorTools/commit/34adbd16ee714a5ce6a445630745a17d4171cca4" },
+        ],
+      },
+      {
+        id: "inspector-workflow",
+        title: "Inspector workflows beyond the default list",
+        description: "I added ways to isolate the components I am working on and edit the same component type across a hierarchy.",
+        bullets: [
+          { title: "Component tabs", text: "Switch from the traditional list to tabs, keep multiple components active, and toggle their enabled state." },
+          { title: "Child Components", text: "Group descendants by type, search or filter Root and Inactive, batch enable or disable, and select or remove components." },
+          { title: "Unified settings", text: "One Tools/EditorTools/Settings window organizes the five tools with short option explanations." },
+        ],
+        layout: "features",
+        sources: [
+          { label: "Inspector component workflows", href: "https://github.com/Hubr1zz/UnityEditorTools/commit/25fdf2390d832edec91f1c1212410ae93c9aea69" },
+          { label: "Child Components window", href: "https://github.com/Hubr1zz/UnityEditorTools/commit/19509d329438773b80738290a9306316aaa5c3fc" },
+        ],
+      },
+      {
+        id: "compatibility",
+        title: "Keeping the workspace usable across Unity versions",
+        description: "I adapted newer Unity instance and entityID changes, fixed detached Inspector component windows, stabilized the Unity toolbar preview, and made the model preview background configurable.",
+        layout: "prose",
+        sources: [
+          { label: "Compatibility fixes", href: "https://github.com/Hubr1zz/UnityEditorTools/commit/822e456a848f2955ad9118a60606798d3cb82181" },
+          { label: "Version 0.1.5 changelog", href: "https://github.com/Hubr1zz/UnityEditorTools/commit/4b142b6ed2a4d71c6dfc887454562a9b4fef8172" },
+        ],
       },
       {
         id: "editor-scene",
         title: "Scene tools as an independent package",
-        description: "CameraFollow and LookAt Scene View overlays provide focused navigation, with the selected object available as the rotation root.",
-        details: "The package also saves and loads expansion state for Scene, Prefab, and Project folders. Scene Tools can be installed independently from the zEditor workspace package in the same repository.",
-        diagram: "editor-scene",
-        href: "https://github.com/Hubr1zz/UnityEditorTools/tree/main/SceneTools",
-        linkLabel: "Explore Scene Tools",
+        description: "Scene Tools is a separate companion package for the editor workspace.",
+        bullets: [
+          { title: "Camera follow & LookAt", text: "SceneView follows the target and looks toward it." },
+          { title: "Rotation root", text: "Set an object as a shared pivot, rotate selected objects around it, or orient the selection to face the root." },
+          { title: "Saved expansion", text: "Scene, Prefab, and Project folder expansion state is saved and restored." },
+        ],
+        layout: "features",
+        sources: [{ label: "Explore Scene Tools", href: "https://github.com/Hubr1zz/UnityEditorTools/tree/main/SceneTools" }],
       },
     ];
   }

@@ -156,7 +156,7 @@ function GamesLibrary() {
   return (
     <section className="games-library" aria-labelledby="games-library-heading">
       <div className="library-heading">
-        <div><span className="section-index">01 / PLAY HISTORY</span><h2 id="games-library-heading">Games I Played</h2><p>An ongoing record of the games I spend time with, plus an additional family library.</p></div>
+        <div><div className="numbered-heading"><span className="section-index">01</span><h2 id="games-library-heading">Games I Played</h2></div><p>An ongoing record of the games I spend time with, plus an additional family library.</p></div>
         <div className="library-meta"><span>{filteredGames.length} games</span>{updatedAt && <span>Updated {updatedAt}</span>}</div>
       </div>
       <div className="library-controls" aria-label="Game library controls">
@@ -178,7 +178,7 @@ function GamesLibrary() {
 }
 
 function LibraryEmpty({ isSynced }: { isSynced: boolean }) {
-  return <section className="library-empty" aria-labelledby="library-empty-heading"><div className="empty-spines" aria-hidden="true"><i /><i /><i /><i /></div><div><span className="section-index">01 / PLAY HISTORY</span><h2 id="library-empty-heading">{isSynced ? "No played games yet." : "Play history, coming soon."}</h2><p>{isSynced ? "No games with recorded playtime are available yet." : "The library is being prepared."}</p></div></section>;
+  return <section className="library-empty" aria-labelledby="library-empty-heading"><div className="empty-spines" aria-hidden="true"><i /><i /><i /><i /></div><div><div className="numbered-heading"><span className="section-index">01</span><h2 id="library-empty-heading">{isSynced ? "No played games yet." : "Play history, coming soon."}</h2></div><p>{isSynced ? "No games with recorded playtime are available yet." : "The library is being prepared."}</p></div></section>;
 }
 
 function OtherHeader({ section }: { section: OtherSection }) {
@@ -197,9 +197,9 @@ function OtherHeader({ section }: { section: OtherSection }) {
 }
 
 function ProjectsEmpty() {
-  return <section className="side-projects-empty" aria-labelledby="side-projects-empty-heading"><span className="section-index">02 / WORKBENCH</span><h2 id="side-projects-empty-heading">On the workbench.</h2><p>Learning tools and Unity experiments. More to share soon.</p></section>;
+  return <section className="side-projects-empty" aria-labelledby="side-projects-empty-heading"><div className="numbered-heading"><span className="section-index">02</span><h2 id="side-projects-empty-heading">On the workbench.</h2></div><p>Learning tools and Unity experiments. More to share soon.</p></section>;
 }
 
 export function OtherContent({ section }: { section: OtherSection }) {
-  return <PortfolioShell page="other"><div className="other-page"><OtherHeader section={section} />{section === "games" ? <GamesLibrary /> : <section className="side-projects" aria-labelledby="side-projects-heading"><div className="side-projects-heading"><span className="section-index">02 / SIDE WORK</span><h2 id="side-projects-heading">Other Projects</h2><p>Small tools and experiments outside my main practice.</p></div><ProjectsEmpty /></section>}</div></PortfolioShell>;
+  return <PortfolioShell page="other"><div className="other-page"><OtherHeader section={section} />{section === "games" ? <GamesLibrary /> : <section className="side-projects" aria-labelledby="side-projects-heading"><div className="side-projects-heading"><div className="numbered-heading"><span className="section-index">02</span><h2 id="side-projects-heading">Other Projects</h2></div><p>Small tools and experiments outside my main practice.</p></div><ProjectsEmpty /></section>}</div></PortfolioShell>;
 }

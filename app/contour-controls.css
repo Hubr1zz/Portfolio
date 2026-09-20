@@ -1,0 +1,170 @@
+.contour-field {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: visible;
+  pointer-events: none;
+  --contour-x: 50%;
+  --contour-y: 50%;
+  --contour-line-width: 1px;
+  --contour-base-opacity: .06;
+  --contour-pointer-opacity: .18;
+  --contour-pointer-radius: 220px;
+}
+
+.contour-field-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  overflow: visible;
+}
+
+.contour-field-path {
+  fill: none;
+  stroke: var(--signal);
+  stroke-width: var(--contour-line-width);
+  vector-effect: non-scaling-stroke;
+}
+
+.contour-field-base {
+  opacity: var(--contour-base-opacity);
+}
+
+.contour-field-path-major {
+  stroke-width: var(--contour-line-width);
+}
+
+.contour-field-pointer {
+  position: absolute;
+  inset: 0;
+  opacity: var(--contour-pointer-opacity);
+  pointer-events: none;
+  -webkit-mask-image: radial-gradient(circle var(--contour-pointer-radius) at var(--contour-x) var(--contour-y), #000 0%, rgb(0 0 0 / .9) 42%, transparent 100%);
+  mask-image: radial-gradient(circle var(--contour-pointer-radius) at var(--contour-x) var(--contour-y), #000 0%, rgb(0 0 0 / .9) 42%, transparent 100%);
+}
+
+.contour-field[data-pointer-enabled="false"] .contour-field-pointer {
+  display: none;
+}
+
+.contour-controls {
+  width: min(340px, calc(100vw - 32px));
+  max-height: calc(100dvh - 100px);
+  padding: 16px;
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 80;
+  overflow: auto;
+  border: 1px solid var(--line-strong);
+  background: color-mix(in srgb, var(--paper) 96%, transparent);
+  color: var(--ink);
+  box-shadow: 0 14px 40px rgb(34 37 31 / .14);
+  backdrop-filter: blur(12px);
+}
+
+.contour-controls-heading {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid var(--line);
+  color: var(--signal);
+  font: 12px/1.3 var(--font-mono);
+  letter-spacing: .08em;
+}
+
+.contour-controls-close {
+  width: 44px;
+  height: 44px;
+  margin: -1px -8px -1px 0;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  font-size: 20px;
+  line-height: 1;
+}
+
+.contour-controls-close:hover,
+.contour-controls-close:focus-visible {
+  color: var(--signal);
+}
+
+.contour-controls-fields {
+  display: grid;
+  gap: 14px;
+  padding: 16px 0;
+}
+
+.contour-control {
+  display: grid;
+  gap: 7px;
+  color: var(--muted);
+  font: 12px/1.3 var(--font-mono);
+  letter-spacing: .03em;
+}
+
+.contour-control-label {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.contour-control output {
+  color: var(--signal);
+  font-variant-numeric: tabular-nums;
+}
+
+.contour-control input {
+  width: 100%;
+  accent-color: var(--signal);
+  cursor: pointer;
+}
+
+.contour-controls-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.contour-controls-actions button {
+  min-height: 40px;
+  padding: 9px 11px;
+  border: 1px solid var(--line-strong);
+  background: transparent;
+  color: var(--signal);
+  cursor: pointer;
+  font: 11px/1.3 var(--font-mono);
+  letter-spacing: .03em;
+}
+
+.contour-controls-actions button:hover,
+.contour-controls-actions button:focus-visible {
+  border-color: var(--signal);
+  background: var(--signal-soft);
+}
+
+.contour-controls-status {
+  min-height: 20px;
+  margin: 10px 0 0;
+  color: var(--signal);
+  font: 11px/1.4 var(--font-mono);
+}
+
+.contour-controls-hint {
+  margin: 3px 0 0;
+  color: var(--muted);
+  font: 11px/1.4 var(--font-mono);
+}
+
+@media (max-width: 600px) {
+  .contour-controls {
+    right: 8px;
+    bottom: 8px;
+  }
+}

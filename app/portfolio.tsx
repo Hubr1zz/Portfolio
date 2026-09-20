@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState, type MouseEvent, type ReactNode } from "react";
 import Image from "next/image";
 import { assetPath, InternalLink } from "./portfolio-links";
-import { MarginContours, MarginContoursWell } from "./presentation-extras";
+import { MarginContours } from "./presentation-extras";
 import { getBoardItems, projects, tabs, type BoardItem, type DiagramId, type PageId, type Project, type TabId } from "./portfolio-data";
 
 export type { PageId } from "./portfolio-data";
@@ -181,7 +181,7 @@ function FlowDiagram({ id }: { id: DiagramId }) {
     return (
       <div className="flow-diagram editor-overview" aria-label="zEditor workspace and scene tools overview">
         <span className="flow-kicker">EDITOR_TOOLKIT / OVERVIEW</span>
-        <div className="editor-overview-columns"><section><small>01 / WORKSPACE</small><strong>zEditor workspace</strong><span>Favorites / Folders &amp; Hierarchy / Inspector &amp; Tabs</span></section><section><small>02 / SCENE TOOLS</small><strong>Scene Tools</strong><span>Camera follow / Rotation root / Saved expansion</span></section></div>
+        <div className="editor-overview-columns"><section><small>ZEDITOR CONTRIBUTIONS</small><strong>Favorites interface</strong><span>Inspector component workflows</span></section><section><small>SCENE TOOLS</small><strong>Independent package</strong><span>Camera / Pivot / Saved expansion</span></section></div>
       </div>
     );
   }
@@ -190,9 +190,9 @@ function FlowDiagram({ id }: { id: DiagramId }) {
     return (
       <div className="flow-diagram editor-navigation" aria-label="zEditor navigation schematic">
         <span className="flow-kicker">EDITOR_NAVIGATION</span>
-        <div className="editor-nav-grid"><section><small>PROJECT / FAVORITES</small><b>Space · Alt · Tab quick popup</b></section><section><small>HIERARCHY</small><b>Icons · colors · scene context</b></section><section><small>INSPECTOR</small><b>Multi-select component tabs · floating panel</b></section></div>
-        <p>Shared Settings rail keeps navigation choices consistent.</p>
-        <small className="editor-footnote">zEditor adapts the original vSeries tools.</small>
+        <div className="editor-nav-context"><b>Project overlay</b><b>Favorites window</b></div>
+        <div className="editor-nav-panel"><span>SHARED FAVORITES PANEL</span><div><i>Page tabs</i><i>Grid / list</i><i>Navigation</i></div></div>
+        <p>One interface · two contexts</p>
       </div>
     );
   }
@@ -201,7 +201,7 @@ function FlowDiagram({ id }: { id: DiagramId }) {
     return (
       <div className="flow-diagram editor-scene" aria-label="zEditor scene tools diagram">
         <span className="flow-kicker">SCENE_TOOLS / PERSISTENT_STATE</span>
-        <div className="editor-scene-grid"><section><b>Camera follow &amp; LookAt</b><small>Scene focus</small></section><section><b>Selected rotation root</b><small>Transform control</small></section><section><b>Save &amp; restore hierarchy</b><small>Scene · prefab · folder states</small></section></div>
+        <div className="editor-scene-grid"><section><b>Camera follow &amp; LookAt</b><small>SceneView follows and looks toward the target</small></section><section><b>Rotation root</b><small>Selected target becomes the pivot</small></section><section><b>Saved expansion</b><small>Scene · prefab · project folders</small></section></div>
       </div>
     );
   }
@@ -210,7 +210,7 @@ function FlowDiagram({ id }: { id: DiagramId }) {
     return (
       <div className="flow-diagram vault-map" aria-label="Living design vault overview">
         <span className="flow-kicker">LIVING DESIGN VAULT</span>
-        <div className="vault-map-groups"><section><small>01 / PRINCIPLES</small><b>Principles &amp; world</b></section><section><small>02 / LOOP</small><b>Hunt / Showdown / Settlement</b></section><section><small>03 / SHARED</small><b>Shared rules / Terms / References</b></section></div>
+        <div className="vault-map-groups"><section><small>01</small><b>Principles &amp; world</b><span>Premise, rules, and setting</span></section><section><small>02</small><b>Hunt / Showdown / Settlement</b><span>Three phases, one consequence loop</span></section><section><small>03</small><b>Shared rules / Terms / References</b><span>Linked knowledge for revision</span></section></div>
       </div>
     );
   }
@@ -292,9 +292,17 @@ const coverDiagramByProject: Partial<Record<string, DiagramId>> = {
   "tactics-design": "vault-map",
 };
 
-function FeatureCard({ project, category, index }: { project: Project; category: TabId; index: string }) {
+function FeatureCard({ project, index }: { project: Project; index: string }) {
   const visual = project.id === "tactics-design" ? <TacticsMap /> : <ProjectCover project={project} />;
-  return <InternalLink id={"project-" + project.id} className="featured-card" href={"/projects/" + project.id} onClick={(event) => rememberProjectOrigin(event, project.id)}><div className="feature-media">{visual}</div><div className="feature-meta"><span>{index} / {categoryMeta(category).label.toUpperCase()}</span><span>{project.year}</span></div><h3>{project.title}</h3><p className="feature-description">{project.description}</p><span className="feature-link">View details ↗</span></InternalLink>;
+  return <InternalLink id={"project-" + project.id} className="featured-card" href={"/projects/" + project.id} onClick={(event) => rememberProjectOrigin(event, project.id)}><div className="feature-media">{visual}</div><div className="feature-title-row"><span className="feature-number">{index}</span><h3>{project.title}</h3></div><div className="feature-meta"><span>{project.year}</span></div><p className="feature-description">{project.description}</p><span className="feature-link">View details ↗</span></InternalLink>;
+}
+
+function ArchiveDecoration({ page }: { page: TabId }) {
+  if (page === "technical")
+    return <svg className="archive-decoration archive-decoration-technical" viewBox="0 0 420 260" aria-hidden="true" focusable="false"><path d="M16 224V154h92V82h98V34h190" /><path d="M108 154h72v54h102V112h114" /><path d="M206 82v76h94" /><circle cx="16" cy="224" r="4" /><circle cx="108" cy="154" r="4" /><circle cx="206" cy="82" r="4" /><circle cx="306" cy="112" r="4" /><circle cx="396" cy="34" r="4" /></svg>;
+  if (page === "design")
+    return <svg className="archive-decoration archive-decoration-design" viewBox="0 0 420 260" aria-hidden="true" focusable="false"><path d="M94 34h172l46 46v148H94z" /><path d="M266 34v46h46" /><path d="M58 70h172l46 46v110H58z" /><path d="M230 70v46h46" /><path d="M34 40v18m-9-9h18M374 190v18m-9-9h18M342 46v14m-7-7h14" /></svg>;
+  return <svg className="archive-decoration archive-decoration-games" viewBox="0 0 420 260" aria-hidden="true" focusable="false"><path d="M12 214C84 72 146 52 206 122s88 102 202-80" /><path d="M12 246C84 104 146 84 206 154s88 102 202-80" /><circle cx="12" cy="214" r="4" /><circle cx="206" cy="122" r="4" /><circle cx="408" cy="42" r="4" /><circle cx="146" cy="84" r="3" /></svg>;
 }
 
 function Navigation({ page }: { page: ShellPage }) {
@@ -334,7 +342,6 @@ function HomePage() {
   return (
     <>
       <section className="home-intro page-enter" id="top">
-        <MarginContoursWell variant="hero" />
         <div className="intro-kicker">
           <span>Technical Designer · Gameplay Programmer</span>
           <span>LOS ANGELES / CA</span>
@@ -347,28 +354,22 @@ function HomePage() {
           <p className="intro-summary">I design gameplay systems and build the technology that makes them tangible—bridging mechanics, tools, and real-time visuals.</p>
           <div className="intro-actions">
             <a href="#work">Explore selected work</a>
-            <a href={resumeHref} target="_blank" rel="noreferrer">Résumé</a>
+            <a className="resume-action" href={resumeHref} target="_blank" rel="noreferrer"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 3.5h8l4 4V20.5H6z" /><path d="M14 3.5v4h4M9 12h6M9 15.5h6" /></svg><span>Résumé</span><small>PDF</small></a>
           </div>
         </div>
       </section>
       <section className="featured-section page-enter" id="work">
         <div className="section-heading">
-          <div>
-            <span className="section-index">01 / SELECTED WORK</span>
-            <h2>Ideas, made tangible.</h2>
-          </div>
+          <div className="numbered-heading"><span className="section-index">01</span><h2>Selected work</h2></div>
           <p>Three projects across workflow tools, game design, and resolution framework</p>
         </div>
         <div className="featured-grid">
-          <FeatureCard project={zworkflow} category="technical" index="01" />
-          <FeatureCard project={tactics} category="design" index="02" />
+          <FeatureCard project={zworkflow} index="01" />
+          <FeatureCard project={tactics} index="02" />
           <article className="featured-card is-pending" aria-label="ActionQueue case study coming soon">
             <div className="feature-media pending-art" aria-hidden="true"><i /><i /><i /></div>
-            <div className="feature-meta">
-              <span>03 / UPCOMING</span>
-              <span>IN PREPARATION</span>
-            </div>
-            <h3>ActionQueue</h3>
+            <div className="feature-title-row"><span className="feature-number">03</span><h3>ActionQueue</h3></div>
+            <div className="feature-meta"><span>IN PREPARATION</span></div>
             <p className="feature-description">Case study coming soon.</p>
             <span className="feature-link">In preparation</span>
           </article>
@@ -445,7 +446,7 @@ function RenderingGallery({ project, standalone = false }: { project?: Project; 
   return (
     <section id="project-rendering-studies" className={"rendering-gallery" + (standalone ? " rendering-gallery-standalone" : "")} tabIndex={-1} aria-labelledby="rendering-gallery-heading">
       <div className="archive-group-heading">
-        <span>03 / RENDERING</span>
+        <span>{standalone ? "01" : "03"}</span>
         <div>
           <h2 id="rendering-gallery-heading">Rendering studies</h2>
           <p>A focused set of shader and procedural graphics studies, with each image paired to the technique it tests.</p>
@@ -477,8 +478,15 @@ function RenderingGallery({ project, standalone = false }: { project?: Project; 
   );
 }
 
+function archiveGroupCopy(page: TabId) {
+  if (page === "design")
+    return { title: "Documents & analysis", description: "Design vaults, comparative essays, and an evolving reference library." };
+  return { title: "Playable projects", description: "Prototypes and game-jam projects, explored through the systems I built and tested." };
+}
+
 function ArchivePage({ page }: { page: TabId }) {
   const meta = categoryMeta(page);
+  const groupCopy = archiveGroupCopy(page);
   const categoryProjects = projects[page];
   const releasedProjects = projects.technical.filter((project) => project.tier === "release");
   const studyProjects = projects.technical.filter((project) => project.tier === "study" && project.id !== "rendering-studies");
@@ -486,17 +494,17 @@ function ArchivePage({ page }: { page: TabId }) {
   return (
     <>
       <header className="archive-header page-enter">
-        <MarginContoursWell variant="archive" />
         <span className="section-index">WORK / ARCHIVE</span>
         <h1>{meta.label}</h1>
         <p>{meta.description}</p>
+        <ArchiveDecoration page={page} />
       </header>
       <section className="archive-body page-enter">
         {page === "technical" ? (
           <>
             <section className="archive-group" aria-labelledby="published-heading">
               <div className="archive-group-heading">
-                <span>01 / RELEASED</span>
+                <span>01</span>
                 <div>
                   <h2 id="published-heading">Published projects</h2>
                   <p>Maintained tools and systems intended for use beyond a single prototype.</p>
@@ -513,7 +521,7 @@ function ArchivePage({ page }: { page: TabId }) {
             </section>
             <section className="archive-group" aria-labelledby="studies-heading">
               <div className="archive-group-heading">
-                <span>02 / PRACTICE</span>
+                <span>02</span>
                 <div>
                   <h2 id="studies-heading">Studies &amp; experiments</h2>
                   <p>Focused exercises used to investigate animation, rendering, and editor workflow problems.</p>
@@ -528,10 +536,10 @@ function ArchivePage({ page }: { page: TabId }) {
         ) : (
           <section className="archive-group" aria-labelledby="archive-projects-heading">
             <div className="archive-group-heading">
-              <span>01 / ARCHIVE</span>
+              <span>01</span>
               <div>
-                <h2 id="archive-projects-heading">{meta.label}</h2>
-                <p>{meta.description}</p>
+                <h2 id="archive-projects-heading">{groupCopy.title}</h2>
+                <p>{groupCopy.description}</p>
               </div>
             </div>
             <div className="project-grid">
@@ -587,6 +595,14 @@ function ImageDialog({ item, onClose }: { item: BoardItem | null; onClose: () =>
   // Native cancel and Close button provide keyboard closing; backdrop dismissal is pointer-only.
   // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions
   return <dialog className="image-dialog" ref={dialogRef} aria-labelledby="image-dialog-title" onCancel={(event) => { event.preventDefault(); onClose(); }} onClick={(event) => { if (event.target === event.currentTarget) onClose(); }}>{item && <><div className="image-dialog-header"><h2 id="image-dialog-title">{item.title}</h2><button type="button" className="dialog-close" onClick={onClose}>Close ×</button></div><div className="image-dialog-media"><Image src={assetPath(item.image ?? "")} alt={item.imageAlt ?? item.title} width={2000} height={1400} sizes="90vw" unoptimized /></div><div className="image-dialog-caption"><span>{item.imageAlt ?? item.title}</span><a href={assetPath(item.image ?? "")} target="_blank" rel="noreferrer">Open original ↗</a></div></>}</dialog>;
+}
+
+function CaseCopyContent({ item }: { item: BoardItem }) {
+  if (item.bullets?.length)
+    return <ul className="case-bullets">{item.bullets.map((bullet) => <li key={bullet.title}><strong>{bullet.title}</strong><span>{bullet.text}</span></li>)}</ul>;
+  if (item.details)
+    return <p>{item.details}</p>;
+  return null;
 }
 
 function ProjectDetailContent({ project, category }: { project: Project & { category: TabId }; category: TabId }) {
@@ -668,6 +684,7 @@ function ProjectDetailContent({ project, category }: { project: Project & { cate
             {project.tags.map((tag) => <li key={tag}>{tag}</li>)}
           </ul>
         </div>
+        {project.attribution && <aside className="source-credit" aria-label={project.attribution.title}><div><span>{project.attribution.title}</span><p>{project.attribution.text}</p></div><div className="source-credit-links">{project.attribution.links.map((link) => <a key={link.href} href={link.href} target="_blank" rel="noreferrer">{link.label} ↗</a>)}</div></aside>}
         {!isComparative && project.links.length > 0 && (
           <div className="project-links">
             {project.links.map((link) => <a key={link.href} href={link.href} target="_blank" rel="noreferrer"><span className="hover-shift-label"><span>{link.label}</span><span aria-hidden="true">↗</span></span></a>)}
@@ -692,7 +709,7 @@ function ProjectDetailContent({ project, category }: { project: Project & { cate
         <div className="case-layout">
           <div className="case-content">
             {items.length ? items.map((item, index) => (
-              <section tabIndex={-1} className="case-section" id={"chapter-" + item.id} key={item.id}>
+              <section tabIndex={-1} className={"case-section case-section-" + (item.layout ?? "prose")} id={"chapter-" + item.id} key={item.id}>
                 <header className="case-section-heading">
                   <span>{String(index + 1).padStart(2, "0")}</span>
                   <h2>{item.title}</h2>
@@ -700,8 +717,9 @@ function ProjectDetailContent({ project, category }: { project: Project & { cate
                 <CaseMedia item={item} project={project} onExpand={openImage} />
                 <div className="case-copy">
                   <p>{item.description}</p>
-                  {item.details && <p>{item.details}</p>}
+                  <CaseCopyContent item={item} />
                   {item.href && <a className="case-source-link" href={item.href} target="_blank" rel="noreferrer">{item.linkLabel ?? "View source"} ↗</a>}
+                  {item.sources?.length ? <div className="case-sources">{item.sources.map((source) => <a key={source.href} href={source.href} target="_blank" rel="noreferrer">{source.label} ↗</a>)}</div> : null}
                 </div>
               </section>
             )) : articles.length ? articles.map((article, index) => (

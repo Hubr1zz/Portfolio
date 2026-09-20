@@ -5,7 +5,7 @@
 
 ## 2026-09-20 实施补充
 
-本地重构已把视觉提案推进到可预览的页面结构：当前按五分类导航组织内容，首页保留三项精选位置，其中第三项为 `ActionQueue` 待补；项目详情拆成 13 个独立项目详情页，各页按连续章节组织内容，并提供桌面右侧目录。Other 已拆为 Games I Played 与 Other Projects 两个子页；Steam 使用本地快照，当前没有账号连接，页面仍保持空态。背景只保留轻量静态 SVG 等高线，作品图和正文优先于装饰。
+本地重构已把视觉提案推进到可预览的页面结构：当前按五分类导航组织内容，首页保留三项精选位置，其中第三项为 `ActionQueue` 待补；项目详情拆成 13 个独立项目详情页，各页按连续章节组织内容，并提供桌面右侧目录。Other 已拆为 Games I Played 与 Other Projects 两个子页；Steam 使用本地快照，当前没有账号连接，页面仍保持空态。背景使用固定、均匀且低对比的全屏纹理场，指针只做局部增强；作品图和正文优先于背景。
 
 补充参考 [Pentagram Work](https://www.pentagram.com/work) 的作品索引节奏，以及 [IBM 2x Grid](https://www.ibm.com/design/language/2x-grid/) 的对齐与间距方法；借鉴信息节奏，不搬运视觉资产、品牌或具体作品内容。
 
@@ -155,8 +155,14 @@ technical 详情先给图片区，配架构关键点、本人职责、解决的�
 
 ## 2026-09-20 页面迭代补充
 
-本轮页面整理把指针轮廓收缩为只在边缘和留白中出现的轻量提示，为主视觉保留明确的 hero 空间；几何平面继续承担低对比的结构背景，不与作品证据竞争。technical 内容改为更易扫描的横向 row cards，rendering 项目使用一个主 stage 配合可滚动的缩略图条，便于在完整查看画面与快速切换之间移动。
+本轮页面整理把背景统一为全屏低对比纹理场，正文内容层保持相对定位并位于背景之上；指针局部增强只作为可调的氛围提示，不改变阅读层级。首页保留轻几何切割，technical、design、games 档案页分别使用互连节点、错位文档注册线、轨迹节点 SVG 装饰。technical 内容改为更易扫描的横向 row cards，rendering 项目使用一个主 stage 配合可滚动的缩略图条，便于在完整查看画面与快速切换之间移动。
 
 内容结构补充了比较文章的 article collection，把文章标题、摘要、语言和入口集中呈现；Tactical 项目则以 Obsidian vault 的可导航叙事说明 Hunt、Showdown、Settlement 及其规则、词汇和修订关系。导航增加稳定的 panel 入口，让访客可以在首页、分类、项目和 Other 之间移动，同时保留正文链接和键盘路径。
 
 这次迭代继续把参考实现中的空间秩序、层级和可中断状态转译为平面作品集语言，不复制参考项目内容。具体源码事实与参考来源仍以 [RhineLabUI DESIGN.md](https://github.com/LBEILC/RhineLabUI/blob/main/DESIGN.md) 及文中列出的 [RhineLabUI GitHub](https://github.com/LBEILC/RhineLabUI) 文件为准；本地实现的项目内容和证据链接以 [Portfolio GitHub](https://github.com/Hubr1zz/Portfolio) 为准。
+
+本轮内容层级让编号紧邻真实标题：Technical 分为 `01 Published projects`、`02 Studies & experiments`、`03 Rendering studies`，标题左齐，说明从标题起始线展开。卡片 metadata 只保留编号与年份，首页精选使用 `01 Selected work`，Résumé 与 Explore 同行但以暖金 outlined 按钮作为次级入口。标签改为细线 capsule，完整单词保持在同一标签内；vault-map 的三条上下堆叠，分别说明 Principles & world、Hunt / Showdown / Settlement、Shared rules / Terms / References。
+
+案例章节按内容差异选择 prose 或同权重 bullet。Scene Tools 说明 Camera follow & LookAt、Rotation root、Saved expansion 三项；Interaction input-control 保留 Input phases、Targeting、Control 三项。Unity Editor Tools 明确区分 Favorites 重构、Inspector workflows、Unity 兼容性与 Scene Tools，并在详情 header 使用 `Built on vSeries` 归属面板列出五个原作链接；章节下方安静列出对应 commit 证据。
+
+全屏纹理调参入口由 contour controls 提供：在本地页面按 `Alt+Shift+C`，或使用 `?contours=1` 打开面板，可调整 seed、scale、octaves、roughness、spacing、width、base opacity、pointer intensity 和 pointer radius。参数只保存在当前浏览器的 localStorage；发布时若要改变默认值，需要更新源码，不能依赖访客浏览器中的调参状态。

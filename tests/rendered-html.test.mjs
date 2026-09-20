@@ -33,6 +33,10 @@ test("server-renders the redesigned portfolio home", async () => {
   assert.match(html, /class="site-footer"/);
   assert.match(html, /leonzhouziang@gmail\.com/);
   assert.match(html, /href="\/resume\/Ziang-Zhou-Resume\.pdf"/);
+  assert.match(html, /class="resume-action"/);
+  assert.match(html, /<svg[^>]+viewBox="0 0 24 24"/);
+  assert.match(html, />Selected work</);
+  assert.doesNotMatch(html, />Ideas, made tangible\.</);
   assert.doesNotMatch(html, /brand-mark[^>]*>LZ<\/span>/);
 });
 
@@ -50,6 +54,7 @@ test("category pages contain overview cards and no reader chapters", async () =>
       assert.ok(html.includes(project), project);
     assert.match(html, /class="archive-header/);
     assert.match(html, /class="project-grid/);
+    assert.match(html, /class="archive-decoration/);
     assert.doesNotMatch(html, /class="case-section|class="case-toc|class="project-reader|class="chapter-button/);
     assert.doesNotMatch(html, /href="#project-/);
   }
@@ -94,6 +99,19 @@ test("direct project routes render full case studies", async () => {
   assert.match(html, /CHANGE_LIFECYCLE/);
   assert.match(html, /href="https:\/\/github\.com\/Hubr1zz\/zWorkFlow"/);
   assert.doesNotMatch(html, /Enlarge image:/);
+});
+
+test("editor tools case study distinguishes contributions from vSeries sources", async () => {
+  const html = await htmlAt("/projects/editor-tools");
+  assert.match(html, /Built on vSeries/);
+  for (const label of ["vFavorites2", "vFolders2", "vHierarchy2", "vInspector2", "vTabs2"])
+    assert.ok(html.includes(label), `vSeries attribution: ${label}`);
+  for (const id of ["editor-navigation", "inspector-workflow", "compatibility", "editor-scene"])
+    assert.ok(html.includes(`id="chapter-${id}"`), `editor chapter: ${id}`);
+  for (const label of ["Shared interface", "Input and lifecycle", "Predictable activation", "Component tabs", "Child Components", "Unified settings", "Camera follow &amp; LookAt", "Rotation root", "Saved expansion"])
+    assert.ok(html.includes(label), `editor content: ${label}`);
+  assert.match(html, /Interface &amp; lifecycle changes/);
+  assert.match(html, /Child Components window/);
 });
 
 test("image-backed cases keep real media and image-only expansion controls", async () => {
@@ -141,4 +159,6 @@ test("other routes are reachable and expose their empty state", async () => {
   assert.match(other, /OFF THE CLOCK/);
   const projects = await htmlAt("/other/projects");
   assert.match(projects, /On the workbench\./);
+  assert.doesNotMatch(other, /01 \/ PLAY HISTORY/);
+  assert.doesNotMatch(projects, /02 \/ WORKBENCH/);
 });

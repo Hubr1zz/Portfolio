@@ -12,7 +12,7 @@
     "steam:sync": "node scripts/sync-steam-library.mjs",
     "verify:pages": "node scripts/verify-pages-export.mjs",
     "start": "vinext start",
-    "test": "npm run build && node --test tests/rendered-html.test.mjs tests/steam-sync.test.mjs",
+    "test": "npm run build && node --test tests/rendered-html.test.mjs tests/steam-sync.test.mjs tests/contour-field.test.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "db:generate": "drizzle-kit generate"
   },

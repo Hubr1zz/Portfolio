@@ -136,13 +136,16 @@ test("image-backed cases keep real media and image-only expansion controls", asy
 test("article collection renders comparative essays without media", async () => {
   const html = await htmlAt("/projects/comparative-writing");
   const mainHtml = html.slice(html.indexOf("<main"), html.lastIndexOf("</main>") + "</main>".length);
-  for (const title of ["Elden Ring and the Souls-like formula", "League of Legends / Dota: systems and strategy"])
+  for (const title of ["Elden Ring and the Souls-like formula", "League of Legends / Dota: systems and strategy", "League of Legends Design", "Delta Force: improving Operations"])
     assert.ok(mainHtml.includes(title), `article title: ${title}`);
-  for (const id of ["elden-ring", "lol-dota"])
+  for (const id of ["elden-ring", "lol-dota", "league-of-legends-design", "delta-force-operations"])
     assert.ok(mainHtml.includes(`id="chapter-${id}"`), `article chapter: ${id}`);
   assert.ok((mainHtml.match(/href="https:\/\/docs\.qq\.com\/doc\/DWkdJTnVvUURTRHpU"/g) ?? []).length === 1, "Elden Ring article link should appear once");
   assert.ok((mainHtml.match(/href="https:\/\/docs\.qq\.com\/doc\/DWm5td0ZHUVBDem9v"/g) ?? []).length === 1, "LoL / Dota article link should appear once");
-  assert.ok((mainHtml.match(/Read article/g) ?? []).length === 2, "both article cards should expose Read article");
+  assert.equal((mainHtml.match(/href="https:\/\/leonzhouziang\.notion\.site\/League-of-Legends-Design-37cca75016908037a9f0de4373febf4f"/g) ?? []).length, 1, "League of Legends Design article link should appear once");
+  assert.equal((mainHtml.match(/Read article/g) ?? []).length, 3, "published article cards should expose Read article");
+  assert.ok((mainHtml.match(/Open draft/g) ?? []).length === 1, "the draft article should expose Open draft");
+  assert.equal((mainHtml.match(/https:\/\/leonzhouziang\.notion\.site\/3bcca75016908087918ee4822ddd7aed\?pvs=73/g) ?? []).length, 1, "draft Notion article link should appear once");
   assert.ok(!/class="case-media|class="image-dialog"/.test(mainHtml), "article collection should not render media");
   const caseHeader = mainHtml.slice(mainHtml.indexOf('class="case-header'), mainHtml.indexOf("</header>") + "</header>".length);
   assert.ok(!caseHeader.includes('class="project-links"'), "article header should not render project links");

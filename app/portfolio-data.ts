@@ -13,7 +13,7 @@ export type Project = {
   tags: string[];
   links: ProjectLink[];
   attribution?: ProjectAttribution;
-  articles?: { id: string; title: string; summary: string; href: string; language: string }[];
+  articles?: { id: string; title: string; summary: string; href: string; language: string; status?: "draft" }[];
   image?: string;
   imageAlt?: string;
   gallery?: { src: string; alt: string }[];
@@ -294,11 +294,11 @@ export const projects: Record<TabId, Project[]> = {
       index: "02",
       title: "Comparative Game Analysis",
       eyebrow: "Gameplay-oriented essays",
-      year: "2025",
+      year: "2025—26",
       description:
         "Short-form essays examining how games position themselves, screen players, and produce different strategic behaviors through small systemic changes.",
       details:
-        "Current subjects include Elden Ring’s relationship to traditional Souls-like games and a comparison of League of Legends with Dota. Mandarin editions are currently available; English translations are in progress.",
+        "A growing essay collection with completed essays and work in progress across comparative game analysis, champion identity, and system design.",
       tags: ["Critical Analysis", "Player Segmentation", "Systems"],
       articles: [
         {
@@ -315,10 +315,27 @@ export const projects: Record<TabId, Project[]> = {
           href: "https://docs.qq.com/doc/DWm5td0ZHUVBDem9v",
           language: "Mandarin",
         },
+        {
+          id: "league-of-legends-design",
+          title: "League of Legends Design",
+          summary: "A critique of champion identity, gameplay fantasy, and passive-ability differentiation, with proposals for clearer synergy between abilities.",
+          href: "https://leonzhouziang.notion.site/League-of-Legends-Design-37cca75016908037a9f0de4373febf4f",
+          language: "English",
+        },
+        {
+          id: "delta-force-operations",
+          title: "Delta Force: improving Operations",
+          summary: "A work-in-progress comparison of Delta Force and Escape from Tarkov, examining combat feel, player skill, map flow, and the trade-offs between fighting and looting.",
+          href: "https://leonzhouziang.notion.site/3bcca75016908087918ee4822ddd7aed?pvs=73",
+          language: "Mandarin",
+          status: "draft",
+        },
       ],
       links: [
         { label: "Elden Ring essay", href: "https://docs.qq.com/doc/DWkdJTnVvUURTRHpU" },
         { label: "LoL / Dota essay", href: "https://docs.qq.com/doc/DWm5td0ZHUVBDem9v" },
+        { label: "League of Legends Design", href: "https://leonzhouziang.notion.site/League-of-Legends-Design-37cca75016908037a9f0de4373febf4f" },
+        { label: "Delta Force: improving Operations", href: "https://leonzhouziang.notion.site/3bcca75016908087918ee4822ddd7aed?pvs=73" },
       ],
     },
     {

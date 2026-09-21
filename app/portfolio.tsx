@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, type MouseEvent, type ReactNode } from "react";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { assetPath, InternalLink } from "./portfolio-links";
 import { MarginContours } from "./presentation-extras";
 import { getBoardItems, projects, tabs, type BoardItem, type DiagramId, type PageId, type Project, type TabId } from "./portfolio-data";
@@ -273,7 +274,21 @@ function TacticsMap() {
   return <FlowDiagram id="vault-map" />;
 }
 
+function ArticleIndexCover({ articles }: { articles: NonNullable<Project["articles"]> }) {
+  const draftCount = articles.filter((article) => article.status === "draft").length;
+  const completedCount = articles.length - draftCount;
+  return <div className="article-index-cover" aria-label="Essay collection cover"><div className="article-index-heading"><span>ESSAY COLLECTION</span><strong>{String(articles.length).padStart(2, "0")} entries</strong></div><p>{completedCount} essays · {draftCount} in progress</p><ol>{articles.map((article, index) => <li key={article.id}><span>{String(index + 1).padStart(2, "0")}</span><strong>{article.title}</strong>{article.status === "draft" && <small>Draft</small>}</li>)}</ol><footer>READ / COMPARE / QUESTION</footer></div>;
+}
+
+function DesignNotebookCover() {
+  return <div className="design-notebook-cover" aria-label="Design notebook cover"><div className="design-notebook-heading"><span>DESIGN NOTEBOOK</span><svg viewBox="0 0 72 48" aria-hidden="true" focusable="false"><rect x="8" y="8" width="44" height="32" /><path d="M16 16h28M16 24h20M16 32h28M52 16h12v16H52" /></svg></div><div className="design-notebook-rows"><div><b>01 Observe</b><span>Collect design examples</span></div><div><b>02 Explain</b><span>Connect mechanics and player response</span></div><div><b>03 Reuse</b><span>Preserve a transferable lesson</span></div></div><footer>AN EVOLVING REFERENCE</footer></div>;
+}
+
 function ProjectCover({ project }: { project: Project }) {
+  if (project.articles?.length)
+    return <ArticleIndexCover articles={project.articles} />;
+  if (project.id === "design-vault")
+    return <DesignNotebookCover />;
   const coverDiagram = coverDiagramByProject[project.id];
   if (coverDiagram)
     return <FlowDiagram id={coverDiagram} />;
@@ -331,8 +346,25 @@ function Footer() {
 }
 
 export function PortfolioShell({ page, children }: { page: ShellPage; children: ReactNode }) {
+  const pathname = usePathname();
+  const mainContentRef = useRef<HTMLDivElement>(null);
   useRestoreOrigin();
-  return <main className={"site-shell page-" + page + " theme-amber"}><a className="skip-link" href="#main-content">Skip to content</a><MarginContours /><Navigation page={page} /><div id="main-content">{children}</div><Footer /></main>;
+  useEffect(() => {
+    const handlePageShow = (event: PageTransitionEvent) => {
+      if (!event.persisted || window.matchMedia("(prefers-reduced-motion: reduce)").matches)
+        return;
+      const root = mainContentRef.current;
+      if (!root)
+        return;
+      root.getAnimations({ subtree: true }).forEach((animation) => {
+        animation.cancel();
+        animation.play();
+      });
+    };
+    window.addEventListener("pageshow", handlePageShow);
+    return () => window.removeEventListener("pageshow", handlePageShow);
+  }, []);
+  return <main className={"site-shell page-" + page + " theme-amber"}><a className="skip-link" href="#main-content">Skip to content</a><MarginContours /><Navigation page={page} /><div id="main-content" key={pathname} ref={mainContentRef}>{children}</div><Footer /></main>;
 }
 
 function HomePage() {
@@ -724,7 +756,7 @@ function ProjectDetailContent({ project, category }: { project: Project & { cate
                     <span>{String(index + 1).padStart(2, "0")}</span>
                     <h2>{article.title}</h2>
                   </header>
-                  <div className="article-card-copy"><p>{article.summary}</p><span>{article.language}</span><a href={article.href} target="_blank" rel="noreferrer">Read article ↗</a></div>
+                  <div className="article-card-copy"><p>{article.summary}</p><div className="article-card-meta"><span>{article.language}</span>{article.status === "draft" && <small className="article-status">Draft</small>}</div><a href={article.href} target="_blank" rel="noreferrer">{article.status === "draft" ? "Open draft" : "Read article"} ↗</a></div>
                 </div>
               </section>
             )) : project.details ? (

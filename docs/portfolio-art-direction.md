@@ -175,8 +175,14 @@ technical 详情先给图片区，配架构关键点、本人职责、解决的�
 
 入场效果是 CSS/SVG 的短序列：职位行使用约 850ms 的 `steps(40)` clip reveal，首页标题两行以 760ms、120ms 间隔从左侧进入，actions plane 约 850ms 滑入，按钮使用 480ms 级联并以 140ms 错开，直角注册线使用 750ms 描边绘制；archive header 使用 600ms 侧向 reveal，档案 SVG 路径使用 `pathLength=1` 的 900ms 描边绘制，圆点使用 360ms 淡入并延迟 600ms；case heading 使用 620ms，其余 case 内容使用 600ms，页面级入场为 600ms，图片 dialog 为 260ms。档案标题标签与 Other 标签使用 850ms、24 步的 `type-reveal`，容器本身不裁切。所有动画只运行一次，没有视频、WebGL 或无穷循环；`prefers-reduced-motion` 会立即清除 delay、clip、opacity、transform 和描边偏移，完整 DOM 文本始终可读。页面入场使用 `backwards`，动画结束后不会留下破坏 sticky 或文本渲染的 transform。
 
-View details 使用独立的可见箭头：首页、Design、Games 卡片右侧斜切，Technical row cards 右对齐并从左侧斜切；900–1100px 时 Design/Games 预览改为媒体在上、文字在下，避免窄列压缩标题。Archive header 不再叠加暖金 wedge 或棕色分隔短线，真实边框和分类 SVG 保持清晰。
+View details 使用独立的可见箭头：首页、Design、Games 卡片右侧斜切，Technical row cards 右对齐并从左侧斜切；900–1100px 时 Games 预览改为媒体在上、文字在下，Design 使用本轮宽幅条目布局，避免窄列压缩标题。Archive header 不再叠加暖金 wedge 或棕色分隔短线，真实边框和分类 SVG 保持清晰。
 
 本轮实际纹理由离线生成器导出为静态 prerendered WebP，运行时不暴露“仅边缘线”调参面板、Warp 滑块、URL 参数或 localStorage 覆盖；页面只保留有界的指针局部 transform，纹理生成过程在发布前的离线流程完成。纹理仍只位于全屏留白和板块间隙，阅读层通过纸面连续底保持清晰。
 
 动效转译继续以 RhineLabUI 的公开源码为参考事实：[`boot.ts`](https://github.com/LBEILC/RhineLabUI/blob/main/src/boot.ts) 负责 DOM/SVG 启动入口，[`boot-motion.ts`](https://github.com/LBEILC/RhineLabUI/blob/main/src/boot-motion.ts) 提供自定义时间轴、clipPath 面板和 transform 滑入思路，[`style.css`](https://github.com/LBEILC/RhineLabUI/blob/main/src/style.css) 提供线条、label 与 atmosphere 的层级参考。作品集只采用这些可迁移的时序和几何原则，不复制参考项目的品牌、内容或长启动门槛。
+
+### 2026-09-20 档案入口与阅读边界补充
+
+页面主内容按 pathname 作为 key 重新触发入口动画，并在 bfcache `pageshow` replay 可见动画；`prefers-reduced-motion` 仍直接跳过 replay。intro、archive 标签和标题的横向 clip reveal 允许上下各 `0.25em` 的垂直 bleed，避免字形被裁切。阅读层取消图片周围的柔化阴影，图片、流程图和媒体容器保持清晰边界。
+
+首页精选卡片与 Technical 项目列表使用细实线分隔，分隔线随宽度变化保持在文字列之间；移动端保留卡片底边。比较文章索引封面与 Design notebook 封面直接从项目数据渲染，当前文章集合为 4 entries，其中 3 篇已发布、1 篇为 draft。

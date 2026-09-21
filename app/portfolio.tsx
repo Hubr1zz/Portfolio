@@ -294,7 +294,7 @@ const coverDiagramByProject: Partial<Record<string, DiagramId>> = {
 
 function FeatureCard({ project, index }: { project: Project; index: string }) {
   const visual = project.id === "tactics-design" ? <TacticsMap /> : <ProjectCover project={project} />;
-  return <InternalLink id={"project-" + project.id} className="featured-card" href={"/projects/" + project.id} onClick={(event) => rememberProjectOrigin(event, project.id)}><div className="feature-media">{visual}</div><div className="feature-copy reading-surface"><div className="feature-title-row"><span className="feature-number">{index}</span><h3>{project.title}</h3></div><div className="feature-meta"><span>{project.year}</span></div><p className="feature-description">{project.description}</p><span className="feature-link">View details ↗</span></div></InternalLink>;
+  return <InternalLink id={"project-" + project.id} className="featured-card" href={"/projects/" + project.id} onClick={(event) => rememberProjectOrigin(event, project.id)}><div className="feature-media">{visual}</div><div className="feature-copy reading-surface"><div className="feature-title-row"><span className="feature-number">{index}</span><h3>{project.title}</h3></div><div className="feature-meta"><span>{project.year}</span></div><p className="feature-description">{project.description}</p><span className="feature-link details-action"><span>View details</span><span aria-hidden="true">↗</span></span></div></InternalLink>;
 }
 
 function ArchiveDecoration({ page }: { page: TabId }) {
@@ -419,7 +419,7 @@ function ProjectPreview({ project }: { project: Project }) {
           <ul className="tag-list" aria-label={project.title + " technologies and disciplines"}>
             {project.tags.slice(0, 3).map((tag) => <li key={tag}>{tag}</li>)}
           </ul>
-          <span className="preview-link">View details ↗</span>
+          <span className="preview-link details-action"><span>View details</span><span aria-hidden="true">↗</span></span>
         </div>
       </InternalLink>
     </article>
@@ -489,8 +489,8 @@ function ArchivePage({ page }: { page: TabId }) {
   return (
     <>
       <header className="archive-header">
-        <span className="section-index reading-surface">WORK / ARCHIVE</span>
-        <h1 className="reading-surface">{meta.label}</h1>
+        <span className="section-index reading-surface"><span className="type-reveal">WORK / ARCHIVE</span></span>
+        <h1 className="reading-surface"><span className="type-reveal">{meta.label}</span></h1>
         <p className="reading-surface">{meta.description}</p>
         <ArchiveDecoration page={page} />
       </header>

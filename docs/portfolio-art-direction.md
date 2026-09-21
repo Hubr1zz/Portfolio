@@ -173,7 +173,9 @@ technical 详情先给图片区，配架构关键点、本人职责、解决的�
 
 首页下半段使用全宽双栏网格，摘要限制在 620px；右侧 actions 使用暖金斜切 plane、直角注册 SVG、Resume 暖金 outline 和深色 Explore。按钮保持明确顺序与触控高度，320px 宽度下也不会溢出。正文相关内容使用连续的暖白 `reading-surface` 和柔化纸面边缘（`background: var(--paper)` 与 `box-shadow: 0 0 14px 10px var(--paper)`），没有把所有段落变成独立卡片；图片、流程图和深色 Continue 区保留原有表面。
 
-入场效果是 CSS/SVG 的短序列：职位行使用约 560ms 的 `steps(40)` clip reveal，首页标题两行以 520ms、90ms 间隔从左侧进入，actions plane 约 600ms 滑入，按钮使用 340ms 级联并以 100ms 错开；archive/case header 使用 420–440ms 的侧向 reveal，档案 SVG 路径使用 `pathLength=1` 的 640ms 描边绘制，圆点使用 260ms 淡入并延迟 440ms。所有动画只运行一次，没有视频、WebGL 或无穷循环；`prefers-reduced-motion` 会立即清除 delay、clip、opacity、transform 和描边偏移，完整 DOM 文本始终可读。页面入场使用 `backwards`，动画结束后不会留下破坏 sticky 或文本渲染的 transform。
+入场效果是 CSS/SVG 的短序列：职位行使用约 850ms 的 `steps(40)` clip reveal，首页标题两行以 760ms、120ms 间隔从左侧进入，actions plane 约 850ms 滑入，按钮使用 480ms 级联并以 140ms 错开，直角注册线使用 750ms 描边绘制；archive header 使用 600ms 侧向 reveal，档案 SVG 路径使用 `pathLength=1` 的 900ms 描边绘制，圆点使用 360ms 淡入并延迟 600ms；case heading 使用 620ms，其余 case 内容使用 600ms，页面级入场为 600ms，图片 dialog 为 260ms。档案标题标签与 Other 标签使用 850ms、24 步的 `type-reveal`，容器本身不裁切。所有动画只运行一次，没有视频、WebGL 或无穷循环；`prefers-reduced-motion` 会立即清除 delay、clip、opacity、transform 和描边偏移，完整 DOM 文本始终可读。页面入场使用 `backwards`，动画结束后不会留下破坏 sticky 或文本渲染的 transform。
+
+View details 使用独立的可见箭头：首页、Design、Games 卡片右侧斜切，Technical row cards 右对齐并从左侧斜切；900–1100px 时 Design/Games 预览改为媒体在上、文字在下，避免窄列压缩标题。Archive header 不再叠加暖金 wedge 或棕色分隔短线，真实边框和分类 SVG 保持清晰。
 
 本轮实际纹理由离线生成器导出为静态 prerendered WebP，运行时不暴露“仅边缘线”调参面板、Warp 滑块、URL 参数或 localStorage 覆盖；页面只保留有界的指针局部 transform，纹理生成过程在发布前的离线流程完成。纹理仍只位于全屏留白和板块间隙，阅读层通过纸面连续底保持清晰。
 

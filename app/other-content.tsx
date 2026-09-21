@@ -184,8 +184,8 @@ function LibraryEmpty({ isSynced }: { isSynced: boolean }) {
 function OtherHeader({ section }: { section: OtherSection }) {
   return (
     <>
-      <header className="other-header page-enter">
-        <div><span className="section-index">OFF THE CLOCK</span><h1>Other</h1><p>Games, small tools, and side experiments.</p></div>
+      <header className="other-header">
+        <div><span className="section-index"><span className="type-reveal">OFF THE CLOCK</span></span><h1><span className="type-reveal">Other</span></h1><p>Games, small tools, and side experiments.</p></div>
         <svg className="other-header-field" viewBox="0 0 520 250" aria-hidden="true" focusable="false"><path d="M0 196C74 98 148 100 224 178S380 264 520 68" /><path d="M0 218C74 120 148 122 224 200S380 286 520 90" /><path d="M0 240C74 142 148 144 224 222S380 308 520 112" /><path className="other-header-field-major" d="M0 174C74 76 148 78 224 156S380 242 520 46" /></svg>
       </header>
       <nav className="other-tabs" aria-label="Other sections">

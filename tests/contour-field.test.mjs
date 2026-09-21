@@ -67,7 +67,7 @@ test("connected contour paths use shared quadratic joins", () => {
 
 test("malicious settings normalize to finite bounded values", () => {
   const settings = normalizeContourSettings({ seed: Infinity, noiseScale: -1000, octaves: NaN, persistence: 999, warpIntensity: -1, contourGap: "nope", lineWidth: -1, baseOpacity: Infinity, pointerIntensity: 0, pointerRadius: 999999 });
-  assert.deepEqual(settings, { seed: 137, noiseScale: 80, octaves: 2, persistence: .65, warpIntensity: 0, contourGap: .065, lineWidth: .5, baseOpacity: .035, pointerIntensity: .05, pointerRadius: 500 });
+  assert.deepEqual(settings, { seed: 137, noiseScale: 80, octaves: 1, persistence: .65, warpIntensity: 0, contourGap: .086, lineWidth: .5, baseOpacity: .05, pointerIntensity: .05, pointerRadius: 500 });
   assert.ok(Object.values(settings).every(Number.isFinite));
 });
 

@@ -37,8 +37,11 @@ test("server-renders the redesigned portfolio home", async () => {
   assert.match(html, /class="resume-action"/);
   assert.match(html, /class="explore-action"/);
   assert.match(html, /class="intro-registration"/);
-  assert.match(html, /class="profile-name">Leon Zhou<\/p>/);
+  assert.match(html, /class="profile-name"><span>Leon<\/span> <span>Zhou<\/span><\/p>/);
   assert.match(html, />About Me<\/h2>/);
+  assert.match(html, /I am currently pursuing an M\.S\. in Game Design and Development at the University of Southern California \(USC\)\./);
+  assert.equal((html.match(/Game designer, gameplay programmer, but most importantly, game player\./g) ?? []).length, 1);
+  assert.ok(html.indexOf(">About Me</h2>") < html.indexOf('id="work"'), "About Me should precede Selected work");
   assert.doesNotMatch(html, /PROFILE \/ NOTES|How I work/);
   assert.ok(html.indexOf('class="resume-action"') < html.indexOf('class="explore-action"'), "Resume should precede Explore");
   assert.match(html, /<svg[^>]+viewBox="0 0 24 24"/);

@@ -5,7 +5,7 @@
 
 ## 2026-09-20 实施补充
 
-本地重构已把视觉提案推进到可预览的页面结构：当前按五分类导航组织内容，首页保留三项精选位置，其中第三项为 `ActionQueue` 待补；项目详情拆成 13 个独立项目详情页，各页按连续章节组织内容，并提供桌面右侧目录。Other 已拆为 Games I Played 与 Other Projects 两个子页；Steam 使用本地快照，当前没有账号连接，页面仍保持空态。背景使用固定、均匀且低对比的全屏纹理场，指针只做局部增强；作品图和正文优先于背景。
+本地重构已把视觉提案推进到可预览的页面结构：当前按五分类导航组织内容，首页保留三项精选位置，其中第三项为 `ActionQueue` 待补；项目详情拆成 13 个独立项目详情页，各页按连续章节组织内容，并提供桌面右侧目录。Other 已拆为 Games I Played 与 Other Projects 两个子页；Steam 使用本地快照，当前没有账号连接，页面仍保持空态。背景使用离线生成的静态 prerendered WebP，运行时不提供参数覆盖或控制面板，只保留有界的指针局部 transform；作品图和正文优先于背景。
 
 补充参考 [Pentagram Work](https://www.pentagram.com/work) 的作品索引节奏，以及 [IBM 2x Grid](https://www.ibm.com/design/language/2x-grid/) 的对齐与间距方法；借鉴信息节奏，不搬运视觉资产、品牌或具体作品内容。
 
@@ -155,7 +155,7 @@ technical 详情先给图片区，配架构关键点、本人职责、解决的�
 
 ## 2026-09-20 页面迭代补充
 
-本轮页面整理把背景统一为全屏低对比纹理场，正文内容层保持相对定位并位于背景之上；指针局部增强只作为可调的氛围提示，不改变阅读层级。首页保留轻几何切割，technical、design、games 档案页分别使用互连节点、错位文档注册线、轨迹节点 SVG 装饰。technical 内容改为更易扫描的横向 row cards，rendering 项目使用一个主 stage 配合可滚动的缩略图条，便于在完整查看画面与快速切换之间移动。
+本轮页面整理把背景统一为离线生成的静态 prerendered WebP，正文内容层保持相对定位并位于背景之上；运行时只保留有界的指针局部 transform，不提供参数覆盖或控制面板。首页保留轻几何切割，technical、design、games 档案页分别使用互连节点、错位文档注册线、轨迹节点 SVG 装饰。technical 内容改为更易扫描的横向 row cards，rendering 项目使用一个主 stage 配合可滚动的缩略图条，便于在完整查看画面与快速切换之间移动。
 
 内容结构补充了比较文章的 article collection，把文章标题、摘要、语言和入口集中呈现；Tactical 项目则以 Obsidian vault 的可导航叙事说明 Hunt、Showdown、Settlement 及其规则、词汇和修订关系。导航增加稳定的 panel 入口，让访客可以在首页、分类、项目和 Other 之间移动，同时保留正文链接和键盘路径。
 
@@ -165,16 +165,16 @@ technical 详情先给图片区，配架构关键点、本人职责、解决的�
 
 案例章节按内容差异选择 prose 或同权重 bullet。Scene Tools 说明 Camera follow & LookAt、Rotation root、Saved expansion 三项；Interaction input-control 保留 Input phases、Targeting、Control 三项。Unity Editor Tools 明确区分 Favorites 重构、Inspector workflows、Unity 兼容性与 Scene Tools，并在详情 header 使用 `Built on vSeries` 归属面板列出五个原作链接；章节下方安静列出对应 commit 证据。
 
-全屏纹理调参入口由 contour controls 提供：在本地页面按 `Alt+Shift+C`，或使用 `?contours=1` 打开面板，可调整 seed、scale、octaves、roughness、Warp、spacing、width、base opacity、pointer intensity 和 pointer radius。参数只保存在当前浏览器的 localStorage；发布时若要改变默认值，需要更新源码，不能依赖访客浏览器中的调参状态。
+全屏纹理由离线生成器导出为静态 prerendered WebP；运行时没有 contour controls、URL 参数、localStorage 覆盖或浏览器调参入口。页面只保留有界的指针局部 transform，生成器在离线流程运行，发布页面不承担纹理计算。
 
 ## 2026-09-20 首页构图、阅读层与动效实现摘要
 
-本轮首页移除了 `Other` teaser 行，导航仍保留 Other；首屏保留原主文案，Resume 位于 Explore selected work 上方。Selected work 的标题直接左齐，不再为首页标题预留编号空列。Profile 区改为 `About Me`，左侧以独立的大字号 `Leon Zhou` 标识，右侧保留完整介绍原文；桌面使用 480px 以上的双栏阅读区，窄屏改为自然单列。
+本轮首页移除了 `Other` teaser 行，导航仍保留 Other；首屏保留原主文案，Resume 位于 Explore selected work 上方。Selected work 的标题直接左齐，不再为首页标题预留编号空列。Profile 区移动到 hero 与 Selected work 之间，改为 `About Me`；左侧以两个独立块级名字行 `Leon`、`Zhou` 标识，并在名字下保留完整 profile lead，右侧先显示 USC 在读说明，再接 RPI、mechanics/math 与 seeking-goal 原文；桌面使用 480px 以上的双栏阅读区，右栏下移 40px，窄屏自然单列。
 
 首页下半段使用全宽双栏网格，摘要限制在 620px；右侧 actions 使用暖金斜切 plane、直角注册 SVG、Resume 暖金 outline 和深色 Explore。按钮保持明确顺序与触控高度，320px 宽度下也不会溢出。正文相关内容使用连续的暖白 `reading-surface` 和柔化纸面边缘（`background: var(--paper)` 与 `box-shadow: 0 0 14px 10px var(--paper)`），没有把所有段落变成独立卡片；图片、流程图和深色 Continue 区保留原有表面。
 
-入场效果是 CSS/SVG 的短序列：职位行使用约 380ms 的 `steps(40)` clip reveal，首页标题两行以 360ms、70ms 间隔从左侧进入，actions plane 约 420ms 滑入，按钮不超过 100ms 级联；archive/case header 使用 220–300ms 的侧向 reveal，档案 SVG 路径使用 `pathLength=1` 的 460ms 描边绘制，圆点只淡入一次。所有动画只运行一次，没有视频、WebGL 或无穷循环；`prefers-reduced-motion` 会立即清除 delay、clip、opacity、transform 和描边偏移，完整 DOM 文本始终可读。页面入场使用 `backwards`，动画结束后不会留下破坏 sticky 或文本渲染的 transform。
+入场效果是 CSS/SVG 的短序列：职位行使用约 560ms 的 `steps(40)` clip reveal，首页标题两行以 520ms、90ms 间隔从左侧进入，actions plane 约 600ms 滑入，按钮使用 340ms 级联并以 100ms 错开；archive/case header 使用 420–440ms 的侧向 reveal，档案 SVG 路径使用 `pathLength=1` 的 640ms 描边绘制，圆点使用 260ms 淡入并延迟 440ms。所有动画只运行一次，没有视频、WebGL 或无穷循环；`prefers-reduced-motion` 会立即清除 delay、clip、opacity、transform 和描边偏移，完整 DOM 文本始终可读。页面入场使用 `backwards`，动画结束后不会留下破坏 sticky 或文本渲染的 transform。
 
-本轮实际纹理不再是“仅边缘线”或静态占位描述：背景由 warped simplex 噪声与 quadratic contours 组成，contour controls 的 `key v2` 面板提供 Warp 滑块，默认 scale、roughness、octaves 与 Warp 已更新。该纹理仍只位于全屏留白和板块间隙，阅读层通过纸面连续底保持清晰；参数只保存在当前浏览器的 localStorage。
+本轮实际纹理由离线生成器导出为静态 prerendered WebP，运行时不暴露“仅边缘线”调参面板、Warp 滑块、URL 参数或 localStorage 覆盖；页面只保留有界的指针局部 transform，纹理生成过程在发布前的离线流程完成。纹理仍只位于全屏留白和板块间隙，阅读层通过纸面连续底保持清晰。
 
 动效转译继续以 RhineLabUI 的公开源码为参考事实：[`boot.ts`](https://github.com/LBEILC/RhineLabUI/blob/main/src/boot.ts) 负责 DOM/SVG 启动入口，[`boot-motion.ts`](https://github.com/LBEILC/RhineLabUI/blob/main/src/boot-motion.ts) 提供自定义时间轴、clipPath 面板和 transform 滑入思路，[`style.css`](https://github.com/LBEILC/RhineLabUI/blob/main/src/style.css) 提供线条、label 与 atmosphere 的层级参考。作品集只采用这些可迁移的时序和几何原则，不复制参考项目的品牌、内容或长启动门槛。

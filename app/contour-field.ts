@@ -33,15 +33,15 @@ export interface ContourFieldGeometry {
 
 export const DEFAULT_CONTOUR_SETTINGS: Readonly<ContourSettings> = Object.freeze({
   seed: 137,
-  noiseScale: 340,
-  octaves: 2,
-  persistence: .24,
-  warpIntensity: .28,
-  contourGap: .065,
+  noiseScale: 210,
+  octaves: 1,
+  persistence: .05,
+  warpIntensity: .65,
+  contourGap: .086,
   lineWidth: 1,
-  baseOpacity: .035,
-  pointerIntensity: .14,
-  pointerRadius: 220,
+  baseOpacity: .05,
+  pointerIntensity: .06,
+  pointerRadius: 315,
 });
 
 const CONTOUR_LIMITS = {

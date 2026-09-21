@@ -341,7 +341,7 @@ function HomePage() {
 
   return (
     <>
-      <section className="home-intro page-enter" id="top">
+      <section className="home-intro" id="top">
         <div className="intro-kicker reading-surface">
           <span>Technical Designer · Gameplay Programmer</span>
           <span>LOS ANGELES / CA</span>
@@ -357,6 +357,23 @@ function HomePage() {
             <a className="resume-action" href={resumeHref} target="_blank" rel="noreferrer"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 3.5h8l4 4V20.5H6z" /><path d="M14 3.5v4h4M9 12h6M9 15.5h6" /></svg><span>Résumé</span><small>PDF</small></a>
             <a className="explore-action" href="#work">Explore selected work</a>
           </div>
+        </div>
+      </section>
+      <section className="profile-section">
+        <div className="profile-title-group reading-surface">
+          <div className="section-heading">
+            <div>
+              <h2>About Me</h2>
+              <p className="profile-name"><span>Leon</span>{" "}<span>Zhou</span></p>
+              <p className="profile-lead">Game designer, gameplay programmer, but most importantly, game player.</p>
+            </div>
+          </div>
+        </div>
+        <div className="profile-copy reading-surface">
+          <p>I am currently pursuing an M.S. in Game Design and Development at the University of Southern California (USC).</p>
+          <p>I graduated from Rensselaer Polytechnic Institute’s Games &amp; Simulation Arts &amp; Sciences program, connecting computer science, game design, and real-time visual practice.</p>
+          <p>I care about how mechanics, systems, and feedback shape player experience. Programming and 3D math let me turn ambiguous ideas into playable, testable systems.</p>
+          <p className="profile-goal">Seeking Technical Designer, Systems Designer, or Gameplay Engineer opportunities.</p>
         </div>
       </section>
       <section className="featured-section page-enter" id="work">
@@ -383,22 +400,6 @@ function HomePage() {
           </InternalLink>
         ))}
       </nav>
-      <section className="profile-section">
-        <div className="profile-title-group reading-surface">
-          <div className="section-heading">
-            <div>
-              <h2>About Me</h2>
-              <p className="profile-name">Leon Zhou</p>
-            </div>
-          </div>
-        </div>
-        <div className="profile-copy reading-surface">
-          <p className="profile-lead">Game designer, gameplay programmer, but most importantly, game player.</p>
-          <p>I graduated from Rensselaer Polytechnic Institute’s Games &amp; Simulation Arts &amp; Sciences program, connecting computer science, game design, and real-time visual practice.</p>
-          <p>I care about how mechanics, systems, and feedback shape player experience. Programming and 3D math let me turn ambiguous ideas into playable, testable systems.</p>
-          <p className="profile-goal">Seeking Technical Designer, Systems Designer, or Gameplay Engineer opportunities.</p>
-        </div>
-      </section>
     </>
   );
 }
@@ -487,7 +488,7 @@ function ArchivePage({ page }: { page: TabId }) {
 
   return (
     <>
-      <header className="archive-header page-enter">
+      <header className="archive-header">
         <span className="section-index reading-surface">WORK / ARCHIVE</span>
         <h1 className="reading-surface">{meta.label}</h1>
         <p className="reading-surface">{meta.description}</p>
@@ -664,7 +665,7 @@ function ProjectDetailContent({ project, category }: { project: Project & { cate
 
   return (
     <>
-      <header className="case-header page-enter">
+      <header className="case-header">
         <nav className="case-breadcrumb reading-surface" aria-label="Breadcrumb">
           <InternalLink href={meta.path}>{meta.label}</InternalLink>
           <span aria-hidden="true">/</span>

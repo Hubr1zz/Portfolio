@@ -10,9 +10,10 @@
     "build": "vinext build",
     "build:pages": "next build",
     "steam:sync": "node scripts/sync-steam-library.mjs",
+    "steam:import-screenshots": "node scripts/import-screenshot-library.mjs",
     "verify:pages": "node scripts/verify-pages-export.mjs",
     "start": "vinext start",
-    "test": "npm run build && node --test tests/rendered-html.test.mjs tests/steam-sync.test.mjs tests/contour-field.test.mjs",
+    "test": "npm run build && node --test tests/rendered-html.test.mjs tests/steam-sync.test.mjs tests/steam-screenshot-import.test.mjs tests/contour-field.test.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "db:generate": "drizzle-kit generate"
   },

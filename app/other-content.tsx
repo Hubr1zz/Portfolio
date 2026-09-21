@@ -19,6 +19,7 @@ type SteamGame = {
 };
 type SteamLibrary = {
   version: number;
+  source?: "steam-api" | "screenshots";
   updatedAt: string | null;
   profileUrl: string | null;
   profiles: { steamId: string; role: "primary" | "family"; url: string }[];
@@ -52,6 +53,7 @@ function parseLibrary(value: unknown): SteamLibrary {
   const games = data.games.map((game) => version >= 2 ? game : { ...game, familyPlaytimeMinutes: 0, accountIds: [], origin: "primary" as const });
   return {
     version,
+    source: data.source === "screenshots" ? "screenshots" : "steam-api",
     updatedAt: typeof data.updatedAt === "string" ? data.updatedAt : null,
     profileUrl: typeof data.profileUrl === "string" ? data.profileUrl : null,
     profiles: Array.isArray(data.profiles) ? data.profiles.filter((profile): profile is SteamLibrary["profiles"][number] => Boolean(profile) && typeof profile === "object" && /^\d{17}$/.test(profile.steamId) && (profile.role === "primary" || profile.role === "family") && typeof profile.url === "string") : [],
@@ -129,7 +131,7 @@ function GamesLibrary() {
     if (!library)
       return [];
     const normalizedQuery = query.trim().toLocaleLowerCase();
-    const scopedGames = scope === "primary" ? library.games.filter((game) => game.playtimeMinutes > 0) : library.games.filter((game) => game.playtimeMinutes > 0 || game.origin === "family" || game.origin === "both");
+    const scopedGames = library.source === "screenshots" ? library.games : scope === "primary" ? library.games.filter((game) => game.playtimeMinutes > 0) : library.games.filter((game) => game.playtimeMinutes > 0 || game.origin === "family" || game.origin === "both");
     return scopedGames
       .filter((game) => !normalizedQuery || game.name.toLocaleLowerCase().includes(normalizedQuery))
       .sort((left, right) => sortMode === "name" ? left.name.localeCompare(right.name) : right.playtimeMinutes - left.playtimeMinutes);
@@ -156,20 +158,19 @@ function GamesLibrary() {
   return (
     <section className="games-library" aria-labelledby="games-library-heading">
       <div className="library-heading">
-        <div><div className="numbered-heading"><span className="section-index">01</span><h2 id="games-library-heading">Games I Played</h2></div><p>An ongoing record of the games I spend time with, plus an additional family library.</p></div>
-        <div className="library-meta"><span>{filteredGames.length} games</span>{updatedAt && <span>Updated {updatedAt}</span>}</div>
+        <div><div className="numbered-heading"><span className="section-index">01</span><h2 id="games-library-heading">Games I Played</h2></div><p>{library.source === "screenshots" ? "A curated snapshot transcribed from my Steam play history." : "An ongoing record of the games I spend time with, plus an additional family library."}</p></div>
+        <div className="library-meta"><span>{library.source === "screenshots" ? "Screenshot snapshot" : `${filteredGames.length} games`}</span>{updatedAt && <span>Updated {updatedAt}</span>}</div>
       </div>
       <div className="library-controls" aria-label="Game library controls">
         <label htmlFor="game-search">Search games</label>
         <input id="game-search" type="search" value={query} onChange={(event) => { setQuery(event.target.value); setVisibleCount(PAGE_SIZE); }} placeholder="Search by name" />
-        <label htmlFor="game-library-scope">Library</label>
-        <select id="game-library-scope" value={scope} onChange={(event) => { const nextScope = event.target.value as LibraryScope; setScope(nextScope); setSortMode(nextScope === "family" ? "name" : "playtime"); setVisibleCount(PAGE_SIZE); }}><option value="primary">My play history</option><option value="family">Family library</option></select>
+        {library.source !== "screenshots" && <><label htmlFor="game-library-scope">Library</label><select id="game-library-scope" value={scope} onChange={(event) => { const nextScope = event.target.value as LibraryScope; setScope(nextScope); setSortMode(nextScope === "family" ? "name" : "playtime"); setVisibleCount(PAGE_SIZE); }}><option value="primary">My play history</option><option value="family">Family library</option></select></>}
         <label htmlFor="game-sort">Sort by</label>
         <select id="game-sort" value={sortMode} onChange={(event) => { setSortMode(event.target.value as SortMode); setVisibleCount(PAGE_SIZE); }}><option value="playtime">My playtime</option><option value="name">Name</option></select>
       </div>
       {filteredGames.length > 0 ? <>
         <div className="game-grid">
-          {visibleGames.map((game) => <a className="game-card" href={`https://store.steampowered.com/app/${game.appid}/`} target="_blank" rel="noreferrer" key={game.appid}><GameCover game={game} /><div className="game-card-copy"><h3>{game.name}</h3><p>{scope === "family" ? "Family library" : formatPlaytime(game.playtimeMinutes)}</p><span className="game-card-external" aria-label="Opens Steam store">↗</span></div></a>)}
+          {visibleGames.map((game) => <a className="game-card" href={`https://store.steampowered.com/app/${game.appid}/`} target="_blank" rel="noreferrer" key={game.appid}><GameCover game={game} /><div className="game-card-copy"><h3>{game.name}</h3><p>{library.source === "screenshots" ? "Steam library snapshot" : scope === "family" ? "Family library" : formatPlaytime(game.playtimeMinutes)}</p><span className="game-card-external" aria-label="Opens Steam store">↗</span></div></a>)}
         </div>
         {visibleCount < filteredGames.length && <button type="button" className="load-more" onClick={() => setVisibleCount((value) => value + PAGE_SIZE)}>Load more <span aria-hidden="true">+24</span></button>}
       </> : query.trim() ? <div className="library-no-results"><p>No games match “{query.trim()}”.</p><button type="button" className="text-action" onClick={() => { setQuery(""); setVisibleCount(PAGE_SIZE); }}>Reset search <span aria-hidden="true">↗</span></button></div> : scope === "primary" ? <div className="library-no-results"><p>No recorded playtime on my account yet.</p><button type="button" className="text-action" onClick={() => { setScope("family"); setSortMode("name"); setVisibleCount(PAGE_SIZE); }}>Explore family library <span aria-hidden="true">↗</span></button></div> : <div className="library-no-results"><p>No games in this collection.</p></div>}

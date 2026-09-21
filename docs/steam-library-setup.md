@@ -2,6 +2,16 @@
 
 The portfolio reads `public/data/steam-library.json` at runtime. The file starts as an empty snapshot and is safe to commit because it contains no Steam API key. The sync script runs locally and writes only the public fields used by the page.
 
+## Screenshot-based snapshot
+
+When the Steam profile does not expose a complete public library, use the supplied screenshots as the source of truth. `data/steam-library-screenshot-names.json` preserves the transcribed titles, while `data/steam-library-games.json` is the reviewed manifest of English names and verified Steam AppIDs. `data/steam-library-corrections.json` records removed utilities, demos, alternate launch entries, and corrected matches. The importer uses the reviewed manifest directly and asks SteamGridDB only for missing cover URLs:
+
+```text
+npm run steam:import-screenshots
+```
+
+This command reads only `STEAMGRIDDB_API_KEY` from `.env.steam.local` and writes a static snapshot to `public/data/steam-library.json`. The key is never sent to the browser. Existing cover URLs are reused, and a failed cover lookup leaves that game's cover empty without dropping the game. The generated snapshot is tagged with `source: "screenshots"`, so the page does not imply that playtime or live library data was collected.
+
 Create an ignored `.env.steam.local` file at the repository root. The API key stays local and is never sent to the frontend:
 
 ```text

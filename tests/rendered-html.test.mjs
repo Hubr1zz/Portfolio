@@ -74,7 +74,7 @@ test("technical archive renders rendering studies as a gallery section", async (
   const html = await htmlAt("/technical");
   assert.ok(html.includes('<section id="project-rendering-studies"'), "rendering studies should be a section");
   assert.ok(!html.includes('<article id="project-rendering-studies"'), "rendering studies should not be a project card");
-  for (const title of ["Stylized grass in Unity", "Depth-based water and caustics", "Wind-shaped desert", "Geometry Nodes grass source"])
+  for (const title of ["Start with the silhouette and lighting target in Blender", "Transfer the authored grass language into a real-time shader", "Use scene depth to anchor water edges and caustics", "Layer authored dunes, shader motion, and particles into one wind cue"])
     assert.ok(html.includes(title), `rendering gallery button: ${title}`);
   assert.ok((html.match(/class="rendering-gallery-strip"/g) ?? []).length === 1, "rendering gallery should have one strip");
 });
@@ -102,11 +102,20 @@ test("direct project routes render full case studies", async () => {
   assert.match(html, /<title>zWorkFlow — Leon Zhou<\/title>/i);
   assert.match(html, /class="case-header/);
   assert.match(html, /class="case-summary/);
-  assert.match(html, /id="chapter-change-lifecycle"/);
-  assert.match(html, /id="chapter-shared-context"/);
-  assert.match(html, /CHANGE_LIFECYCLE/);
+  for (const id of ["system-bridge", "design-intake", "governed-lifecycle", "shared-context", "workbench-evidence"])
+    assert.ok(html.includes(`id="chapter-${id}"`), `zWorkFlow chapter: ${id}`);
+  assert.match(html, /AI workflow that bridges and manages game design documents and game projects/);
   assert.match(html, /href="https:\/\/github\.com\/Hubr1zz\/zWorkFlow"/);
   assert.doesNotMatch(html, /Enlarge image:/);
+});
+
+test("ActionChainWeaver explains the execution model rather than presenting a quick-start tutorial", async () => {
+  const html = await htmlAt("/projects/action-chain-weaver");
+  for (const id of ["problem", "lifecycle", "composite", "reactors", "insertion", "outcomes"])
+    assert.ok(html.includes(`id="chapter-${id}"`), `ActionChainWeaver chapter: ${id}`);
+  for (const phrase of ["BeforeExecution", "AfterResolved", "ReactionGate", "Immediate", "Bottom"])
+    assert.ok(html.includes(phrase), `ActionChainWeaver concept: ${phrase}`);
+  assert.doesNotMatch(html, /Shortest start|Where to read the code|Usage boundaries/i);
 });
 
 test("editor tools case study distinguishes contributions from vSeries sources", async () => {

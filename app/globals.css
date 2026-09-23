@@ -274,7 +274,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--signal); outlin
 .vault-loop-steps b { font-size: 13px; line-height: 1.25; }
 .vault-loop-steps small { color: var(--muted); font-size: 11px; line-height: 1.35; }
 .vault-loop-steps > i { color: var(--signal); font-style: normal; text-align: center; }
-.vault-structure, .vault-ai-flow, .action-chain-overview, .action-chain-reactors { min-height: 270px; padding: 58px 20px 20px; background: #eeede6; }
+.vault-structure, .vault-ai-flow, .action-chain-overview, .action-chain-reactors, .workflow-bridge, .workflow-governance, .editor-inspector, .locomotion-search, .locomotion-gait, .action-chain-lifecycle, .action-chain-composite, .action-chain-insertion, .interaction-state, .interaction-context { min-height: 270px; padding: 58px 20px 20px; background: #eeede6; }
 .vault-structure-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; counter-reset: vault-part; }
 .vault-structure-grid b { min-width: 0; min-height: 64px; padding: 14px 10px 10px; display: grid; place-items: center; position: relative; border: 1px solid var(--line-strong); background: var(--surface); font-size: 12px; line-height: 1.3; text-align: center; overflow-wrap: anywhere; }
 .vault-structure-grid b::before { content: counter(vault-part, decimal-leading-zero); counter-increment: vault-part; position: absolute; top: 6px; left: 7px; color: var(--signal); font: 10px/1 var(--font-mono); }
@@ -286,10 +286,79 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--signal); outlin
 .action-root-flow i, .action-phase-flow i { color: var(--signal); font-style: normal; text-align: center; }
 .action-phase-flow { margin-top: 10px; display: grid; grid-template-columns: minmax(0, 1fr) 18px minmax(0, 1fr) 18px minmax(0, 1fr) 18px; align-items: center; gap: 6px; }
 .action-phase-flow span { min-height: 44px; padding: 8px; background: var(--signal-soft); }
+.workflow-bridge { display: grid; grid-template-columns: minmax(0, 1fr) 20px minmax(110px, .8fr) 20px minmax(0, 1fr); align-items: center; gap: 8px; }
+.workflow-bridge-source, .workflow-bridge-core { min-width: 0; min-height: 96px; padding: 12px; display: grid; place-content: center; gap: 7px; border: 1px solid var(--line-strong); background: var(--surface); text-align: center; }
+.workflow-bridge-source small, .workflow-bridge-core small { color: var(--signal); font: 10px/1.3 var(--font-mono); letter-spacing: .05em; text-transform: uppercase; }
+.workflow-bridge-source b, .workflow-bridge-core strong { font-size: 13px; line-height: 1.3; overflow-wrap: anywhere; }
+.workflow-bridge-core { background: var(--signal); color: var(--paper); }
+.workflow-bridge-core small, .workflow-bridge-core span { color: inherit; }
+.workflow-bridge-core span { font: 10px/1.3 var(--font-mono); }
+.workflow-bridge > i, .editor-inspector > i, .interaction-context > i { color: var(--signal); font-style: normal; text-align: center; }
+.workflow-bridge > p { grid-column: 1 / -1; margin: 6px 0 0; color: var(--muted); font-size: 11px; line-height: 1.45; text-align: center; }
+.workflow-governance { display: grid; align-content: center; gap: 12px; }
+.governance-main { min-width: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr) 14px) minmax(0, 1fr); align-items: center; gap: 4px; }
+.governance-main b { min-width: 0; min-height: 54px; padding: 8px 5px; display: grid; place-items: center; border: 1px solid var(--line-strong); background: var(--surface); font-size: 11px; line-height: 1.25; text-align: center; overflow-wrap: anywhere; }
+.governance-main b:nth-of-type(3) { background: var(--signal); color: var(--paper); }
+.governance-main i { color: var(--signal); font-style: normal; text-align: center; }
+.governance-rails { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.governance-rails span { padding: 9px 10px; border-left: 1px solid var(--signal); background: color-mix(in srgb, var(--surface) 72%, transparent); color: var(--muted); font: 10px/1.35 var(--font-mono); }
+.workflow-governance > p { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.4; text-align: center; }
+.editor-inspector { display: grid; grid-template-columns: minmax(0, 1fr) 18px minmax(0, 1fr) 18px minmax(0, 1.1fr); align-items: center; gap: 8px; }
+.editor-inspector-source, .editor-inspector-core, .editor-inspector-actions { min-width: 0; min-height: 110px; padding: 12px; display: grid; align-content: center; gap: 7px; border: 1px solid var(--line-strong); background: var(--surface); text-align: center; }
+.editor-inspector-source span, .editor-inspector-core span { color: var(--muted); font-size: 11px; line-height: 1.35; }
+.editor-inspector-core { background: var(--signal-soft); }
+.editor-inspector-actions b { padding: 5px; border-left: 1px solid var(--signal); font-size: 10px; line-height: 1.3; text-align: left; }
+.locomotion-search, .locomotion-gait, .action-chain-lifecycle, .action-chain-insertion, .interaction-state { display: grid; align-content: center; gap: 14px; }
+.locomotion-search-flow, .gait-body, .action-lifecycle-track, .action-lifecycle-branch, .interaction-state-main { min-width: 0; display: grid; align-items: center; gap: 8px; }
+.locomotion-search-flow { grid-template-columns: minmax(0, 1fr) 18px minmax(0, 1fr) 18px minmax(0, 1fr); }
+.locomotion-search-flow b, .gait-phases b, .gait-body span, .gait-body strong, .action-lifecycle-track b, .action-lifecycle-branch span, .action-lifecycle-branch strong, .interaction-state-main b, .interaction-state-main strong { min-width: 0; min-height: 56px; padding: 10px 8px; display: grid; place-items: center; border: 1px solid var(--line-strong); background: var(--surface); font-size: 11px; line-height: 1.3; text-align: center; overflow-wrap: anywhere; }
+.locomotion-search-flow i, .gait-body i, .action-lifecycle-track i, .action-lifecycle-branch i, .interaction-state-main i { color: var(--signal); font-style: normal; text-align: center; }
+.locomotion-search-branch { display: grid; grid-template-columns: auto minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 6px; }
+.locomotion-search-branch span { color: var(--signal); font: 10px/1.3 var(--font-mono); }
+.locomotion-search-branch strong { padding: 8px; border-left: 1px solid var(--signal); background: color-mix(in srgb, var(--surface) 72%, transparent); font-size: 11px; line-height: 1.3; }
+.gait-phases { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 7px; }
+.gait-phases b { gap: 5px; }
+.gait-phases small { color: var(--signal); font: 10px/1 var(--font-mono); }
+.gait-body { grid-template-columns: minmax(0, 1fr) 16px minmax(0, 1fr) 18px minmax(0, 1fr); }
+.gait-body strong { background: var(--signal); color: var(--paper); }
+.action-lifecycle-track { grid-template-columns: minmax(0, 1fr) 16px minmax(0, 1fr) 16px minmax(0, 1fr) 16px minmax(0, 1fr); }
+.action-lifecycle-track b:first-child, .action-lifecycle-track b:last-child { background: var(--signal-soft); }
+.action-lifecycle-branch { grid-template-columns: minmax(0, 1fr) 14px minmax(0, .7fr) 14px minmax(0, 1fr); }
+.action-lifecycle-branch span, .action-lifecycle-branch strong { min-height: 42px; }
+.action-lifecycle-branch strong { background: var(--signal); color: var(--paper); }
+.action-chain-composite { display: grid; grid-template-columns: minmax(120px, .7fr) minmax(0, 1.3fr); grid-template-rows: 1fr auto; align-items: center; gap: 12px; }
+.composite-tree { min-width: 0; display: grid; justify-items: center; gap: 4px; }
+.composite-tree strong, .composite-tree b { width: 100%; padding: 8px; border: 1px solid var(--line-strong); background: var(--surface); font-size: 11px; line-height: 1.25; text-align: center; }
+.composite-tree strong { background: var(--signal); color: var(--paper); }
+.composite-tree i { color: var(--signal); font-style: normal; }
+.composite-queue { min-width: 0; display: grid; gap: 7px; }
+.composite-queue > small { color: var(--signal); font: 10px/1.3 var(--font-mono); letter-spacing: .05em; }
+.composite-queue > div { min-width: 0; display: flex; gap: 5px; }
+.composite-queue span { min-width: 0; flex: 1; padding: 8px 6px; border: 1px solid var(--line); background: var(--surface); font: 10px/1.25 var(--font-mono); text-align: center; overflow-wrap: anywhere; }
+.action-chain-composite > p { grid-column: 1 / -1; margin: 0; color: var(--muted); font-size: 11px; line-height: 1.4; text-align: center; }
 .action-chain-reactors { display: grid; grid-template-columns: minmax(0, 1fr) 22px minmax(90px, .65fr) 22px minmax(0, 1fr); align-items: center; gap: 8px; }
 .reactor-scopes, .reactor-results { display: grid; gap: 6px; }
 .reactor-scopes b, .reactor-results b { min-width: 0; padding: 8px; border-left: 1px solid var(--signal); background: color-mix(in srgb, var(--surface) 72%, transparent); font-size: 11px; line-height: 1.25; overflow-wrap: anywhere; }
-.reactor-hub { min-height: 76px; padding: 12px 8px; display: grid; place-items: center; background: var(--signal); color: var(--paper); font: 600 13px/1.3 var(--font-mono); text-align: center; }
+.action-chain-reactors > i { color: var(--signal); font-style: normal; text-align: center; }
+.reactor-collect { min-width: 0; min-height: 106px; padding: 10px 8px; display: grid; align-content: center; gap: 5px; background: var(--signal); color: var(--paper); text-align: center; }
+.reactor-collect strong { font: 600 12px/1.3 var(--font-mono); }
+.reactor-collect span { padding-top: 4px; border-top: 1px solid color-mix(in srgb, var(--paper) 36%, transparent); font: 10px/1.25 var(--font-mono); }
+.action-insertion-caption { display: flex; justify-content: space-between; color: var(--signal); font: 10px/1.3 var(--font-mono); }
+.action-insertion-queue { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 5px; }
+.action-insertion-queue b, .action-insertion-queue strong { min-width: 0; min-height: 68px; padding: 9px 6px; display: grid; place-items: center; border: 1px solid var(--line-strong); background: var(--surface); font-size: 11px; line-height: 1.3; text-align: center; overflow-wrap: anywhere; }
+.action-insertion-queue strong { background: var(--signal); color: var(--paper); }
+.action-chain-insertion > p { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.4; text-align: center; }
+.interaction-state-main { grid-template-columns: minmax(0, 1fr) 18px minmax(0, 1fr) 18px minmax(0, 1fr); }
+.interaction-state-main strong { background: var(--signal); color: var(--paper); }
+.interaction-state-branches { display: grid; grid-template-columns: auto minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 6px; }
+.interaction-state-branches span { color: var(--signal); font: 10px/1.3 var(--font-mono); }
+.interaction-state-branches b { padding: 8px 6px; border-left: 1px solid var(--signal); background: color-mix(in srgb, var(--surface) 72%, transparent); font-size: 11px; line-height: 1.3; }
+.interaction-context { display: grid; grid-template-columns: minmax(0, 1fr) 18px minmax(0, 1fr) 18px minmax(0, .8fr); align-items: center; gap: 7px; }
+.interaction-context-object, .interaction-context-payload, .interaction-context-target { min-width: 0; min-height: 118px; padding: 10px; display: grid; align-content: center; gap: 6px; border: 1px solid var(--line-strong); background: var(--surface); }
+.interaction-context-payload { background: var(--signal); color: var(--paper); }
+.interaction-context-object strong, .interaction-context-payload strong, .interaction-context-target strong { font-size: 11px; line-height: 1.3; overflow-wrap: anywhere; }
+.interaction-context-object span, .interaction-context-payload span, .interaction-context-target span { padding-top: 5px; border-top: 1px solid var(--line); color: var(--muted); font-size: 10px; line-height: 1.3; }
+.interaction-context-payload span { border-color: color-mix(in srgb, var(--paper) 36%, transparent); color: inherit; }
 
 .site-footer { margin-top: 72px; padding: 40px 0 24px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, 1fr); gap: 48px; border-top: 1px solid var(--line-strong); }
 .footer-kicker { color: var(--signal); font-size: 12px; line-height: 1.3; }
@@ -925,8 +994,19 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--signal); outlin
   .vault-ai-flow .flow-chain { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(2, minmax(56px, auto)); }
   .action-root-flow, .action-phase-flow { grid-template-columns: minmax(0, 1fr); }
   .action-root-flow i, .action-phase-flow i { transform: rotate(90deg); }
+  .workflow-bridge, .editor-inspector, .interaction-context { grid-template-columns: minmax(0, 1fr); }
+  .workflow-bridge > i, .editor-inspector > i, .interaction-context > i { transform: rotate(90deg); }
+  .governance-main { grid-template-columns: minmax(0, 1fr); }
+  .governance-main i { transform: rotate(90deg); }
+  .governance-rails { grid-template-columns: minmax(0, 1fr); }
+  .locomotion-search-flow, .gait-body, .action-lifecycle-track, .action-lifecycle-branch, .interaction-state-main { grid-template-columns: minmax(0, 1fr); }
+  .locomotion-search-flow i, .gait-body i, .action-lifecycle-track i, .action-lifecycle-branch i, .interaction-state-main i { transform: rotate(90deg); }
+  .locomotion-search-branch, .interaction-state-branches { grid-template-columns: auto minmax(0, 1fr); }
+  .gait-phases, .action-insertion-queue { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .action-chain-composite { grid-template-columns: minmax(0, 1fr); }
+  .action-chain-composite > p { grid-column: 1; }
   .action-chain-reactors { grid-template-columns: minmax(0, 1fr); }
-  .action-chain-reactors > .flow-line { width: 1px; height: 18px; justify-self: center; }
+  .action-chain-reactors > i { transform: rotate(90deg); }
 }
 
 @media (max-width: 360px) {

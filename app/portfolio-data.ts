@@ -21,7 +21,7 @@ export type Project = {
   featured?: boolean;
   tier?: "release" | "study";
 };
-export type DiagramId = "workflow-lifecycle" | "workflow-knowledge" | "interaction-routing" | "interaction-typed" | "workflow-overview" | "editor-overview" | "editor-navigation" | "editor-scene" | "vault-map" | "vault-loop" | "vault-structure" | "vault-ai-flow" | "action-chain-overview" | "action-chain-reactors";
+export type DiagramId = "workflow-bridge" | "workflow-lifecycle" | "workflow-knowledge" | "workflow-governance" | "interaction-routing" | "interaction-state" | "interaction-context" | "workflow-overview" | "editor-overview" | "editor-navigation" | "editor-inspector" | "editor-scene" | "locomotion-search" | "locomotion-gait" | "vault-map" | "vault-loop" | "vault-structure" | "vault-ai-flow" | "action-chain-overview" | "action-chain-lifecycle" | "action-chain-composite" | "action-chain-reactors" | "action-chain-insertion";
 export type BoardItem = {
   id: string;
   title: string;
@@ -375,18 +375,46 @@ export function getBoardItems(project: Project): BoardItem[] {
   if (project.id === "zworkflow") {
     return [
       {
-        id: "change-lifecycle",
-        title: "Reviewed change lifecycle",
-        description: "Design intent is converted into a Draft Change, reviewed by a person, then approved before implementation begins.",
-        details: "Apply updates code and validation records without silently rewriting the formal specification. A deliberate sync merges the approved delta into the project contract, and only completed, synchronized work can be archived.",
+        id: "system-bridge",
+        title: "One workflow between design documents and the game project",
+        description: "In one sentence: zWorkFlow is an AI coordination layer that keeps design intent, implementation plans, and code evidence connected instead of letting each tool build its own version of the project.",
+        details: "Design documents remain the creative source, the game repository remains the implementation source, and OpenSpec records the reviewed contract between them. The workflow does not replace Codex, Claude Code, Cursor, or Unity; it gives those tools shared project memory, explicit approval gates, and a common view of what is proposed, implemented, blocked, or stale.",
+        diagram: "workflow-bridge",
+        sources: [{ label: "Workflow overview", href: "https://github.com/Hubr1zz/zWorkFlow/blob/main/WORKFLOW_OVERVIEW.md" }],
+      },
+      {
+        id: "design-intake",
+        title: "Turning a design document into reviewable work",
+        description: "A design import reads the relevant documents and nearby code, then separates a broad idea into modules that can be understood, approved, and verified independently.",
+        details: "Each module becomes a Draft Change containing its goal, rule deltas, dependencies, gaps, review questions, and expected tasks. Existing records are reused instead of duplicated, ordinary utilities stay out of the graph unless they define a shared contract, and the original design document is never silently rewritten during intake.",
         diagram: "workflow-lifecycle",
       },
       {
+        id: "governed-lifecycle",
+        title: "Approval, implementation, sync, and archive stay separate",
+        description: "The lifecycle deliberately prevents an AI implementation from becoming the project specification merely because code was written.",
+        details: "A person first promotes a Draft into an approved Change. Apply modifies code and records validation inside that Change, while sync later performs a three-way comparison between the Change baseline, the current formal Spec, and its delta. Only completed and synchronized work can be archived, preserving the proposal, decisions, implementation evidence, and final contract as one traceable history.",
+        diagram: "workflow-governance",
+      },
+      {
         id: "shared-context",
-        title: "Shared project context",
-        description: "Different AI tools work from the same OpenSpec records, project skills, code evidence, and design documents.",
-        details: "Thin tool-specific adapters point Codex, Claude Code, Cursor, and other supported agents at one shared source of truth. The Unity Workbench exposes review status, dependencies, blockers, translations, and implementation evidence without duplicating the workflow.",
+        title: "Many AI tools, one project context",
+        description: "Codex, Claude Code, Cursor, Copilot, Gemini CLI, Windsurf, and Kimi share the same Skills, OpenSpec records, project facts, and code evidence.",
+        details: "Tool-specific folders contain only thin adapters rather than copied workflows. A task therefore keeps the same domain rules and project state when another team member or AI tool continues it, while member preferences remain separate from team rules and do not overwrite the project contract.",
         diagram: "workflow-knowledge",
+      },
+      {
+        id: "workbench-evidence",
+        title: "The Workbench makes project state inspectable",
+        description: "The Unity Workbench turns workflow files into an operational view of imports, Specs, Changes, dependencies, blockers, translations, and implementation evidence.",
+        bullets: [
+          { title: "Relationship graph", text: "System, Feature, and Change nodes expose dependencies, pending deltas, active implementation, and blocking paths instead of hiding them in separate documents." },
+          { title: "Evidence status", text: "Code references are marked valid, modified, missing, or stale so approval and implementation are based on current files rather than remembered claims." },
+          { title: "Engineering capabilities", text: "Plugins, reusable Architecture, and project Systems are catalogued with evidence and constraints; locked Architecture requires confirmation before an agent changes it." },
+          { title: "Bilingual display", text: "One authoritative Spec keeps stable IDs, while block-level hashes prevent stale translations from being shown after the source changes." },
+        ],
+        layout: "features",
+        diagram: "workflow-governance",
       },
     ];
   }
@@ -395,27 +423,49 @@ export function getBoardItems(project: Project): BoardItem[] {
     return [
       {
         id: "problem",
-        title: "A growing sequence, not a single function call",
-        description: "A card-game action can branch into targeting, checks, damage, reactions, healing, animation waits, and further derived actions whose length is not known in advance.",
-        details: "ActionChainWeaver treats that work as one traceable causal chain. External requests wait in a root FIFO, while the active chain resolves one work item at a time so unrelated roots never interleave and deeply nested effects do not consume the C# call stack.",
+        title: "One sentence: turn a growing game flow into an explicit action chain",
+        description: "A card-game attack is rarely one function call: it may select a target, perform a check, deal damage, trigger healing or a counterattack, wait for input, and create still more actions.",
+        details: "ActionChainWeaver breaks that flow into small GameActions and lets a non-recursive queue resolve them one at a time. A Root Action owns the complete request, a Chain records its causal descendants, Composite Actions describe multi-step control flow, and Reactors observe or alter individual nodes without hard-wiring every possible effect into the original action.",
         diagram: "action-chain-overview",
       },
       {
+        id: "lifecycle",
+        title: "Exactly when a Reactor can affect an Action",
+        description: "Every Action crosses two reaction windows: BeforeExecution runs before gameplay logic and may modify or prevent it; AfterResolved runs only after the Action has an explicit outcome.",
+        details: "The Engine first takes an Action.Before work item, collects matching BeforeExecution Reactors, and executes them in deterministic order. A prevented Action skips Execute but still resolves as Prevented and enters AfterResolved. Otherwise a normal Action runs ExecuteAsync, or a Composite emits its next child. After the outcome becomes Succeeded, Failed, Prevented, or Cancelled, AfterResolved Reactors may observe that fact and enqueue follow-up work.",
+        diagram: "action-chain-lifecycle",
+      },
+      {
+        id: "composite",
+        title: "Composite Actions grow the flow without recursive execution",
+        description: "A parent such as AttackAction yields one child at a time and places its own continuation behind that child in the same work deque.",
+        details: "For an attack, the queue expands into Check.Before followed by Attack.Continuation. When the check finishes, the continuation reads the child outcome and either emits Damage.Before plus another continuation, or resolves the parent. Nested Composites repeat the same queue protocol, so deep action trees do not add C# call-stack depth and every child remains visible to Reactors and the debugger.",
+        diagram: "action-chain-composite",
+      },
+      {
         id: "reactors",
-        title: "Scoped reactions without hard-wired dependencies",
-        description: "Reactors can observe an action before execution or after resolution, then modify it, prevent it, or enqueue immediate and deferred follow-up actions.",
-        details: "Rules may be global, attached to a source or target entity, limited to the current chain, inherited by an action subtree or descendants, or local to one action instance. Type filtering, reaction gates, and each Reactor’s own match conditions keep routing explicit, while priority and registration order make conflicts deterministic.",
+        title: "Which Reactors are collected for this specific Action",
+        description: "Reactor scope answers where a rule comes from; timing, action type, Matches, and ReactionGate decide whether it actually runs now.",
+        details: "The registry gathers global rules, Source and Target entity rules, Chain rules, inherited subtree or descendant rules, and local rules. It then filters by Before/After timing and observed Action type, applies gameplay conditions and external suppression, and sorts by type specificity, priority, then registration order. An attack against a Boss therefore collects the Hero’s Source effects and that Boss’s Target effects, while attacking a Slime never triggers the Boss’s Reactors.",
         diagram: "action-chain-reactors",
       },
       {
+        id: "insertion",
+        title: "A reaction chooses where its derived Action enters the chain",
+        description: "Immediate work runs before the parent continuation; bottom work waits behind the chain’s existing nodes.",
+        details: "Counterattacks, thorns, and other effects that must resolve now use EnqueueImmediate at the deque head. Deferred cleanup or effects that should wait for the current local flow use EnqueueToBottom at the tail. Both remain inside the same causal Chain, inherit the appropriate subtree Reactors, and are visible in the same deterministic trace.",
+        diagram: "action-chain-insertion",
+      },
+      {
         id: "outcomes",
-        title: "Explicit outcomes, presentation, and debugging",
-        description: "The framework keeps gameplay facts, visual presentation, and infrastructure safeguards separate so each layer can be reasoned about independently.",
+        title: "Outcomes, presentation, safety, and debugging remain separate",
+        description: "The framework keeps gameplay facts, visual projection, infrastructure invariants, and diagnostic recording in distinct layers so none can masquerade as another gameplay response.",
         bullets: [
           { title: "Four outcomes", text: "Succeeded, Failed, Prevented, and Cancelled distinguish rule failure from pre-emptive blocking and player cancellation." },
           { title: "Presentation boundary", text: "Animations, audio, and floating text are requests in a separate PresentationSystem; an action chooses whether to await their real lifecycle." },
-          { title: "Loop protection", text: "A configurable per-chain action budget stops direct and indirect response loops, records the recent causal trace, and lets the next root request continue." },
-          { title: "Visual debugger", text: "The Unity Editor window exposes root requests, work queues, registered Reactors, causal trees, outcomes, breakpoints, and step-through execution." },
+          { title: "Infrastructure guards", text: "Non-negotiable engine invariants run before enqueue and cannot be suppressed by a gameplay Buff or ReactionGate." },
+          { title: "Loop protection", text: "A per-chain action budget stops direct and indirect response loops, records the recent causal trace, and lets the next Root request continue." },
+          { title: "Visual debugger", text: "The Unity Editor window exposes root requests, the work deque, registered Reactors, causal trees, outcomes, breakpoints, and step-through execution." },
         ],
         layout: "features",
         sources: [
@@ -430,34 +480,37 @@ export function getBoardItems(project: Project): BoardItem[] {
     return [
       {
         id: "unified-routing",
-        title: "Unified 3D and UI routing",
-        description: "Physics raycasts and Unity EventSystem events converge on the same IInteractableTarget contract.",
-        details: "InteractionSystem does not need to know whether a target originated in world space or UI. It dispatches both paths to composable Behaviour classes that implement Focus, Click, or Drag responsibilities.",
+        title: "One interaction state machine for 3D objects and UGUI",
+        description: "In one sentence: a single InteractionSystem turns Physics and GraphicRaycaster hits into the same Hover, Click, Drag, and Drop lifecycle.",
+        details: "The system resolves the top UI Graphic and the nearest valid 3D Collider into an InteractableObject, then evaluates both through one deterministic dispatcher. Scene objects therefore do not need separate input logic merely because one lives in world space and another lives on a Canvas.",
         diagram: "interaction-routing",
       },
       {
-        id: "typed-drag",
-        title: "Typed drag communication",
-        description: "Generic drag and focus interfaces let a source and target exchange strongly typed context—for example, a card and its receiving slot.",
-        details: "Generic interface mappings are discovered and cached at startup, so target relationships do not need to be rediscovered for each interaction. The current dispatcher invokes those cached methods to deliver typed callbacks.",
-        diagram: "interaction-typed",
+        id: "pointer-state",
+        title: "Press capture keeps the lifecycle deterministic",
+        description: "Once the pointer goes down, the original object owns that press until release or cancellation—even if the cursor leaves a small target.",
+        details: "Hover is updated from the current hit, but Pressed stores the captured object and position. Movement beyond the configured threshold promotes the interaction into Dragging; otherwise a release inside the original target becomes Click. Release, disable, destruction, focus loss, pause, and system shutdown each take an explicit path so no object remains stuck in a hovered or dragged state.",
+        diagram: "interaction-state",
       },
       {
-        id: "input-control",
-        title: "Input, targeting, and control",
-        description: "Input phases stay explicit across 3D targets and the Unity EventSystem for UI.",
+        id: "behaviour-context",
+        title: "Composable Behaviours communicate through one context",
+        description: "An InteractableObject contains multiple ordinary serialized Behaviours instead of requiring a new MonoBehaviour for every interaction effect.",
+        details: "Each Behaviour opts into focused interfaces such as hover, click, drag, or drop. InteractionContext carries the pointer phase, current hit, captured source, and candidate drop target, so a card slot can query the dragged card’s Behaviour or Component without the dispatcher knowing their game-specific types. Global and per-category switches can disable behaviour without changing the state machine.",
+        diagram: "interaction-context",
+      },
+      {
+        id: "targeting-safety",
+        title: "Targeting, lifecycle safety, and the hot path",
+        description: "The package makes scene dependencies and cancellation behaviour explicit while keeping per-frame targeting predictable.",
         bullets: [
-          { title: "Input phases", text: "Pressed, Held, and Released bindings make input phases explicit across 3D targets and the Unity EventSystem for UI." },
-          { title: "Targeting", text: "Configurable drag thresholds keep movement intentional; a nonalloc raycast runs first with a spherecast fallback." },
-          { title: "Control", text: "The currently dragged object is skipped, while global or per-object behaviours can be toggled as needed." },
+          { title: "Explicit scene references", text: "The interaction camera is assigned in the Inspector or through an API; the package does not silently search for Main Camera." },
+          { title: "Intentional dragging", text: "A configurable distance threshold separates click from drag, and drop candidates receive enter, over, exit, acceptance, and final drop callbacks." },
+          { title: "Predictable cleanup", text: "Disable, destroy, focus loss, pause, and shutdown generate cancellation or exit callbacks instead of abandoning captured state." },
+          { title: "Lean dispatch", text: "The hot path avoids LINQ, generic reflection, and MethodInfo.Invoke; Behaviour lists and interface routing stay explicit." },
         ],
         layout: "features",
-      },
-      {
-        id: "integration-status",
-        title: "Integration notes",
-        description: "The upstream project describes the basic functions as working while broader testing continues.",
-        details: "The author prefers Odin for configuration. The repository provides useful implementation evidence, but this portfolio does not claim the system is production-hardened.",
+        sources: [{ label: "InteractionSystem README", href: "https://github.com/Hubr1zz/InteractionSystem" }],
       },
     ];
   }
@@ -483,13 +536,14 @@ export function getBoardItems(project: Project): BoardItem[] {
       {
         id: "inspector-workflow",
         title: "Inspector workflows beyond the default list",
-        description: "I added ways to isolate the components I am working on and edit the same component type across a hierarchy.",
+        description: "The Inspector additions change how component-heavy hierarchies are navigated: isolate the active component, then operate on matching components as a group.",
         bullets: [
           { title: "Component tabs", text: "Switch from the traditional list to tabs, keep multiple components active, and toggle their enabled state." },
           { title: "Child Components", text: "Group descendants by type, search or filter Root and Inactive, batch enable or disable, and select or remove components." },
           { title: "Unified settings", text: "One Tools/EditorTools/Settings window organizes the five tools with short option explanations." },
         ],
         layout: "features",
+        diagram: "editor-inspector",
         sources: [
           { label: "Inspector component workflows", href: "https://github.com/Hubr1zz/UnityEditorTools/commit/25fdf2390d832edec91f1c1212410ae93c9aea69" },
           { label: "Child Components window", href: "https://github.com/Hubr1zz/UnityEditorTools/commit/19509d329438773b80738290a9306316aaa5c3fc" },
@@ -694,41 +748,79 @@ export function getBoardItems(project: Project): BoardItem[] {
   }
 
   if (project.id === "procedural-motion") {
-    return [{
-      id: "locomotion-capture",
-      title: "Procedural locomotion prototype",
-      description: "A locomotion test that combines sphere casts, fixed raycasts, phase offsets, and Cinemachine camera control.",
-      details: "A sphere cast searches for a foot landing area and a raycast rejects positions blocked by obstacles. The search rotates through alternative angles until it finds a valid foothold; if none exists, movement stops. Per-leg phase differences prevent simultaneous steps, while the body interpolates between the average foot position and a predicted movement position.",
-      image: project.image,
-      imageAlt: project.imageAlt,
-    }];
+    return [
+      {
+        id: "locomotion-capture",
+        title: "A movement target becomes a coordinated body plan",
+        description: "In one sentence: the prototype predicts where the body wants to move, searches a safe foothold for each leg, then schedules those legs out of phase so the creature remains readable and supported.",
+        details: "The controller combines a desired travel direction, a predicted body target, current foot anchors, and Cinemachine camera feedback. Locomotion is not a canned animation layered over movement—the visible pose is continuously reconstructed from environment queries and the support points that succeeded.",
+        image: project.image,
+        imageAlt: project.imageAlt,
+      },
+      {
+        id: "foothold-search",
+        title: "Foothold search prefers a valid answer over forced motion",
+        description: "A sphere cast proposes a landing region, while a fixed raycast verifies that the path and surface are usable around nearby obstacles.",
+        details: "When the preferred location fails, the search rotates through alternate angles rather than snapping the foot into blocked geometry. If every candidate fails, the movement request stops; preserving a stable pose is treated as more important than pretending the requested motion succeeded.",
+        diagram: "locomotion-search",
+      },
+      {
+        id: "gait-phasing",
+        title: "Phase offsets prevent every leg from stepping together",
+        description: "Each leg receives a different point in the gait cycle, distributing support and motion across time.",
+        details: "A leg only releases its current anchor when its phase and distance threshold allow a new step. Offsetting those phases avoids the mechanical look and instability of simultaneous motion while keeping the rule set independent of one authored animation clip.",
+        diagram: "locomotion-gait",
+      },
+      {
+        id: "body-stability",
+        title: "The body follows support, prediction, and failure state",
+        description: "Body position interpolates between the average planted feet and a predicted movement target instead of following the input vector directly.",
+        bullets: [
+          { title: "Support average", text: "Planted foot positions provide a stable reference for where the body is currently supported." },
+          { title: "Movement prediction", text: "The desired direction biases the body forward so the pose anticipates travel instead of lagging behind every step." },
+          { title: "Failure behaviour", text: "When no valid foothold exists, locomotion stops rather than stretching a leg through an obstacle or creating an unstable body pose." },
+        ],
+        layout: "features",
+        diagram: "locomotion-gait",
+      },
+    ];
   }
 
   if (project.id === "rendering-studies" && project.gallery) {
-    const explanations = [
+    return [
       {
-        title: "Stylized grass in Unity",
-        description: "A Shader Graph recreation of the stylized lawn study, including vertex animation and authored lighting response.",
-        details: "The source grass was built in Blender with Geometry Nodes and baked normals so the lawn would not read as a flat sheet under lighting. The Unity version rebuilds the look as a real-time shader; later exploration targets GPU instancing and a mask-painting workflow.",
+        id: "grass-source",
+        title: "Start with the silhouette and lighting target in Blender",
+        description: "Geometry Nodes establishes grass density, blade distribution, and the broad lawn silhouette before the effect is rebuilt for real-time use.",
+        details: "The study separates authoring questions from runtime questions. Procedural placement makes the source field easy to reshape, while baked normals soften lighting across individual blades so the field reads as one stylized surface rather than a collection of harsh flat cards.",
+        image: project.gallery[3].src,
+        imageAlt: project.gallery[3].alt,
       },
       {
-        title: "Depth-based water and caustics",
-        description: "A stylized water surface built by comparing screen-space depth with reconstructed world-space distance.",
-        details: "World coordinates are reconstructed from the depth buffer and used to sample noise for the caustics. This lets shoreline edges, depth transitions, and the projected light pattern respond to the scene rather than to a fixed texture placement.",
+        id: "grass-runtime",
+        title: "Transfer the authored grass language into a real-time shader",
+        description: "The Unity version recreates the lighting response in Shader Graph and adds vertex animation so the static source becomes a moving gameplay surface.",
+        details: "Baked normal information preserves the unified lighting target, while vertex displacement supplies wind rhythm without moving individual GameObjects. The experiment treats the Blender field as a visual specification: the runtime shader is judged by whether it preserves silhouette, softness, and motion at interactive cost.",
+        image: project.gallery[0].src,
+        imageAlt: project.gallery[0].alt,
       },
       {
-        title: "Wind-shaped desert",
-        description: "A Journey-inspired sand study using a custom HLSL shader and particle-driven wind cues.",
-        details: "The broad terrain undulation is authored in Blender. A custom sand shader and vertex animation add the smaller moving response, while particles provide readable wind direction and rhythm across the scene.",
+        id: "water-depth",
+        title: "Use scene depth to anchor water edges and caustics",
+        description: "The water shader compares the surface with scene depth, reconstructs world position, and uses that spatial information to place shoreline treatment and projected light.",
+        details: "Because the effect is derived from the geometry behind the water, shallow edges and depth transitions respond to actual scene objects instead of a painted mask. Reconstructed world coordinates also drive the caustic noise, keeping the pattern stable in the world as the camera moves.",
+        image: project.gallery[1].src,
+        imageAlt: project.gallery[1].alt,
       },
       {
-        title: "Geometry Nodes grass source",
-        description: "The authored Blender source used to study grass distribution, silhouette, and lighting before rebuilding the effect in Unity.",
-        details: "Geometry Nodes distributes the grass procedurally, while baked normals soften the lighting across individual blades. This source establishes the visual target for the later Shader Graph implementation.",
+        id: "desert-wind",
+        title: "Layer authored dunes, shader motion, and particles into one wind cue",
+        description: "The Journey-inspired desert separates three spatial scales: Blender shapes the broad terrain, HLSL animates the surface response, and particles reveal wind direction.",
+        details: "No single layer has to carry the entire effect. Large undulation gives composition and silhouette, vertex motion adds local movement, and sparse particles provide temporal rhythm that remains readable from a gameplay camera. Together they imply a moving atmosphere without simulating sand grains.",
+        image: project.gallery[2].src,
+        imageAlt: project.gallery[2].alt,
       },
     ];
-
-    return project.gallery.map((image, index) => ({ id: `image-${index}`, ...explanations[index], image: image.src, imageAlt: image.alt }));
   }
 
   if (project.gallery) return project.gallery.map((image, index) => ({ id: `image-${index}`, title: image.alt, description: image.alt, image: image.src, imageAlt: image.alt }));

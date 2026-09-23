@@ -171,6 +171,18 @@ function ProjectVisual({ project }: { project: Project }) {
 
 function FlowDiagram({ id }: { id: DiagramId }) {
   const { content } = useI18n();
+  if (id === "workflow-bridge") {
+    return (
+      <div className="flow-diagram workflow-bridge" aria-label={content("diagram.workflowBridge.aria")}>
+        <span className="flow-kicker">{content("diagram.workflowBridge.label")}</span>
+        <div className="workflow-bridge-source"><small>{content("diagram.workflowBridge.intent")}</small><b>{content("diagram.workflowBridge.designDocuments")}</b></div>
+        <i>→</i><div className="workflow-bridge-core"><small>{content("diagram.workflowBridge.reviewedContract")}</small><strong>OpenSpec</strong><span>{content("diagram.shared.workbench")}</span></div><i>→</i>
+        <div className="workflow-bridge-source"><small>{content("diagram.workflowBridge.evidence")}</small><b>{content("diagram.workflowBridge.gameProject")}</b></div>
+        <p>{content("diagram.workflowBridge.description")}</p>
+      </div>
+    );
+  }
+
   if (id === "workflow-overview") {
     return (
       <div className="flow-diagram flow-overview" aria-label={content("diagram.workflowOverview.aria")}>
@@ -229,6 +241,37 @@ function FlowDiagram({ id }: { id: DiagramId }) {
     );
   }
 
+  if (id === "locomotion-search") {
+    return (
+      <div className="flow-diagram locomotion-search" aria-label={content("diagram.locomotionSearch.aria")}>
+        <span className="flow-kicker">{content("diagram.locomotionSearch.label")}</span>
+        <div className="locomotion-search-flow"><b>{content("diagram.locomotionSearch.preferred")}</b><i>→</i><b>{content("diagram.locomotionSearch.sphereCast")}</b><i>→</i><b>{content("diagram.locomotionSearch.rayCheck")}</b></div>
+        <div className="locomotion-search-branch"><span>{content("diagram.locomotionSearch.valid")}</span><strong>{content("diagram.locomotionSearch.plantFoot")}</strong><span>{content("diagram.locomotionSearch.blocked")}</span><strong>{content("diagram.locomotionSearch.rotateOrStop")}</strong></div>
+      </div>
+    );
+  }
+
+  if (id === "locomotion-gait") {
+    return (
+      <div className="flow-diagram locomotion-gait" aria-label={content("diagram.locomotionGait.aria")}>
+        <span className="flow-kicker">{content("diagram.locomotionGait.label")}</span>
+        <div className="gait-phases"><b><small>0°</small>{content("diagram.locomotionGait.legA")}</b><b><small>90°</small>{content("diagram.locomotionGait.legB")}</b><b><small>180°</small>{content("diagram.locomotionGait.legC")}</b><b><small>270°</small>{content("diagram.locomotionGait.legD")}</b></div>
+        <div className="gait-body"><span>{content("diagram.locomotionGait.supportAverage")}</span><i>+</i><span>{content("diagram.locomotionGait.predictedTarget")}</span><i>→</i><strong>{content("diagram.locomotionGait.bodyPose")}</strong></div>
+      </div>
+    );
+  }
+
+  if (id === "editor-inspector") {
+    return (
+      <div className="flow-diagram editor-inspector" aria-label={content("diagram.editorInspector.aria")}>
+        <span className="flow-kicker">{content("diagram.editorInspector.label")}</span>
+        <div className="editor-inspector-source"><b>{content("diagram.editorInspector.hierarchy")}</b><span>{content("diagram.editorInspector.manyComponents")}</span></div><i>→</i>
+        <div className="editor-inspector-core"><strong>{content("diagram.editorInspector.groupByType")}</strong><span>{content("diagram.editorInspector.filter")}</span></div><i>→</i>
+        <div className="editor-inspector-actions"><b>{content("diagram.editorInspector.isolate")}</b><b>{content("diagram.editorInspector.batchToggle")}</b><b>{content("diagram.editorInspector.selectRemove")}</b></div>
+      </div>
+    );
+  }
+
   if (id === "vault-structure") {
     return (
       <div className="flow-diagram vault-structure" aria-label={content("diagram.vaultStructure.aria")}>
@@ -260,15 +303,45 @@ function FlowDiagram({ id }: { id: DiagramId }) {
     );
   }
 
+  if (id === "action-chain-lifecycle") {
+    return (
+      <div className="flow-diagram action-chain-lifecycle" aria-label={content("diagram.actionChainLifecycle.aria")}>
+        <span className="flow-kicker">{content("diagram.actionChainLifecycle.label")}</span>
+        <div className="action-lifecycle-track"><b>{content("diagram.actionChainLifecycle.before")}</b><i>→</i><b>{content("diagram.actionChainLifecycle.execute")}</b><i>→</i><b>{content("diagram.actionChainLifecycle.outcome")}</b><i>→</i><b>{content("diagram.actionChainLifecycle.after")}</b></div>
+        <div className="action-lifecycle-branch"><span>{content("diagram.actionChainLifecycle.prevented")}</span><i>↘</i><strong>Prevented</strong><i>↗</i><span>{content("diagram.actionChainLifecycle.afterStillRuns")}</span></div>
+      </div>
+    );
+  }
+
+  if (id === "action-chain-composite") {
+    return (
+      <div className="flow-diagram action-chain-composite" aria-label={content("diagram.actionChainComposite.aria")}>
+        <span className="flow-kicker">{content("diagram.actionChainComposite.label")}</span>
+        <div className="composite-tree"><strong>AttackAction</strong><i>↓</i><b>CheckAction</b><i>↓</i><b>DamageAction</b></div>
+        <div className="composite-queue"><small>{content("diagram.actionChainComposite.workDeque")}</small><div><span>Check.Before</span><span>Attack.Continuation</span></div><div><span>Damage.Before</span><span>Attack.Continuation</span></div><div><span>Attack.Resolve</span></div></div>
+        <p>{content("diagram.actionChainComposite.description")}</p>
+      </div>
+    );
+  }
+
   if (id === "action-chain-reactors") {
     return (
       <div className="flow-diagram action-chain-reactors" aria-label={content("diagram.actionChainReactors.aria")}>
         <span className="flow-kicker">{content("diagram.actionChainReactors.label")}</span>
         <div className="reactor-scopes"><b>{content("diagram.actionChainReactors.global")}</b><b>{content("diagram.actionChainReactors.entity")}</b><b>{content("diagram.actionChainReactors.chain")}</b><b>{content("diagram.actionChainReactors.subtree")}</b><b>{content("diagram.actionChainReactors.descendant")}</b><b>{content("diagram.actionChainReactors.local")}</b></div>
-        <i className="flow-line" />
-        <div className="reactor-hub">Reactor</div>
-        <i className="flow-line" />
+        <i>→</i><div className="reactor-collect"><strong>{content("diagram.actionChainReactors.collect")}</strong><span>{content("diagram.actionChainReactors.timingType")}</span><span>Matches</span><span>ReactionGate</span></div><i>→</i>
         <div className="reactor-results"><b>{content("diagram.actionChainReactors.modify")}</b><b>{content("diagram.actionChainReactors.prevent")}</b><b>{content("diagram.actionChainReactors.inject")}</b></div>
+      </div>
+    );
+  }
+
+  if (id === "action-chain-insertion") {
+    return (
+      <div className="flow-diagram action-chain-insertion" aria-label={content("diagram.actionChainInsertion.aria")}>
+        <span className="flow-kicker">{content("diagram.actionChainInsertion.label")}</span>
+        <div className="action-insertion-caption"><span>{content("diagram.actionChainInsertion.head")}</span><span>{content("diagram.actionChainInsertion.tail")}</span></div>
+        <div className="action-insertion-queue"><strong>{content("diagram.actionChainInsertion.immediate")}</strong><b>{content("diagram.actionChainInsertion.continuation")}</b><b>{content("diagram.actionChainInsertion.existing")}</b><strong>{content("diagram.actionChainInsertion.bottom")}</strong></div>
+        <p>{content("diagram.actionChainInsertion.description")}</p>
       </div>
     );
   }
@@ -279,6 +352,17 @@ function FlowDiagram({ id }: { id: DiagramId }) {
         <span className="flow-kicker">{content("diagram.workflowLifecycle.label")}</span>
         <div className="flow-chain"><b>{content("visual.workflow.designDocs")}</b><i>→</i><b>{content("visual.workflow.draftChange")}</b><i>→</i><b>{content("visual.workflow.review")}</b><i>→</i><b>{content("diagram.workflowLifecycle.approve")}</b><i>→</i><b>{content("diagram.workflowLifecycle.apply")}</b><i>→</i><b>{content("diagram.workflowLifecycle.syncArchive")}</b></div>
         <p>{content("diagram.workflowLifecycle.description")}</p>
+      </div>
+    );
+  }
+
+  if (id === "workflow-governance") {
+    return (
+      <div className="flow-diagram workflow-governance" aria-label={content("diagram.workflowGovernance.aria")}>
+        <span className="flow-kicker">{content("diagram.workflowGovernance.label")}</span>
+        <div className="governance-main"><b>{content("diagram.workflowGovernance.draft")}</b><i>→</i><b>{content("diagram.workflowGovernance.approve")}</b><i>→</i><b>{content("diagram.workflowGovernance.change")}</b><i>→</i><b>{content("diagram.workflowGovernance.apply")}</b><i>→</i><b>{content("diagram.workflowGovernance.sync")}</b><i>→</i><b>{content("diagram.workflowGovernance.archive")}</b></div>
+        <div className="governance-rails"><span>{content("diagram.workflowGovernance.codeEvidence")}</span><span>{content("diagram.workflowGovernance.specContract")}</span></div>
+        <p>{content("diagram.workflowGovernance.description")}</p>
       </div>
     );
   }
@@ -301,21 +385,34 @@ function FlowDiagram({ id }: { id: DiagramId }) {
       <div className="flow-diagram flow-routing" aria-label={content("diagram.interactionRouting.aria")}>
         <span className="flow-kicker">{content("diagram.interactionRouting.label")}</span>
         <div className="route-sources"><b>{content("diagram.interactionRouting.physicsRaycast")}<small>{content("diagram.interactionRouting.object3d")}</small></b><b>EventSystem<small>UGUI</small></b></div>
-        <i>↓</i><div className="route-target">IInteractableTarget</div><i>↓</i><div className="route-dispatch">InteractionSystem / {content("diagram.interactionRouting.dispatch")}</div>
+        <i>↓</i><div className="route-target">InteractableObject</div><i>↓</i><div className="route-dispatch">InteractionSystem / {content("diagram.interactionRouting.dispatch")}</div>
         <div className="route-results"><b>{content("diagram.interactionRouting.focus")}</b><b>{content("diagram.interactionRouting.click")}</b><b>{content("diagram.interactionRouting.drag")}</b></div>
       </div>
     );
   }
 
-  return (
-    <div className="flow-diagram flow-typed" aria-label={content("diagram.interactionTyped.aria")}>
-      <span className="flow-kicker">{content("diagram.interactionTyped.label")}</span>
-      <div className="typed-node"><small>{content("diagram.interactionTyped.source")}</small><b>IDraggable&lt;T&gt;</b><span>{content("diagram.interactionTyped.card")}</span></div>
-      <i>→</i><div className="typed-cache"><small>{content("diagram.interactionTyped.cachedMap")}</small><strong>T</strong><span>{content("diagram.interactionTyped.cachedMappings")}</span></div>
-      <i>→</i><div className="typed-node"><small>{content("diagram.interactionTyped.target")}</small><b>IFocusable&lt;T&gt;</b><span>{content("diagram.interactionTyped.slot")}</span></div>
-      <p>{content("diagram.interactionTyped.phases")}</p>
-    </div>
-  );
+  if (id === "interaction-state") {
+    return (
+      <div className="flow-diagram interaction-state" aria-label={content("diagram.interactionState.aria")}>
+        <span className="flow-kicker">{content("diagram.interactionState.label")}</span>
+        <div className="interaction-state-main"><b>{content("diagram.interactionState.hover")}</b><i>→</i><b>{content("diagram.interactionState.pressed")}</b><i>→</i><strong>{content("diagram.interactionState.captured")}</strong></div>
+        <div className="interaction-state-branches"><span>{content("diagram.interactionState.underThreshold")}</span><b>{content("diagram.interactionState.click")}</b><span>{content("diagram.interactionState.overThreshold")}</span><b>{content("diagram.interactionState.dragDrop")}</b><span>{content("diagram.interactionState.interrupted")}</span><b>{content("diagram.interactionState.cancel")}</b></div>
+      </div>
+    );
+  }
+
+  if (id === "interaction-context") {
+    return (
+      <div className="flow-diagram interaction-context" aria-label={content("diagram.interactionContext.aria")}>
+        <span className="flow-kicker">{content("diagram.interactionContext.label")}</span>
+        <div className="interaction-context-object"><strong>InteractableObject</strong><span>{content("diagram.interactionContext.hoverBehaviour")}</span><span>{content("diagram.interactionContext.clickBehaviour")}</span><span>{content("diagram.interactionContext.dragBehaviour")}</span></div><i>→</i>
+        <div className="interaction-context-payload"><strong>InteractionContext</strong><span>{content("diagram.interactionContext.hit")}</span><span>{content("diagram.interactionContext.source")}</span><span>{content("diagram.interactionContext.target")}</span></div><i>→</i>
+        <div className="interaction-context-target"><strong>{content("diagram.interactionContext.dropTarget")}</strong><span>{content("diagram.interactionContext.query")}</span></div>
+      </div>
+    );
+  }
+
+  return null;
 }
 
 function TacticsMap() {
@@ -698,7 +795,6 @@ function CaseCopyContent({ item }: { item: BoardItem }) {
 function ProjectDetailContent({ project, category }: { project: Project & { category: TabId }; category: TabId }) {
   const { localizeBoardItems, localizeProject, localizeTab, t } = useI18n();
   const hasCaseMedia = Boolean(project.gallery?.length || project.image || project.visual);
-  const isRenderingStudies = project.id === "rendering-studies";
   const articles = useMemo(() => project.articles ?? [], [project.articles]);
   const isComparative = articles.length > 0;
   const hasBoardContent = hasCaseMedia || project.id === "tactics-design" || project.id === "action-chain-weaver";
@@ -710,7 +806,7 @@ function ProjectDetailContent({ project, category }: { project: Project & { cate
   const tocEntries = useMemo(() => items.length ? items.map((item) => ({ id: item.id, title: item.title })) : articles.length ? articles.map((article) => ({ id: article.id, title: article.title })) : project.details ? [{ id: "overview", title: t("case.overview") }] : [], [articles, items, project.details, t]);
 
   useEffect(() => {
-    if (isRenderingStudies || !tocEntries.length)
+    if (!tocEntries.length)
       return;
     const sections = tocEntries.map((entry) => document.getElementById(entry.id === "overview" ? "overview" : "chapter-" + entry.id)).filter((section): section is HTMLElement => section instanceof HTMLElement);
     let frame = 0;
@@ -739,7 +835,7 @@ function ProjectDetailContent({ project, category }: { project: Project & { cate
       window.removeEventListener("resize", scheduleUpdate);
       window.removeEventListener("hashchange", scheduleUpdate);
     };
-  }, [isRenderingStudies, tocEntries]);
+  }, [tocEntries]);
 
   function openImage(event: MouseEvent<HTMLButtonElement>, item: BoardItem) {
     triggerRef.current = event.currentTarget;
@@ -781,9 +877,9 @@ function ProjectDetailContent({ project, category }: { project: Project & { cate
             {project.links.map((link) => <a key={link.href} href={link.href} target="_blank" rel="noreferrer"><span className="hover-shift-label"><span>{link.label}</span><span aria-hidden="true">↗</span></span></a>)}
           </div>
         )}
-        {!isComparative && !isRenderingStudies && project.details && items.length > 0 && <p className="case-summary reading-surface">{project.details}</p>}
+        {!isComparative && project.details && items.length > 0 && <p className="case-summary reading-surface">{project.details}</p>}
       </header>
-      {!isRenderingStudies && tocEntries.length > 0 && (
+      {tocEntries.length > 0 && (
         <details className="mobile-toc reading-surface">
           <summary>{t("case.onThisPage")}</summary>
           <BackLink category={category} projectId={project.id} className="toc-back" compact><span aria-hidden="true">←</span>{t("case.backProject")}</BackLink>
@@ -797,7 +893,7 @@ function ProjectDetailContent({ project, category }: { project: Project & { cate
           </nav>
         </details>
       )}
-      {isRenderingStudies ? <RenderingGallery project={project} standalone /> : !tocEntries.length ? null : (
+      {!tocEntries.length ? null : (
         <div className="case-layout">
           <div className="case-content">
             {items.length ? items.map((item, index) => (
@@ -848,7 +944,7 @@ function ProjectDetailContent({ project, category }: { project: Project & { cate
           </aside>
         </div>
       )}
-      {hasCaseMedia && !isRenderingStudies && !isComparative && <ImageDialog item={dialogItem} onClose={closeImage} />}
+      {hasCaseMedia && !isComparative && <ImageDialog item={dialogItem} onClose={closeImage} />}
       <nav className="case-navigation" aria-label={t("case.navigation")}>
         <div className="case-navigation-heading"><span>{t("case.continue")}</span><span>{meta.label.toUpperCase()}</span></div>
         <div className="case-navigation-links">

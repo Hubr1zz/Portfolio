@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { assetPath, InternalLink } from "./portfolio-links";
 import { MarginContours } from "./presentation-extras";
 import { getBoardItems, projects, tabs, type BoardItem, type DiagramId, type PageId, type Project, type TabId } from "./portfolio-data";
+import { useI18n } from "./i18n";
 
 export type { PageId } from "./portfolio-data";
 export type ShellPage = PageId | "other";
@@ -74,6 +75,7 @@ function categoryPath(category: TabId) {
 }
 
 function BackLink({ category, projectId, className, children }: { category: TabId; projectId: string; className?: string; children: ReactNode }) {
+  const { t } = useI18n();
   const defaultHref = categoryPath(category) + "#project-" + projectId;
   const [href, setHref] = useState(defaultHref);
   const [originPath, setOriginPath] = useState<string | null>(null);
@@ -95,10 +97,11 @@ function BackLink({ category, projectId, className, children }: { category: TabI
     }
   }, [projectId]);
 
-  return <InternalLink className={className} href={href}>{originPath !== null && normalizePortfolioPath(originPath) === "/" ? <span className="case-navigation-card"><small>RETURN TO SELECTED WORK</small><strong>Back to selected work</strong><i aria-hidden="true">↗</i></span> : children}</InternalLink>;
+  return <InternalLink className={className} href={href}>{originPath !== null && normalizePortfolioPath(originPath) === "/" ? <span className="case-navigation-card"><small>{t("case.returnSelected")}</small><strong>{t("case.backSelected")}</strong><i aria-hidden="true">↗</i></span> : children}</InternalLink>;
 }
 
 function ProjectVisual({ project }: { project: Project }) {
+  const { localize } = useI18n();
   if (project.gallery) {
     return (
       <div className="media-grid">
@@ -113,19 +116,19 @@ function ProjectVisual({ project }: { project: Project }) {
     return (
       <figure className="project-image">
         <Image src={assetPath(project.image)} alt={project.imageAlt ?? ""} width={1200} height={720} sizes="(max-width: 760px) 100vw, 50vw" unoptimized />
-        <figcaption><span>FIELD_CAPTURE</span><span>{project.index} / {project.year}</span></figcaption>
+        <figcaption><span>{localize("FIELD_CAPTURE")}</span><span>{project.index} / {project.year}</span></figcaption>
       </figure>
     );
   }
 
   if (project.visual === "workflow") {
     return (
-      <div className="system-visual workflow-visual" aria-label="Design to implementation workflow diagram">
-        <span className="visual-label">SYSTEM_MAP / LIVE</span>
-        <div className="system-node node-a">Design docs</div>
-        <div className="system-node node-b">Draft change</div>
-        <div className="system-node node-c">Review</div>
-        <div className="system-node node-d">Implementation</div>
+      <div className="system-visual workflow-visual" aria-label={localize("Design to implementation workflow diagram")}>
+        <span className="visual-label">{localize("SYSTEM_MAP / LIVE")}</span>
+        <div className="system-node node-a">{localize("Design docs")}</div>
+        <div className="system-node node-b">{localize("Draft change")}</div>
+        <div className="system-node node-c">{localize("Review")}</div>
+        <div className="system-node node-d">{localize("Implementation")}</div>
         <div className="system-core"><span>SPEC</span></div>
       </div>
     );
@@ -133,139 +136,140 @@ function ProjectVisual({ project }: { project: Project }) {
 
   if (project.visual === "interaction") {
     return (
-      <div className="system-visual interaction-visual" aria-label="Unified interaction system diagram">
-        <span className="visual-label">EVENT_ROUTING / 3D + UI</span>
+      <div className="system-visual interaction-visual" aria-label={localize("Unified interaction system diagram")}>
+        <span className="visual-label">{localize("EVENT_ROUTING / 3D + UI")}</span>
         <div className="input-stream"><i /><i /><i /><i /><i /></div>
-        <div className="interaction-core"><span>I</span><small>DISPATCH</small></div>
-        <div className="output-tags"><span>FOCUS</span><span>CLICK</span><span>DRAG</span></div>
+        <div className="interaction-core"><span>I</span><small>{localize("DISPATCH")}</small></div>
+        <div className="output-tags"><span>{localize("FOCUS")}</span><span>{localize("CLICK")}</span><span>{localize("DRAG")}</span></div>
       </div>
     );
   }
 
   if (project.visual === "editor") {
     return (
-      <div className="system-visual editor-visual" aria-label="Abstract Unity editor window layout">
-        <span className="visual-label">EDITOR_LAYER / MODULAR</span>
+      <div className="system-visual editor-visual" aria-label={localize("Abstract Unity editor window layout")}>
+        <span className="visual-label">{localize("EDITOR_LAYER / MODULAR")}</span>
         <div className="fake-toolbar"><i /><i /><i /><i /></div>
         <div className="fake-tree"><span /><span /><span /><span /><span /></div>
-        <div className="fake-panel"><b>INSPECT</b><i /><i /><i /></div>
+        <div className="fake-panel"><b>{localize("INSPECT")}</b><i /><i /><i /></div>
       </div>
     );
   }
 
   if (project.visual === "prototype") {
     return (
-      <div className="system-visual prototype-visual" aria-label="Abstract movement trajectory diagram">
-        <span className="visual-label">MOTION_TRACE / ITERATION</span>
+      <div className="system-visual prototype-visual" aria-label={localize("Abstract movement trajectory diagram")}>
+        <span className="visual-label">{localize("MOTION_TRACE / ITERATION")}</span>
         <div className="motion-line" />
         <div className="motion-point p1">A</div><div className="motion-point p2">B</div><div className="motion-point p3">C</div>
       </div>
     );
   }
 
-  return <div className="system-visual quiet-visual"><span className="visual-label">ARCHIVE / {project.year}</span><strong>{project.index}</strong></div>;
+  return <div className="system-visual quiet-visual"><span className="visual-label">{localize("ARCHIVE")} / {project.year}</span><strong>{project.index}</strong></div>;
 }
 
 function FlowDiagram({ id }: { id: DiagramId }) {
+  const { localize } = useI18n();
   if (id === "workflow-overview") {
     return (
-      <div className="flow-diagram flow-overview" aria-label="zWorkFlow production workflow diagram">
-        <span className="flow-kicker">WORKFLOW_OVERVIEW</span>
-        <span className="flow-workbench">WORKBENCH</span>
-        <div className="flow-overview-steps"><b>Design documents</b><b>Draft modules</b><b>Review &amp; approve</b><b>Implement &amp; verify</b><b>Sync &amp; archive</b></div>
-        <div className="flow-context-rail"><span>Project skills</span><span>OpenSpec</span><span>Code evidence</span></div>
+      <div className="flow-diagram flow-overview" aria-label={localize("zWorkFlow production workflow diagram")}>
+        <span className="flow-kicker">{localize("WORKFLOW_OVERVIEW")}</span>
+        <span className="flow-workbench">{localize("WORKBENCH")}</span>
+        <div className="flow-overview-steps"><b>{localize("Design documents")}</b><b>{localize("Draft modules")}</b><b>{localize("Review & approve")}</b><b>{localize("Implement & verify")}</b><b>{localize("Sync & archive")}</b></div>
+        <div className="flow-context-rail"><span>{localize("Project skills")}</span><span>OpenSpec</span><span>{localize("Code evidence")}</span></div>
       </div>
     );
   }
 
   if (id === "editor-overview") {
     return (
-      <div className="flow-diagram editor-overview" aria-label="zEditor workspace and scene tools overview">
-        <span className="flow-kicker">EDITOR_TOOLKIT / OVERVIEW</span>
-        <div className="editor-overview-columns"><section><small>ZEDITOR CONTRIBUTIONS</small><strong>Favorites interface</strong><span>Inspector component workflows</span></section><section><small>SCENE TOOLS</small><strong>Independent package</strong><span>Camera / Pivot / Saved expansion</span></section></div>
+      <div className="flow-diagram editor-overview" aria-label={localize("zEditor workspace and scene tools overview")}>
+        <span className="flow-kicker">{localize("EDITOR_TOOLKIT / OVERVIEW")}</span>
+        <div className="editor-overview-columns"><section><small>{localize("ZEDITOR CONTRIBUTIONS")}</small><strong>{localize("Favorites interface")}</strong><span>{localize("Inspector component workflows")}</span></section><section><small>{localize("SCENE TOOLS")}</small><strong>{localize("Independent package")}</strong><span>{localize("Camera / Pivot / Saved expansion")}</span></section></div>
       </div>
     );
   }
 
   if (id === "editor-navigation") {
     return (
-      <div className="flow-diagram editor-navigation" aria-label="zEditor navigation schematic">
-        <span className="flow-kicker">EDITOR_NAVIGATION</span>
-        <div className="editor-nav-context"><b>Project overlay</b><b>Favorites window</b></div>
-        <div className="editor-nav-panel"><span>SHARED FAVORITES PANEL</span><div><i>Page tabs</i><i>Grid / list</i><i>Navigation</i></div></div>
-        <p>One interface · two contexts</p>
+      <div className="flow-diagram editor-navigation" aria-label={localize("zEditor navigation schematic")}>
+        <span className="flow-kicker">{localize("EDITOR_NAVIGATION")}</span>
+        <div className="editor-nav-context"><b>{localize("Project overlay")}</b><b>{localize("Favorites window")}</b></div>
+        <div className="editor-nav-panel"><span>{localize("SHARED FAVORITES PANEL")}</span><div><i>{localize("Page tabs")}</i><i>{localize("Grid / list")}</i><i>{localize("Navigation")}</i></div></div>
+        <p>{localize("One interface · two contexts")}</p>
       </div>
     );
   }
 
   if (id === "editor-scene") {
     return (
-      <div className="flow-diagram editor-scene" aria-label="zEditor scene tools diagram">
-        <span className="flow-kicker">SCENE_TOOLS / PERSISTENT_STATE</span>
-        <div className="editor-scene-grid"><section><b>Camera follow &amp; LookAt</b><small>SceneView follows and looks toward the target</small></section><section><b>Rotation root</b><small>Selected target becomes the pivot</small></section><section><b>Saved expansion</b><small>Scene · prefab · project folders</small></section></div>
+      <div className="flow-diagram editor-scene" aria-label={localize("zEditor scene tools diagram")}>
+        <span className="flow-kicker">{localize("SCENE_TOOLS / PERSISTENT_STATE")}</span>
+        <div className="editor-scene-grid"><section><b>{localize("Camera follow & LookAt")}</b><small>{localize("SceneView follows and looks toward the target")}</small></section><section><b>{localize("Rotation root")}</b><small>{localize("Selected target becomes the pivot")}</small></section><section><b>{localize("Saved expansion")}</b><small>{localize("Scene · prefab · project folders")}</small></section></div>
       </div>
     );
   }
 
   if (id === "vault-map") {
     return (
-      <div className="flow-diagram vault-map" aria-label="Living design vault overview">
-        <span className="flow-kicker">LIVING DESIGN VAULT</span>
-        <div className="vault-map-groups"><section><small>01</small><b>Principles &amp; world</b><span>Premise, rules, and setting</span></section><section><small>02</small><b>Hunt / Showdown / Settlement</b><span>Three phases, one consequence loop</span></section><section><small>03</small><b>Shared rules / Terms / References</b><span>Linked knowledge for revision</span></section></div>
+      <div className="flow-diagram vault-map" aria-label={localize("Living design vault overview")}>
+        <span className="flow-kicker">{localize("LIVING DESIGN VAULT")}</span>
+        <div className="vault-map-groups"><section><small>01</small><b>{localize("Principles & world")}</b><span>{localize("Premise, rules, and setting")}</span></section><section><small>02</small><b>{localize("Hunt / Showdown / Settlement")}</b><span>{localize("Three phases, one consequence loop")}</span></section><section><small>03</small><b>{localize("Shared rules / Terms / References")}</b><span>{localize("Linked knowledge for revision")}</span></section></div>
       </div>
     );
   }
 
   if (id === "vault-loop") {
     return (
-      <div className="flow-diagram vault-loop" aria-label="Living design vault tactical loop">
-        <span className="flow-kicker">TACTICAL_LOOP</span>
-        <div className="vault-loop-steps"><section><b>Hunt</b><small>Information &amp; risk</small></section><i>→</i><section><b>Showdown</b><small>Tactical commitment</small></section><i>→</i><section><b>Settlement</b><small>Lasting consequences</small></section><i>→</i><section><b>Preparation</b><small>Ready the next hunt</small></section></div>
+      <div className="flow-diagram vault-loop" aria-label={localize("Living design vault tactical loop")}>
+        <span className="flow-kicker">{localize("TACTICAL_LOOP")}</span>
+        <div className="vault-loop-steps"><section><b>{localize("Hunt")}</b><small>{localize("Information & risk")}</small></section><i>→</i><section><b>{localize("Showdown")}</b><small>{localize("Tactical commitment")}</small></section><i>→</i><section><b>{localize("Settlement")}</b><small>{localize("Lasting consequences")}</small></section><i>→</i><section><b>{localize("Preparation")}</b><small>{localize("Ready the next hunt")}</small></section></div>
       </div>
     );
   }
 
   if (id === "workflow-lifecycle") {
     return (
-      <div className="flow-diagram flow-lifecycle" aria-label="zWorkFlow change lifecycle diagram">
-        <span className="flow-kicker">CHANGE_LIFECYCLE</span>
-        <div className="flow-chain"><b>Design docs</b><i>→</i><b>Draft change</b><i>→</i><b>Review</b><i>→</i><b>Approve</b><i>→</i><b>Apply</b><i>→</i><b>Sync + archive</b></div>
-        <p>Human approval remains the gate between design intent and implementation.</p>
+      <div className="flow-diagram flow-lifecycle" aria-label={localize("zWorkFlow change lifecycle diagram")}>
+        <span className="flow-kicker">{localize("CHANGE_LIFECYCLE")}</span>
+        <div className="flow-chain"><b>{localize("Design docs")}</b><i>→</i><b>{localize("Draft change")}</b><i>→</i><b>{localize("Review")}</b><i>→</i><b>{localize("Approve")}</b><i>→</i><b>{localize("Apply")}</b><i>→</i><b>{localize("Sync + archive")}</b></div>
+        <p>{localize("Human approval remains the gate between design intent and implementation.")}</p>
       </div>
     );
   }
 
   if (id === "workflow-knowledge") {
     return (
-      <div className="flow-diagram flow-network" aria-label="zWorkFlow shared project knowledge diagram">
-        <span className="flow-kicker">SHARED_PROJECT_CONTEXT</span>
-        <div className="flow-inputs"><b>OpenSpec</b><b>Project skills</b><b>Code index</b></div>
+      <div className="flow-diagram flow-network" aria-label={localize("zWorkFlow shared project knowledge diagram")}>
+        <span className="flow-kicker">{localize("SHARED_PROJECT_CONTEXT")}</span>
+        <div className="flow-inputs"><b>OpenSpec</b><b>{localize("Project skills")}</b><b>{localize("Code index")}</b></div>
         <i className="flow-line" />
-        <div className="flow-hub"><span>ONE SOURCE</span><strong>WORKBENCH</strong></div>
+        <div className="flow-hub"><span>{localize("ONE SOURCE")}</span><strong>{localize("WORKBENCH")}</strong></div>
         <i className="flow-line" />
-        <div className="flow-outputs"><b>Codex</b><b>Claude</b><b>Cursor + tools</b></div>
+        <div className="flow-outputs"><b>Codex</b><b>Claude</b><b>{localize("Cursor + tools")}</b></div>
       </div>
     );
   }
 
   if (id === "interaction-routing") {
     return (
-      <div className="flow-diagram flow-routing" aria-label="Interaction System unified event routing diagram">
-        <span className="flow-kicker">UNIFIED_EVENT_ROUTING</span>
-        <div className="route-sources"><b>Physics raycast<small>3D OBJECT</small></b><b>EventSystem<small>UGUI</small></b></div>
-        <i>↓</i><div className="route-target">IInteractableTarget</div><i>↓</i><div className="route-dispatch">InteractionSystem / dispatch</div>
-        <div className="route-results"><b>FOCUS</b><b>CLICK</b><b>DRAG</b></div>
+      <div className="flow-diagram flow-routing" aria-label={localize("Interaction System unified event routing diagram")}>
+        <span className="flow-kicker">{localize("UNIFIED_EVENT_ROUTING")}</span>
+        <div className="route-sources"><b>{localize("Physics raycast")}<small>{localize("3D OBJECT")}</small></b><b>EventSystem<small>UGUI</small></b></div>
+        <i>↓</i><div className="route-target">IInteractableTarget</div><i>↓</i><div className="route-dispatch">InteractionSystem / {localize("dispatch")}</div>
+        <div className="route-results"><b>{localize("FOCUS")}</b><b>{localize("CLICK")}</b><b>{localize("DRAG")}</b></div>
       </div>
     );
   }
 
   return (
-    <div className="flow-diagram flow-typed" aria-label="Interaction System typed drag communication diagram">
-      <span className="flow-kicker">TYPED_DRAG_COMMUNICATION</span>
-      <div className="typed-node"><small>SOURCE</small><b>IDraggable&lt;T&gt;</b><span>Card</span></div>
-      <i>→</i><div className="typed-cache"><small>CACHED MAP</small><strong>T</strong><span>cached method mappings</span></div>
-      <i>→</i><div className="typed-node"><small>TARGET</small><b>IFocusable&lt;T&gt;</b><span>Slot</span></div>
-      <p>ENTER · STAY · RELEASE · LEAVE</p>
+    <div className="flow-diagram flow-typed" aria-label={localize("Interaction System typed drag communication diagram")}>
+      <span className="flow-kicker">{localize("TYPED_DRAG_COMMUNICATION")}</span>
+      <div className="typed-node"><small>{localize("SOURCE")}</small><b>IDraggable&lt;T&gt;</b><span>{localize("Card")}</span></div>
+      <i>→</i><div className="typed-cache"><small>{localize("CACHED MAP")}</small><strong>T</strong><span>{localize("cached method mappings")}</span></div>
+      <i>→</i><div className="typed-node"><small>{localize("TARGET")}</small><b>IFocusable&lt;T&gt;</b><span>{localize("Slot")}</span></div>
+      <p>{localize("ENTER · STAY · RELEASE · LEAVE")}</p>
     </div>
   );
 }
@@ -275,13 +279,15 @@ function TacticsMap() {
 }
 
 function ArticleIndexCover({ articles }: { articles: NonNullable<Project["articles"]> }) {
+  const { t } = useI18n();
   const draftCount = articles.filter((article) => article.status === "draft").length;
   const completedCount = articles.length - draftCount;
-  return <div className="article-index-cover" aria-label="Essay collection cover"><div className="article-index-heading"><span>ESSAY COLLECTION</span><strong>{String(articles.length).padStart(2, "0")} entries</strong></div><p>{completedCount} essays · {draftCount} in progress</p><ol>{articles.map((article, index) => <li key={article.id}><span>{String(index + 1).padStart(2, "0")}</span><strong>{article.title}</strong>{article.status === "draft" && <small>Draft</small>}</li>)}</ol><footer>READ / COMPARE / QUESTION</footer></div>;
+  return <div className="article-index-cover" aria-label={t("cover.essayLabel")}><div className="article-index-heading"><span>{t("cover.essay")}</span><strong>{t("cover.entries", { count: String(articles.length).padStart(2, "0") })}</strong></div><p>{t("cover.progress", { complete: completedCount, draft: draftCount })}</p><ol>{articles.map((article, index) => <li key={article.id}><span>{String(index + 1).padStart(2, "0")}</span><strong>{article.title}</strong>{article.status === "draft" && <small>{t("case.draft")}</small>}</li>)}</ol><footer>{t("cover.readCompare")}</footer></div>;
 }
 
 function DesignNotebookCover() {
-  return <div className="design-notebook-cover" aria-label="Design notebook cover"><div className="design-notebook-heading"><span>DESIGN NOTEBOOK</span><svg viewBox="0 0 72 48" aria-hidden="true" focusable="false"><rect x="8" y="8" width="44" height="32" /><path d="M16 16h28M16 24h20M16 32h28M52 16h12v16H52" /></svg></div><div className="design-notebook-rows"><div><b>01 Observe</b><span>Collect design examples</span></div><div><b>02 Explain</b><span>Connect mechanics and player response</span></div><div><b>03 Reuse</b><span>Preserve a transferable lesson</span></div></div><footer>AN EVOLVING REFERENCE</footer></div>;
+  const { t } = useI18n();
+  return <div className="design-notebook-cover" aria-label={t("cover.notebookLabel")}><div className="design-notebook-heading"><span>{t("cover.notebook")}</span><svg viewBox="0 0 72 48" aria-hidden="true" focusable="false"><rect x="8" y="8" width="44" height="32" /><path d="M16 16h28M16 24h20M16 32h28M52 16h12v16H52" /></svg></div><div className="design-notebook-rows"><div><b>{t("cover.observe")}</b><span>{t("cover.observeText")}</span></div><div><b>{t("cover.explain")}</b><span>{t("cover.explainText")}</span></div><div><b>{t("cover.reuse")}</b><span>{t("cover.reuseText")}</span></div></div><footer>{t("cover.evolving")}</footer></div>;
 }
 
 function ProjectCover({ project }: { project: Project }) {
@@ -308,8 +314,9 @@ const coverDiagramByProject: Partial<Record<string, DiagramId>> = {
 };
 
 function FeatureCard({ project, index }: { project: Project; index: string }) {
+  const { t } = useI18n();
   const visual = project.id === "tactics-design" ? <TacticsMap /> : <ProjectCover project={project} />;
-  return <InternalLink id={"project-" + project.id} className="featured-card" href={"/projects/" + project.id} onClick={(event) => rememberProjectOrigin(event, project.id)}><div className="feature-media">{visual}</div><div className="feature-copy reading-surface"><div className="feature-title-row"><span className="feature-number">{index}</span><h3>{project.title}</h3></div><div className="feature-meta"><span>{project.year}</span></div><p className="feature-description">{project.description}</p><span className="feature-link details-action"><span>View details</span><span aria-hidden="true">↗</span></span></div></InternalLink>;
+  return <InternalLink id={"project-" + project.id} className="featured-card" href={"/projects/" + project.id} onClick={(event) => rememberProjectOrigin(event, project.id)}><div className="feature-media">{visual}</div><div className="feature-copy reading-surface"><div className="feature-title-row"><span className="feature-number">{index}</span><h3>{project.title}</h3></div><div className="feature-meta"><span>{project.year}</span></div><p className="feature-description">{project.description}</p><span className="feature-link details-action"><span>{t("common.viewDetails")}</span><span aria-hidden="true">↗</span></span></div></InternalLink>;
 }
 
 function ArchiveDecoration({ page }: { page: TabId }) {
@@ -321,12 +328,14 @@ function ArchiveDecoration({ page }: { page: TabId }) {
 }
 
 function Navigation({ page }: { page: ShellPage }) {
+  const { locale, t, toggleLocale } = useI18n();
   const navTabs = [tabs.find((tab) => tab.id === "technical"), tabs.find((tab) => tab.id === "design"), tabs.find((tab) => tab.id === "games")].filter((tab): tab is (typeof tabs)[number] => Boolean(tab));
-  return <header className="site-header"><InternalLink className="brand" href="/" aria-label="Leon Zhou portfolio home"><span className="brand-label">LEON ZHOU</span><small>PORTFOLIO / 2026</small></InternalLink><nav className="header-links" aria-label="Primary navigation"><InternalLink href="/" aria-current={page === "home" ? "page" : undefined}><span className="hover-shift-label">Home</span></InternalLink>{navTabs.map((tab) => <InternalLink key={tab.id} href={tab.path} aria-current={page === tab.id ? "page" : undefined}><span className="hover-shift-label">{tab.id === "technical" ? "Technical" : tab.id === "games" ? "Games" : "Design"}</span></InternalLink>)}<InternalLink href="/other" aria-current={page === "other" ? "page" : undefined}><span className="hover-shift-label">Other</span></InternalLink></nav></header>;
+  return <header className="site-header"><InternalLink className="brand" href="/" aria-label={t("nav.homeLabel")}><span className="brand-label">LEON ZHOU</span><small>PORTFOLIO / 2026</small></InternalLink><div className="header-actions"><nav className="header-links" aria-label={t("nav.primaryLabel")}><InternalLink href="/" aria-current={page === "home" ? "page" : undefined}><span className="hover-shift-label">{t("nav.home")}</span></InternalLink>{navTabs.map((tab) => <InternalLink key={tab.id} href={tab.path} aria-current={page === tab.id ? "page" : undefined}><span className="hover-shift-label">{tab.id === "technical" ? t("nav.technical") : tab.id === "games" ? t("nav.games") : t("nav.design")}</span></InternalLink>)}<InternalLink href="/other" aria-current={page === "other" ? "page" : undefined}><span className="hover-shift-label">{t("nav.other")}</span></InternalLink></nav><button className="language-toggle" type="button" onClick={toggleLocale} aria-label={locale === "en" ? t("language.switchToChinese") : t("language.switchToEnglish")} title={locale === "en" ? t("language.switchToChinese") : t("language.switchToEnglish")}><span className={locale === "en" ? "is-active" : ""}>{t("language.short.en")}</span><i aria-hidden="true">/</i><span className={locale === "zh" ? "is-active" : ""}>{t("language.short.zh")}</span></button></div></header>;
 }
 
 function Footer() {
-  const [copyStatus, setCopyStatus] = useState("COPY");
+  const { t } = useI18n();
+  const [copyStatus, setCopyStatus] = useState<"idle" | "copied" | "failed">("idle");
   const copyTimer = useRef(0);
 
   useEffect(() => () => window.clearTimeout(copyTimer.current), []);
@@ -334,18 +343,20 @@ function Footer() {
   async function copyEmail() {
     try {
       await navigator.clipboard.writeText("leonzhouziang@gmail.com");
-      setCopyStatus("COPIED");
+      setCopyStatus("copied");
       window.clearTimeout(copyTimer.current);
-      copyTimer.current = window.setTimeout(() => setCopyStatus("COPY"), 1800);
+      copyTimer.current = window.setTimeout(() => setCopyStatus("idle"), 1800);
     } catch {
-      setCopyStatus("COPY FAILED");
+      setCopyStatus("failed");
     }
   }
 
-  return <footer className="site-footer"><div><span className="footer-kicker">OPEN TO COLLABORATION</span><h2>Let’s make<br />something playable.</h2></div><div className="footer-links"><button className="footer-copy" type="button" onClick={copyEmail}><span className="hover-shift-label"><span>leonzhouziang@gmail.com</span><small aria-live="polite">{copyStatus}</small></span></button><a href="https://github.com/Hubr1zz" target="_blank" rel="noreferrer"><span className="hover-shift-label"><span>GitHub</span><span aria-hidden="true">↗</span></span></a><a href="https://leon-zhou.itch.io/" target="_blank" rel="noreferrer"><span className="hover-shift-label"><span>Itch.io</span><span aria-hidden="true">↗</span></span></a><a href={resumeHref} target="_blank" rel="noreferrer"><span className="hover-shift-label"><span>Résumé</span><span aria-hidden="true">↗</span></span></a></div><div className="footer-base"><span>LEON ZHOU / PORTFOLIO</span><span>DESIGNED FOR CLARITY · BUILT WITH INTENT</span></div></footer>;
+  const copyLabel = copyStatus === "copied" ? t("footer.copied") : copyStatus === "failed" ? t("footer.copyFailed") : t("footer.copy");
+  return <footer className="site-footer"><div><span className="footer-kicker">{t("footer.kicker")}</span><h2>{t("footer.titleLine1")}<br />{t("footer.titleLine2")}</h2></div><div className="footer-links"><button className="footer-copy" type="button" onClick={copyEmail}><span className="hover-shift-label"><span>leonzhouziang@gmail.com</span><small aria-live="polite">{copyLabel}</small></span></button><a href="https://github.com/Hubr1zz" target="_blank" rel="noreferrer"><span className="hover-shift-label"><span>GitHub</span><span aria-hidden="true">↗</span></span></a><a href="https://leon-zhou.itch.io/" target="_blank" rel="noreferrer"><span className="hover-shift-label"><span>Itch.io</span><span aria-hidden="true">↗</span></span></a><a href={resumeHref} target="_blank" rel="noreferrer"><span className="hover-shift-label"><span>{t("footer.resume")}</span><span aria-hidden="true">↗</span></span></a></div><div className="footer-base"><span>LEON ZHOU / PORTFOLIO</span><span>{t("footer.signature")}</span></div></footer>;
 }
 
 export function PortfolioShell({ page, children }: { page: ShellPage; children: ReactNode }) {
+  const { t } = useI18n();
   const pathname = usePathname();
   const mainContentRef = useRef<HTMLDivElement>(null);
   useRestoreOrigin();
@@ -364,30 +375,33 @@ export function PortfolioShell({ page, children }: { page: ShellPage; children: 
     window.addEventListener("pageshow", handlePageShow);
     return () => window.removeEventListener("pageshow", handlePageShow);
   }, []);
-  return <main className={"site-shell page-" + page + " theme-amber"}><a className="skip-link" href="#main-content">Skip to content</a><MarginContours /><Navigation page={page} /><div id="main-content" key={pathname} ref={mainContentRef}>{children}</div><Footer /></main>;
+  return <main className={"site-shell page-" + page + " theme-amber"}><a className="skip-link" href="#main-content">{t("nav.skip")}</a><MarginContours /><Navigation page={page} /><div id="main-content" key={pathname} ref={mainContentRef}>{children}</div><Footer /></main>;
 }
 
 function HomePage() {
-  const zworkflow = projects.technical[0];
-  const tactics = projects.design[0];
+  const { localize, t } = useI18n();
+  const localizedProjects = useMemo(() => localize(projects), [localize]);
+  const localizedTabs = useMemo(() => localize(tabs), [localize]);
+  const zworkflow = localizedProjects.technical[0];
+  const tactics = localizedProjects.design[0];
 
   return (
     <>
       <section className="home-intro" id="top">
         <div className="intro-kicker reading-surface">
-          <span>Technical Designer · Gameplay Programmer</span>
-          <span>LOS ANGELES / CA</span>
+          <span>{t("home.role")}</span>
+          <span>{t("home.location")}</span>
         </div>
         <h1 className="intro-title reading-surface">
-          <span>Designing play.</span>
-          <span>Building systems.</span>
+          <span>{t("home.title1")}</span>
+          <span>{t("home.title2")}</span>
         </h1>
         <div className="intro-bottom">
-          <p className="intro-summary reading-surface">I design gameplay systems and build the technology that makes them tangible—bridging mechanics, tools, and real-time visuals.</p>
+          <p className="intro-summary reading-surface">{t("home.summary")}</p>
           <div className="intro-actions reading-surface">
             <svg className="intro-registration" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path pathLength="1" d="M4 4H20V20" /></svg>
-            <a className="resume-action" href={resumeHref} target="_blank" rel="noreferrer"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 3.5h8l4 4V20.5H6z" /><path d="M14 3.5v4h4M9 12h6M9 15.5h6" /></svg><span>Résumé</span><small>PDF</small></a>
-            <a className="explore-action" href="#work">Explore selected work</a>
+            <a className="resume-action" href={resumeHref} target="_blank" rel="noreferrer"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 3.5h8l4 4V20.5H6z" /><path d="M14 3.5v4h4M9 12h6M9 15.5h6" /></svg><span>{t("footer.resume")}</span><small>PDF</small></a>
+            <a className="explore-action" href="#work">{t("home.explore")}</a>
           </div>
         </div>
       </section>
@@ -395,35 +409,35 @@ function HomePage() {
         <div className="profile-title-group reading-surface">
           <div className="section-heading">
             <div>
-              <h2>About Me</h2>
+              <h2>{t("home.about")}</h2>
               <p className="profile-name"><span>Leon</span>{" "}<span>Zhou</span></p>
-              <p className="profile-lead">Game designer, gameplay programmer, but most importantly, game player.</p>
+              <p className="profile-lead">{t("home.lead")}</p>
             </div>
           </div>
         </div>
         <div className="profile-copy reading-surface">
-          <p>I am currently pursuing an M.S. in Game Design and Development at the University of Southern California (USC).</p>
-          <p>I graduated from Rensselaer Polytechnic Institute’s Games &amp; Simulation Arts &amp; Sciences program, connecting computer science, game design, and real-time visual practice.</p>
-          <p>I care about how mechanics, systems, and feedback shape player experience. Programming and 3D math let me turn ambiguous ideas into playable, testable systems.</p>
-          <p className="profile-goal">Seeking Technical Designer, Systems Designer, or Gameplay Engineer opportunities.</p>
+          <p>{t("home.bio1")}</p>
+          <p>{t("home.bio2")}</p>
+          <p>{t("home.bio3")}</p>
+          <p className="profile-goal">{t("home.goal")}</p>
         </div>
       </section>
       <section className="featured-section page-enter" id="work">
         <div className="section-heading reading-surface">
-          <div className="selected-heading"><h2>Selected work</h2></div>
-          <p>Three projects across workflow tools, game design, and resolution framework</p>
+          <div className="selected-heading"><h2>{t("home.selected")}</h2></div>
+          <p>{t("home.selectedDescription")}</p>
         </div>
         <div className="featured-grid">
           <FeatureCard project={zworkflow} index="01" />
           <FeatureCard project={tactics} index="02" />
-          <article className="featured-card is-pending" aria-label="ActionQueue case study coming soon">
+          <article className="featured-card is-pending" aria-label={t("home.pendingLabel")}>
             <div className="feature-media pending-art" aria-hidden="true"><i /><i /><i /></div>
-            <div className="feature-copy reading-surface"><div className="feature-title-row"><span className="feature-number">03</span><h3>ActionQueue</h3></div><div className="feature-meta"><span>IN PREPARATION</span></div><p className="feature-description">Case study coming soon.</p><span className="feature-link">In preparation</span></div>
+            <div className="feature-copy reading-surface"><div className="feature-title-row"><span className="feature-number">03</span><h3>ActionQueue</h3></div><div className="feature-meta"><span>{t("home.inPreparation")}</span></div><p className="feature-description">{t("home.comingSoon")}</p><span className="feature-link">{t("home.inPreparation")}</span></div>
           </article>
         </div>
       </section>
-      <nav className="discipline-nav" aria-label="Explore by discipline">
-        {tabs.map((tab, index) => (
+      <nav className="discipline-nav" aria-label={t("home.exploreDisciplines")}>
+        {localizedTabs.map((tab, index) => (
           <InternalLink key={tab.id} className="discipline-link" href={tab.path}>
             <span className="index">{String(index + 1).padStart(2, "0")}</span>
             <h3>{tab.label}</h3>
@@ -437,6 +451,7 @@ function HomePage() {
 }
 
 function ProjectPreview({ project }: { project: Project }) {
+  const { t } = useI18n();
   return (
     <article id={"project-" + project.id} className="project-preview" tabIndex={-1}>
       <InternalLink className="project-preview-link" href={"/projects/" + project.id} onClick={(event) => rememberProjectOrigin(event, project.id)}>
@@ -448,10 +463,10 @@ function ProjectPreview({ project }: { project: Project }) {
           </div>
           <h2>{project.title}</h2>
           <p className="preview-description">{project.description}</p>
-          <ul className="tag-list" aria-label={project.title + " technologies and disciplines"}>
+          <ul className="tag-list" aria-label={project.title + " " + t("case.technologies")}>
             {project.tags.slice(0, 3).map((tag) => <li key={tag}>{tag}</li>)}
           </ul>
-          <span className="preview-link details-action"><span>View details</span><span aria-hidden="true">↗</span></span>
+          <span className="preview-link details-action"><span>{t("common.viewDetails")}</span><span aria-hidden="true">↗</span></span>
         </div>
       </InternalLink>
     </article>
@@ -459,7 +474,8 @@ function ProjectPreview({ project }: { project: Project }) {
 }
 
 function RenderingGallery({ project, standalone = false }: { project?: Project; standalone?: boolean }) {
-  const items = useMemo(() => project ? getBoardItems(project) : [], [project]);
+  const { localize, t } = useI18n();
+  const items = useMemo(() => project ? localize(getBoardItems(project)) : [], [localize, project]);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const activeIndex = Math.min(selectedIndex, Math.max(0, items.length - 1));
   const selected = items[activeIndex] ?? items[0];
@@ -475,15 +491,15 @@ function RenderingGallery({ project, standalone = false }: { project?: Project; 
       <div className="archive-group-heading">
         <span>{standalone ? "01" : "03"}</span>
         <div className="reading-surface">
-          <h2 id="rendering-gallery-heading">Rendering studies</h2>
-          <p>A focused set of shader and procedural graphics studies, with each image paired to the technique it tests.</p>
+          <h2 id="rendering-gallery-heading">{t("gallery.title")}</h2>
+          <p>{t("gallery.description")}</p>
         </div>
       </div>
       <div className="rendering-gallery-controls">
-        <button type="button" onClick={selectPrevious} disabled={activeIndex === 0} aria-label="Previous rendering study">← Previous</button>
-        <button type="button" onClick={selectNext} disabled={activeIndex === items.length - 1} aria-label="Next rendering study">Next →</button>
+        <button type="button" onClick={selectPrevious} disabled={activeIndex === 0} aria-label={t("gallery.previousLabel")}>{t("gallery.previous")}</button>
+        <button type="button" onClick={selectNext} disabled={activeIndex === items.length - 1} aria-label={t("gallery.nextLabel")}>{t("gallery.next")}</button>
       </div>
-      <div className="rendering-gallery-strip" aria-label="Rendering studies">
+      <div className="rendering-gallery-strip" aria-label={t("gallery.title")}>
         {items.map((item, index) => <button key={item.id} type="button" aria-pressed={activeIndex === index} onClick={() => setSelectedIndex(index)}>
           {item.image && <Image src={assetPath(item.image)} alt="" width={240} height={150} sizes="120px" unoptimized />}
           <span className="reading-surface">{item.title}</span>
@@ -500,28 +516,30 @@ function RenderingGallery({ project, standalone = false }: { project?: Project; 
           {selected.details && <p>{selected.details}</p>}
         </div>
       </div>
-      {!standalone && <InternalLink className="rendering-gallery-link" href="/projects/rendering-studies" onClick={(event) => rememberProjectOrigin(event, "rendering-studies")}>View full gallery ↗</InternalLink>}
+      {!standalone && <InternalLink className="rendering-gallery-link" href="/projects/rendering-studies" onClick={(event) => rememberProjectOrigin(event, "rendering-studies")}>{t("gallery.full")}</InternalLink>}
     </section>
   );
 }
 
-function archiveGroupCopy(page: TabId) {
+function archiveGroupCopy(page: TabId, t: ReturnType<typeof useI18n>["t"]) {
   if (page === "design")
-    return { title: "Documents & analysis", description: "Design vaults, comparative essays, and an evolving reference library." };
-  return { title: "Playable projects", description: "Prototypes and game-jam projects, explored through the systems I built and tested." };
+    return { title: t("archive.designTitle"), description: t("archive.designDescription") };
+  return { title: t("archive.gamesTitle"), description: t("archive.gamesDescription") };
 }
 
 function ArchivePage({ page }: { page: TabId }) {
-  const meta = categoryMeta(page);
-  const groupCopy = archiveGroupCopy(page);
-  const categoryProjects = projects[page];
-  const releasedProjects = projects.technical.filter((project) => project.tier === "release");
-  const studyProjects = projects.technical.filter((project) => project.tier === "study" && project.id !== "rendering-studies");
+  const { localize, t } = useI18n();
+  const localizedProjects = useMemo(() => localize(projects), [localize]);
+  const meta = localize(categoryMeta(page));
+  const groupCopy = archiveGroupCopy(page, t);
+  const categoryProjects = localizedProjects[page];
+  const releasedProjects = localizedProjects.technical.filter((project) => project.tier === "release");
+  const studyProjects = localizedProjects.technical.filter((project) => project.tier === "study" && project.id !== "rendering-studies");
 
   return (
     <>
       <header className="archive-header">
-        <span className="section-index reading-surface"><span className="type-reveal">WORK / ARCHIVE</span></span>
+        <span className="section-index reading-surface"><span className="type-reveal">{t("archive.kicker")}</span></span>
         <h1 className="reading-surface"><span className="type-reveal">{meta.label}</span></h1>
         <p className="reading-surface">{meta.description}</p>
         <ArchiveDecoration page={page} />
@@ -533,32 +551,32 @@ function ArchivePage({ page }: { page: TabId }) {
               <div className="archive-group-heading">
                 <span>01</span>
                 <div className="reading-surface">
-                  <h2 id="published-heading">Published projects</h2>
-                  <p>Maintained tools and systems intended for use beyond a single prototype.</p>
+                  <h2 id="published-heading">{t("archive.published")}</h2>
+                  <p>{t("archive.publishedDescription")}</p>
                 </div>
               </div>
               <div className="project-grid">
                 {releasedProjects.map((project) => <ProjectPreview key={project.id} project={project} />)}
               </div>
               <a className="roadmap-slot focus-frame" href="https://github.com/Hubr1zz/ZFramework" target="_blank" rel="noreferrer">
-                <span>NEXT_RELEASE</span>
+                <span>{t("archive.nextRelease")}</span>
                 <strong>ZFramework</strong>
-                <small>IN DEVELOPMENT ↗</small>
+                <small>{t("archive.inDevelopment")}</small>
               </a>
             </section>
             <section className="archive-group" aria-labelledby="studies-heading">
               <div className="archive-group-heading">
                 <span>02</span>
                 <div className="reading-surface">
-                  <h2 id="studies-heading">Studies &amp; experiments</h2>
-                  <p>Focused exercises used to investigate animation, rendering, and editor workflow problems.</p>
+                  <h2 id="studies-heading">{t("archive.studies")}</h2>
+                  <p>{t("archive.studiesDescription")}</p>
                 </div>
               </div>
               <div className="project-grid">
                 {studyProjects.map((project) => <ProjectPreview key={project.id} project={project} />)}
               </div>
             </section>
-            <RenderingGallery project={projects.technical.find((project) => project.id === "rendering-studies")} />
+            <RenderingGallery project={localizedProjects.technical.find((project) => project.id === "rendering-studies")} />
           </>
         ) : (
           <section className="archive-group" aria-labelledby="archive-projects-heading">
@@ -580,8 +598,9 @@ function ArchivePage({ page }: { page: TabId }) {
 }
 
 function CaseMedia({ item, project, onExpand }: { item: BoardItem; project: Project; onExpand: (event: MouseEvent<HTMLButtonElement>, item: BoardItem) => void }) {
+  const { t } = useI18n();
   if (item.image)
-    return <div className="case-media"><Image src={assetPath(item.image)} alt={item.imageAlt ?? item.title} width={1600} height={1000} sizes="(max-width: 900px) 100vw, 65vw" unoptimized /><button className="media-expand" type="button" onClick={(event) => onExpand(event, item)} aria-label={"Enlarge image: " + item.title}>Enlarge image ↗</button></div>;
+    return <div className="case-media"><Image src={assetPath(item.image)} alt={item.imageAlt ?? item.title} width={1600} height={1000} sizes="(max-width: 900px) 100vw, 65vw" unoptimized /><button className="media-expand" type="button" onClick={(event) => onExpand(event, item)} aria-label={t("case.enlarge") + ": " + item.title}>{t("case.enlarge")} ↗</button></div>;
   if (item.diagram)
     return <div className="case-media"><FlowDiagram id={item.diagram} /></div>;
   if (item.visual)
@@ -599,6 +618,7 @@ function relatedProjects(project: Project & { category: TabId }) {
 }
 
 function ImageDialog({ item, onClose }: { item: BoardItem | null; onClose: () => void }) {
+  const { t } = useI18n();
   const dialogRef = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
@@ -621,7 +641,7 @@ function ImageDialog({ item, onClose }: { item: BoardItem | null; onClose: () =>
 
   // Native cancel and Close button provide keyboard closing; backdrop dismissal is pointer-only.
   // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions
-  return <dialog className="image-dialog" ref={dialogRef} aria-labelledby="image-dialog-title" onCancel={(event) => { event.preventDefault(); onClose(); }} onClick={(event) => { if (event.target === event.currentTarget) onClose(); }}>{item && <><div className="image-dialog-header"><h2 id="image-dialog-title">{item.title}</h2><button type="button" className="dialog-close" onClick={onClose}>Close ×</button></div><div className="image-dialog-media"><Image src={assetPath(item.image ?? "")} alt={item.imageAlt ?? item.title} width={2000} height={1400} sizes="90vw" unoptimized /></div><div className="image-dialog-caption"><span>{item.imageAlt ?? item.title}</span><a href={assetPath(item.image ?? "")} target="_blank" rel="noreferrer">Open original ↗</a></div></>}</dialog>;
+  return <dialog className="image-dialog" ref={dialogRef} aria-labelledby="image-dialog-title" onCancel={(event) => { event.preventDefault(); onClose(); }} onClick={(event) => { if (event.target === event.currentTarget) onClose(); }}>{item && <><div className="image-dialog-header"><h2 id="image-dialog-title">{item.title}</h2><button type="button" className="dialog-close" onClick={onClose}>{t("case.close")}</button></div><div className="image-dialog-media"><Image src={assetPath(item.image ?? "")} alt={item.imageAlt ?? item.title} width={2000} height={1400} sizes="90vw" unoptimized /></div><div className="image-dialog-caption"><span>{item.imageAlt ?? item.title}</span><a href={assetPath(item.image ?? "")} target="_blank" rel="noreferrer">{t("case.openOriginal")}</a></div></>}</dialog>;
 }
 
 function CaseCopyContent({ item }: { item: BoardItem }) {
@@ -633,17 +653,18 @@ function CaseCopyContent({ item }: { item: BoardItem }) {
 }
 
 function ProjectDetailContent({ project, category }: { project: Project & { category: TabId }; category: TabId }) {
+  const { localize, t } = useI18n();
   const hasCaseMedia = Boolean(project.gallery?.length || project.image || project.visual);
   const isRenderingStudies = project.id === "rendering-studies";
   const articles = useMemo(() => project.articles ?? [], [project.articles]);
   const isComparative = articles.length > 0;
   const hasBoardContent = hasCaseMedia || project.id === "tactics-design";
-  const items = useMemo(() => hasBoardContent ? getBoardItems(project) : [], [hasBoardContent, project]);
+  const items = useMemo(() => hasBoardContent ? localize(getBoardItems(project)) : [], [hasBoardContent, localize, project]);
   const [activeSection, setActiveSection] = useState(items[0]?.id ?? articles[0]?.id ?? "overview");
   const [dialogItem, setDialogItem] = useState<BoardItem | null>(null);
   const triggerRef = useRef<HTMLElement | null>(null);
-  const meta = categoryMeta(category);
-  const tocEntries = useMemo(() => items.length ? items.map((item) => ({ id: item.id, title: item.title })) : articles.length ? articles.map((article) => ({ id: article.id, title: article.title })) : project.details ? [{ id: "overview", title: "Overview" }] : [], [articles, items, project.details]);
+  const meta = localize(categoryMeta(category));
+  const tocEntries = useMemo(() => items.length ? items.map((item) => ({ id: item.id, title: item.title })) : articles.length ? articles.map((article) => ({ id: article.id, title: article.title })) : project.details ? [{ id: "overview", title: t("case.overview") }] : [], [articles, items, project.details, t]);
 
   useEffect(() => {
     if (isRenderingStudies || !tocEntries.length)
@@ -698,7 +719,7 @@ function ProjectDetailContent({ project, category }: { project: Project & { cate
   return (
     <>
       <header className="case-header">
-        <nav className="case-breadcrumb reading-surface" aria-label="Breadcrumb">
+        <nav className="case-breadcrumb reading-surface" aria-label={t("case.breadcrumb")}>
           <InternalLink href={meta.path}>{meta.label}</InternalLink>
           <span aria-hidden="true">/</span>
           <span>{project.title}</span>
@@ -707,7 +728,7 @@ function ProjectDetailContent({ project, category }: { project: Project & { cate
           <span className="section-index">{meta.label.toUpperCase()} / {project.year}</span>
           <h1>{project.title}</h1>
           <p className="case-intro">{project.description}</p>
-          <ul className="tag-list" aria-label={project.title + " technologies and disciplines"}>
+          <ul className="tag-list" aria-label={project.title + " " + t("case.technologies")}>
             {project.tags.map((tag) => <li key={tag}>{tag}</li>)}
           </ul>
         </div>
@@ -721,8 +742,8 @@ function ProjectDetailContent({ project, category }: { project: Project & { cate
       </header>
       {!isRenderingStudies && tocEntries.length > 0 && (
         <details className="mobile-toc reading-surface">
-          <summary>On this page</summary>
-          <nav className="toc-links" aria-label="Project sections">
+          <summary>{t("case.onThisPage")}</summary>
+          <nav className="toc-links" aria-label={t("case.sections")}>
             {tocEntries.map((entry, index) => (
               <a key={entry.id} className="toc-link" onClick={(event) => { setActiveSection(entry.id); const menu = event.currentTarget.closest("details"); if (menu instanceof HTMLDetailsElement) menu.open = false; }} aria-current={activeSection === entry.id ? "location" : undefined} href={entry.id === "overview" ? "#overview" : "#chapter-" + entry.id}>
                 <span>{String(index + 1).padStart(2, "0")}</span>
@@ -745,7 +766,7 @@ function ProjectDetailContent({ project, category }: { project: Project & { cate
                 <div className="case-copy reading-surface">
                   <p>{item.description}</p>
                   <CaseCopyContent item={item} />
-                  {item.href && <a className="case-source-link" href={item.href} target="_blank" rel="noreferrer">{item.linkLabel ?? "View source"} ↗</a>}
+                  {item.href && <a className="case-source-link" href={item.href} target="_blank" rel="noreferrer">{item.linkLabel ?? t("common.viewSource")} ↗</a>}
                   {item.sources?.length ? <div className="case-sources">{item.sources.map((source) => <a key={source.href} href={source.href} target="_blank" rel="noreferrer">{source.label} ↗</a>)}</div> : null}
                 </div>
               </section>
@@ -756,22 +777,22 @@ function ProjectDetailContent({ project, category }: { project: Project & { cate
                     <span>{String(index + 1).padStart(2, "0")}</span>
                     <h2>{article.title}</h2>
                   </header>
-                  <div className="article-card-copy"><p>{article.summary}</p><div className="article-card-meta"><span>{article.language}</span>{article.status === "draft" && <small className="article-status">Draft</small>}</div><a href={article.href} target="_blank" rel="noreferrer">{article.status === "draft" ? "Open draft" : "Read article"} ↗</a></div>
+                  <div className="article-card-copy"><p>{article.summary}</p><div className="article-card-meta"><span>{article.language}</span>{article.status === "draft" && <small className="article-status">{t("case.draft")}</small>}</div><a href={article.href} target="_blank" rel="noreferrer">{article.status === "draft" ? t("case.openDraft") : t("case.readArticle")} ↗</a></div>
                 </div>
               </section>
             )) : project.details ? (
               <section tabIndex={-1} className="case-section" id="overview">
                 <header className="case-section-heading reading-surface">
                   <span>01</span>
-                  <h2>Overview</h2>
+                  <h2>{t("case.overview")}</h2>
                 </header>
                 <div className="case-copy reading-surface"><p>{project.details}</p></div>
               </section>
             ) : null}
           </div>
           <aside className="case-toc reading-surface">
-            <p>IN THIS PROJECT</p>
-            <nav className="toc-links" aria-label="Project sections">
+            <p>{t("case.inProject")}</p>
+            <nav className="toc-links" aria-label={t("case.sections")}>
               {tocEntries.map((entry, index) => (
                 <a key={entry.id} className="toc-link" onClick={() => setActiveSection(entry.id)} aria-current={activeSection === entry.id ? "location" : undefined} href={entry.id === "overview" ? "#overview" : "#chapter-" + entry.id}>
                   <span>{String(index + 1).padStart(2, "0")}</span>
@@ -783,11 +804,11 @@ function ProjectDetailContent({ project, category }: { project: Project & { cate
         </div>
       )}
       {hasCaseMedia && !isRenderingStudies && !isComparative && <ImageDialog item={dialogItem} onClose={closeImage} />}
-      <nav className="case-navigation" aria-label="Project navigation">
-        <div className="case-navigation-heading"><span>CONTINUE EXPLORING</span><span>{meta.label.toUpperCase()}</span></div>
+      <nav className="case-navigation" aria-label={t("case.navigation")}>
+        <div className="case-navigation-heading"><span>{t("case.continue")}</span><span>{meta.label.toUpperCase()}</span></div>
         <div className="case-navigation-links">
-          <BackLink category={category} projectId={project.id}><span className="case-navigation-card"><small>RETURN TO ARCHIVE</small><strong>Back to {meta.label}</strong><i aria-hidden="true">↗</i></span></BackLink>
-          {relatedProjects(project).map((candidate) => <InternalLink key={candidate.id} href={"/projects/" + candidate.id} onClick={(event) => rememberProjectOrigin(event, candidate.id)}><span className="case-navigation-card"><small>NEXT PROJECT</small><strong>{candidate.title}</strong><i aria-hidden="true">↗</i></span></InternalLink>)}
+          <BackLink category={category} projectId={project.id}><span className="case-navigation-card"><small>{t("case.returnArchive")}</small><strong>{t("case.backTo", { category: meta.label })}</strong><i aria-hidden="true">↗</i></span></BackLink>
+          {relatedProjects(project).map((candidate) => localize(candidate)).map((candidate) => <InternalLink key={candidate.id} href={"/projects/" + candidate.id} onClick={(event) => rememberProjectOrigin(event, candidate.id)}><span className="case-navigation-card"><small>{t("case.nextProject")}</small><strong>{candidate.title}</strong><i aria-hidden="true">↗</i></span></InternalLink>)}
         </div>
       </nav>
     </>
@@ -795,7 +816,9 @@ function ProjectDetailContent({ project, category }: { project: Project & { cate
 }
 
 export function ProjectDetail({ project, category }: { project: Project & { category: TabId }; category: TabId }) {
-  return <PortfolioShell page={category}><ProjectDetailContent project={project} category={category} /></PortfolioShell>;
+  const { localize } = useI18n();
+  const localizedProject = useMemo(() => localize(project), [localize, project]);
+  return <PortfolioShell page={category}><ProjectDetailContent project={localizedProject} category={category} /></PortfolioShell>;
 }
 
 export function Portfolio({ page = "home" }: { page?: PageId }) {

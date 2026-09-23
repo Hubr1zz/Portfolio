@@ -35,6 +35,12 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--signal); outlin
 .brand-label { min-width: 0; color: var(--muted); font-size: 12px; line-height: 1.3; }
 .brand small, .hero-sequence { color: var(--muted); font-size: 12px; line-height: 1.3; }
 .header-links { min-width: 0; display: flex; align-items: center; gap: 28px; color: var(--muted); font-size: 12px; line-height: 1; }
+.header-actions { min-width: 0; display: flex; align-items: center; gap: 22px; }
+.language-toggle { min-height: 36px; padding: 8px 10px; display: inline-flex; align-items: center; gap: 5px; border: 1px solid var(--line-strong); background: transparent; color: var(--muted); font: 11px/1 var(--font-mono); letter-spacing: .04em; cursor: pointer; white-space: nowrap; transition: border-color 200ms ease, color 200ms ease, background-color 200ms ease; }
+.language-toggle:hover, .language-toggle:focus-visible { border-color: var(--signal); background: var(--signal-soft); color: var(--ink); }
+.language-toggle i { color: var(--line-strong); font-style: normal; }
+.language-toggle span { transition: color 200ms ease; }
+.language-toggle .is-active { color: var(--signal); font-weight: 700; }
 .header-links a { min-height: 44px; padding: 14px 0 12px; position: relative; white-space: nowrap; transition: color 300ms cubic-bezier(.22, 1, .36, 1); }
 .header-links a::after { content: ""; position: absolute; right: 0; bottom: 4px; left: 0; height: 2px; background: var(--signal); transform: scaleX(0); transform-origin: right; transition: transform 300ms cubic-bezier(.22, 1, .36, 1); }
 .header-links a:hover, .header-links a:focus-visible, .header-links a[aria-current="page"] { color: var(--signal); }
@@ -381,7 +387,8 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--signal); outlin
   html { scroll-padding-top: 140px; }
   .site-header, .hero, .home-work-portal, .category-index, .profile-section, .work-page-head, .work-page-body, .site-footer { width: calc(100% - 48px); }
   .site-header { min-height: 80px; align-items: flex-start; padding: 16px 0 12px; flex-wrap: wrap; gap: 8px 24px; }
-  .header-links { width: 100%; justify-content: space-between; gap: 8px; order: 3; }
+  .header-actions { width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; order: 3; }
+  .header-links { width: auto; justify-content: space-between; gap: 8px; }
   .header-links a { flex: 1 1 auto; text-align: center; }
   .header-links a:first-child { text-align: left; }
   .hero { min-height: 0; padding: 36px 0 44px; }
@@ -404,6 +411,8 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--signal); outlin
   .brand-label { font-size: 12px; }
   .header-links { font-size: 12px; }
   .header-links a { padding-top: 12px; padding-bottom: 12px; }
+  .header-actions { gap: 8px; }
+  .language-toggle { min-height: 34px; padding: 7px; font-size: 10px; }
   .hero { padding-top: 30px; }
   .hero h1 { font-size: clamp(48px, 14vw, 68px); }
   .hero-intro { font-size: 18px; }

@@ -274,6 +274,22 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--signal); outlin
 .vault-loop-steps b { font-size: 13px; line-height: 1.25; }
 .vault-loop-steps small { color: var(--muted); font-size: 11px; line-height: 1.35; }
 .vault-loop-steps > i { color: var(--signal); font-style: normal; text-align: center; }
+.vault-structure, .vault-ai-flow, .action-chain-overview, .action-chain-reactors { min-height: 270px; padding: 58px 20px 20px; background: #eeede6; }
+.vault-structure-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; counter-reset: vault-part; }
+.vault-structure-grid b { min-width: 0; min-height: 64px; padding: 14px 10px 10px; display: grid; place-items: center; position: relative; border: 1px solid var(--line-strong); background: var(--surface); font-size: 12px; line-height: 1.3; text-align: center; overflow-wrap: anywhere; }
+.vault-structure-grid b::before { content: counter(vault-part, decimal-leading-zero); counter-increment: vault-part; position: absolute; top: 6px; left: 7px; color: var(--signal); font: 10px/1 var(--font-mono); }
+.vault-structure > p, .vault-ai-flow > p, .action-chain-overview > p { margin: 14px 0 0; color: var(--muted); font-size: 12px; line-height: 1.45; }
+.vault-ai-flow .flow-chain { min-height: 150px; padding: 0; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-template-rows: minmax(70px, auto); }
+.action-root-flow { display: grid; grid-template-columns: minmax(0, 1fr) 18px minmax(0, 1fr) 18px minmax(0, 1.2fr); align-items: center; gap: 8px; }
+.action-root-flow b, .action-root-flow strong, .action-phase-flow span { min-width: 0; min-height: 58px; padding: 12px 8px; display: grid; place-items: center; border: 1px solid var(--line-strong); background: var(--surface); font-size: 12px; line-height: 1.3; text-align: center; overflow-wrap: anywhere; }
+.action-root-flow strong { background: var(--signal); color: var(--paper); }
+.action-root-flow i, .action-phase-flow i { color: var(--signal); font-style: normal; text-align: center; }
+.action-phase-flow { margin-top: 10px; display: grid; grid-template-columns: minmax(0, 1fr) 18px minmax(0, 1fr) 18px minmax(0, 1fr) 18px; align-items: center; gap: 6px; }
+.action-phase-flow span { min-height: 44px; padding: 8px; background: var(--signal-soft); }
+.action-chain-reactors { display: grid; grid-template-columns: minmax(0, 1fr) 22px minmax(90px, .65fr) 22px minmax(0, 1fr); align-items: center; gap: 8px; }
+.reactor-scopes, .reactor-results { display: grid; gap: 6px; }
+.reactor-scopes b, .reactor-results b { min-width: 0; padding: 8px; border-left: 1px solid var(--signal); background: color-mix(in srgb, var(--surface) 72%, transparent); font-size: 11px; line-height: 1.25; overflow-wrap: anywhere; }
+.reactor-hub { min-height: 76px; padding: 12px 8px; display: grid; place-items: center; background: var(--signal); color: var(--paper); font: 600 13px/1.3 var(--font-mono); text-align: center; }
 
 .site-footer { margin-top: 72px; padding: 40px 0 24px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, 1fr); gap: 48px; border-top: 1px solid var(--line-strong); }
 .footer-kicker { color: var(--signal); font-size: 12px; line-height: 1.3; }
@@ -644,6 +660,8 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--signal); outlin
 .case-content, .case-toc { min-width: 0; }
 .case-toc { align-self: start; position: sticky; top: 112px; }
 .case-toc > p { margin: 0 0 10px; color: var(--signal); font: 12px/1.3 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; }
+.toc-back { min-height: 44px; margin-bottom: 18px; padding: 10px 12px; display: flex; align-items: center; gap: 9px; border-top: 1px solid var(--line-strong); border-bottom: 1px solid var(--line-strong); color: var(--signal); font: 12px/1.3 var(--font-mono); letter-spacing: .04em; }
+.toc-back:hover, .toc-back:focus-visible { background: var(--signal-soft); text-decoration: none; }
 .toc-links { min-width: 0; display: grid; }
 .toc-link { min-width: 0; min-height: 48px; padding: 12px 12px; display: grid; grid-template-columns: 32px minmax(0, 1fr); align-items: center; gap: 8px; border-left: 2px solid transparent; border-bottom: 1px solid var(--line); color: var(--muted); font-size: 14px; line-height: 1.4; overflow-wrap: anywhere; transition: color 260ms ease, background-color 260ms ease, border-color 260ms ease; }
 .toc-link > span { color: var(--signal); font: 12px/1.3 var(--font-mono); }
@@ -903,6 +921,12 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--signal); outlin
   .other-tabs a, .other-tabs a + a { padding: 16px 12px; }
   .editor-nav-panel > div { grid-template-columns: minmax(0, 1fr); }
   .vault-map-groups section { grid-template-columns: 32px minmax(0, 1fr); }
+  .vault-structure-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .vault-ai-flow .flow-chain { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(2, minmax(56px, auto)); }
+  .action-root-flow, .action-phase-flow { grid-template-columns: minmax(0, 1fr); }
+  .action-root-flow i, .action-phase-flow i { transform: rotate(90deg); }
+  .action-chain-reactors { grid-template-columns: minmax(0, 1fr); }
+  .action-chain-reactors > .flow-line { width: 1px; height: 18px; justify-self: center; }
 }
 
 @media (max-width: 360px) {

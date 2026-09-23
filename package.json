@@ -7,6 +7,7 @@
   },
   "scripts": {
     "dev": "vinext dev",
+    "prebuild": "npm run i18n:check",
     "build": "vinext build",
     "build:pages": "next build",
     "steam:sync": "node scripts/sync-steam-library.mjs",
@@ -15,6 +16,7 @@
     "start": "vinext start",
     "test": "npm run build && node --test tests/rendered-html.test.mjs tests/steam-sync.test.mjs tests/steam-screenshot-import.test.mjs tests/contour-field.test.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
+    "i18n:check": "node --experimental-strip-types scripts/check-i18n.mjs",
     "db:generate": "drizzle-kit generate"
   },
   "dependencies": {

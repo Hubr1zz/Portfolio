@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
-import { messages, type MessageKey, zhContent } from "./translations";
+import { contentMessages, messages, type ContentKey, type MessageKey } from "./translations";
 
 export type Locale = "en" | "zh";
 type Variables = Record<string, string | number>;
@@ -10,7 +10,12 @@ type I18nContextValue = {
   setLocale: (locale: Locale) => void;
   toggleLocale: () => void;
   t: (key: MessageKey, variables?: Variables) => string;
-  localize: <T>(value: T) => T;
+  content: (key: ContentKey) => string;
+  localizeProject: <T extends { id: string }>(project: T) => T;
+  localizeProjects: <T extends Record<string, { id: string }[]>>(projects: T) => T;
+  localizeTab: <T extends { id: string }>(tab: T) => T;
+  localizeTabs: <T extends { id: string }[]>(tabs: T) => T;
+  localizeBoardItems: <T extends { id: string }[]>(projectId: string, items: T) => T;
 };
 
 const storageKey = "portfolio-locale";
@@ -22,15 +27,21 @@ function interpolate(template: string, variables?: Variables) {
   return template.replace(/\{(\w+)\}/g, (match, key: string) => key in variables ? String(variables[key]) : match);
 }
 
-function localizeValue<T>(value: T, locale: Locale): T {
+function pathSegment(value: unknown, index: number) {
+  if (value && typeof value === "object" && "id" in value && typeof value.id === "string")
+    return value.id;
+  return String(index);
+}
+
+function localizeValue<T>(value: T, path: string, locale: Locale): T {
   if (locale === "en")
     return value;
   if (typeof value === "string")
-    return (zhContent[value] ?? value) as T;
+    return ((contentMessages.zh as Record<string, string>)[path] ?? value) as T;
   if (Array.isArray(value))
-    return value.map((item) => localizeValue(item, locale)) as T;
+    return value.map((item, index) => localizeValue(item, `${path}.${pathSegment(item, index)}`, locale)) as T;
   if (value && typeof value === "object")
-    return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, localizeValue(item, locale)])) as T;
+    return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, localizeValue(item, `${path}.${key}`, locale)])) as T;
   return value;
 }
 
@@ -65,8 +76,13 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
   const toggleLocale = useCallback(() => setLocale(locale === "en" ? "zh" : "en"), [locale, setLocale]);
   const t = useCallback((key: MessageKey, variables?: Variables) => interpolate(messages[locale][key], variables), [locale]);
-  const localize = useCallback(<T,>(value: T) => localizeValue(value, locale), [locale]);
-  const contextValue = useMemo(() => ({ locale, setLocale, toggleLocale, t, localize }), [locale, setLocale, toggleLocale, t, localize]);
+  const content = useCallback((key: ContentKey) => contentMessages[locale][key], [locale]);
+  const localizeProject = useCallback(<T extends { id: string },>(project: T) => localizeValue(project, `project.${project.id}`, locale), [locale]);
+  const localizeProjects = useCallback(<T extends Record<string, { id: string }[]>,>(projectGroups: T) => Object.fromEntries(Object.entries(projectGroups).map(([group, groupProjects]) => [group, groupProjects.map((project) => localizeValue(project, `project.${project.id}`, locale))])) as T, [locale]);
+  const localizeTab = useCallback(<T extends { id: string },>(tab: T) => localizeValue(tab, `tab.${tab.id}`, locale), [locale]);
+  const localizeTabs = useCallback(<T extends { id: string }[],>(tabList: T) => tabList.map((tab) => localizeValue(tab, `tab.${tab.id}`, locale)) as T, [locale]);
+  const localizeBoardItems = useCallback(<T extends { id: string }[],>(projectId: string, items: T) => items.map((item) => localizeValue(item, `project.${projectId}.section.${item.id}`, locale)) as T, [locale]);
+  const contextValue = useMemo(() => ({ locale, setLocale, toggleLocale, t, content, localizeProject, localizeProjects, localizeTab, localizeTabs, localizeBoardItems }), [locale, setLocale, toggleLocale, t, content, localizeProject, localizeProjects, localizeTab, localizeTabs, localizeBoardItems]);
 
   return <I18nContext.Provider value={contextValue}>{children}</I18nContext.Provider>;
 }

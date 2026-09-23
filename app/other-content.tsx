@@ -7,7 +7,6 @@ import { assetPath, InternalLink } from "./portfolio-links";
 import { useI18n } from "./i18n";
 
 type OtherSection = "games" | "projects";
-type SortMode = "playtime" | "name";
 type LibraryScope = "primary" | "family";
 type SteamGame = {
   appid: number;
@@ -98,7 +97,6 @@ function GamesLibrary() {
   const [error, setError] = useState<string | null>(null);
   const [retryKey, setRetryKey] = useState(0);
   const [query, setQuery] = useState("");
-  const [sortMode, setSortMode] = useState<SortMode>("playtime");
   const [scope, setScope] = useState<LibraryScope>("primary");
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
@@ -135,10 +133,8 @@ function GamesLibrary() {
       return [];
     const normalizedQuery = query.trim().toLocaleLowerCase();
     const scopedGames = library.source === "screenshots" ? library.games : scope === "primary" ? library.games.filter((game) => game.playtimeMinutes > 0) : library.games.filter((game) => game.playtimeMinutes > 0 || game.origin === "family" || game.origin === "both");
-    return scopedGames
-      .filter((game) => !normalizedQuery || game.name.toLocaleLowerCase().includes(normalizedQuery))
-      .sort((left, right) => sortMode === "name" ? left.name.localeCompare(right.name) : right.playtimeMinutes - left.playtimeMinutes);
-  }, [library, query, scope, sortMode]);
+    return scopedGames.filter((game) => !normalizedQuery || game.name.toLocaleLowerCase().includes(normalizedQuery));
+  }, [library, query, scope]);
 
   function retryLoad() {
     setError(null);
@@ -167,16 +163,14 @@ function GamesLibrary() {
       <div className="library-controls" aria-label={t("library.controls")}>
         <label htmlFor="game-search">{t("library.search")}</label>
         <input id="game-search" type="search" value={query} onChange={(event) => { setQuery(event.target.value); setVisibleCount(PAGE_SIZE); }} placeholder={t("library.searchPlaceholder")} />
-        {library.source !== "screenshots" && <><label htmlFor="game-library-scope">{t("library.scope")}</label><select id="game-library-scope" value={scope} onChange={(event) => { const nextScope = event.target.value as LibraryScope; setScope(nextScope); setSortMode(nextScope === "family" ? "name" : "playtime"); setVisibleCount(PAGE_SIZE); }}><option value="primary">{t("library.mine")}</option><option value="family">{t("library.family")}</option></select></>}
-        <label htmlFor="game-sort">{t("library.sort")}</label>
-        <select id="game-sort" value={sortMode} onChange={(event) => { setSortMode(event.target.value as SortMode); setVisibleCount(PAGE_SIZE); }}><option value="playtime">{t("library.playtime")}</option><option value="name">{t("library.name")}</option></select>
+        {library.source !== "screenshots" && <><label htmlFor="game-library-scope">{t("library.scope")}</label><select id="game-library-scope" value={scope} onChange={(event) => { setScope(event.target.value as LibraryScope); setVisibleCount(PAGE_SIZE); }}><option value="primary">{t("library.mine")}</option><option value="family">{t("library.family")}</option></select></>}
       </div>
       {filteredGames.length > 0 ? <>
         <div className="game-grid">
           {visibleGames.map((game) => <a className="game-card" href={`https://store.steampowered.com/app/${game.appid}/`} target="_blank" rel="noreferrer" key={game.appid}><GameCover game={game} /><div className="game-card-copy"><h3>{game.name}</h3><p>{library.source === "screenshots" ? t("library.cardSnapshot") : scope === "family" ? t("library.family") : formatPlaytime(game.playtimeMinutes, t)}</p><span className="game-card-external" aria-label={t("library.opensStore")}>↗</span></div></a>)}
         </div>
         {visibleCount < filteredGames.length && <button type="button" className="load-more" onClick={() => setVisibleCount((value) => value + PAGE_SIZE)}>{t("library.loadMore")} <span aria-hidden="true">+24</span></button>}
-      </> : query.trim() ? <div className="library-no-results"><p>{t("library.noMatch", { query: query.trim() })}</p><button type="button" className="text-action" onClick={() => { setQuery(""); setVisibleCount(PAGE_SIZE); }}>{t("library.reset")} <span aria-hidden="true">↗</span></button></div> : scope === "primary" ? <div className="library-no-results"><p>{t("library.noPlaytime")}</p><button type="button" className="text-action" onClick={() => { setScope("family"); setSortMode("name"); setVisibleCount(PAGE_SIZE); }}>{t("library.exploreFamily")} <span aria-hidden="true">↗</span></button></div> : <div className="library-no-results"><p>{t("library.noGames")}</p></div>}
+      </> : query.trim() ? <div className="library-no-results"><p>{t("library.noMatch", { query: query.trim() })}</p><button type="button" className="text-action" onClick={() => { setQuery(""); setVisibleCount(PAGE_SIZE); }}>{t("library.reset")} <span aria-hidden="true">↗</span></button></div> : scope === "primary" ? <div className="library-no-results"><p>{t("library.noPlaytime")}</p><button type="button" className="text-action" onClick={() => { setScope("family"); setVisibleCount(PAGE_SIZE); }}>{t("library.exploreFamily")} <span aria-hidden="true">↗</span></button></div> : <div className="library-no-results"><p>{t("library.noGames")}</p></div>}
     </section>
   );
 }

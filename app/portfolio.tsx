@@ -74,7 +74,7 @@ function categoryPath(category: TabId) {
   return categoryMeta(category).path;
 }
 
-function BackLink({ category, projectId, className, children }: { category: TabId; projectId: string; className?: string; children: ReactNode }) {
+function BackLink({ category, projectId, className, compact = false, children }: { category: TabId; projectId: string; className?: string; compact?: boolean; children: ReactNode }) {
   const { t } = useI18n();
   const defaultHref = categoryPath(category) + "#project-" + projectId;
   const [href, setHref] = useState(defaultHref);
@@ -97,11 +97,11 @@ function BackLink({ category, projectId, className, children }: { category: TabI
     }
   }, [projectId]);
 
-  return <InternalLink className={className} href={href}>{originPath !== null && normalizePortfolioPath(originPath) === "/" ? <span className="case-navigation-card"><small>{t("case.returnSelected")}</small><strong>{t("case.backSelected")}</strong><i aria-hidden="true">↗</i></span> : children}</InternalLink>;
+  return <InternalLink className={className} href={href}>{!compact && originPath !== null && normalizePortfolioPath(originPath) === "/" ? <span className="case-navigation-card"><small>{t("case.returnSelected")}</small><strong>{t("case.backSelected")}</strong><i aria-hidden="true">↗</i></span> : children}</InternalLink>;
 }
 
 function ProjectVisual({ project }: { project: Project }) {
-  const { localize } = useI18n();
+  const { content } = useI18n();
   if (project.gallery) {
     return (
       <div className="media-grid">
@@ -116,19 +116,19 @@ function ProjectVisual({ project }: { project: Project }) {
     return (
       <figure className="project-image">
         <Image src={assetPath(project.image)} alt={project.imageAlt ?? ""} width={1200} height={720} sizes="(max-width: 760px) 100vw, 50vw" unoptimized />
-        <figcaption><span>{localize("FIELD_CAPTURE")}</span><span>{project.index} / {project.year}</span></figcaption>
+        <figcaption><span>{content("visual.fieldCapture")}</span><span>{project.index} / {project.year}</span></figcaption>
       </figure>
     );
   }
 
   if (project.visual === "workflow") {
     return (
-      <div className="system-visual workflow-visual" aria-label={localize("Design to implementation workflow diagram")}>
-        <span className="visual-label">{localize("SYSTEM_MAP / LIVE")}</span>
-        <div className="system-node node-a">{localize("Design docs")}</div>
-        <div className="system-node node-b">{localize("Draft change")}</div>
-        <div className="system-node node-c">{localize("Review")}</div>
-        <div className="system-node node-d">{localize("Implementation")}</div>
+      <div className="system-visual workflow-visual" aria-label={content("visual.workflow.aria")}>
+        <span className="visual-label">{content("visual.workflow.label")}</span>
+        <div className="system-node node-a">{content("visual.workflow.designDocs")}</div>
+        <div className="system-node node-b">{content("visual.workflow.draftChange")}</div>
+        <div className="system-node node-c">{content("visual.workflow.review")}</div>
+        <div className="system-node node-d">{content("visual.workflow.implementation")}</div>
         <div className="system-core"><span>SPEC</span></div>
       </div>
     );
@@ -136,140 +136,184 @@ function ProjectVisual({ project }: { project: Project }) {
 
   if (project.visual === "interaction") {
     return (
-      <div className="system-visual interaction-visual" aria-label={localize("Unified interaction system diagram")}>
-        <span className="visual-label">{localize("EVENT_ROUTING / 3D + UI")}</span>
+      <div className="system-visual interaction-visual" aria-label={content("visual.interaction.aria")}>
+        <span className="visual-label">{content("visual.interaction.label")}</span>
         <div className="input-stream"><i /><i /><i /><i /><i /></div>
-        <div className="interaction-core"><span>I</span><small>{localize("DISPATCH")}</small></div>
-        <div className="output-tags"><span>{localize("FOCUS")}</span><span>{localize("CLICK")}</span><span>{localize("DRAG")}</span></div>
+        <div className="interaction-core"><span>I</span><small>{content("visual.interaction.dispatch")}</small></div>
+        <div className="output-tags"><span>{content("diagram.interactionRouting.focus")}</span><span>{content("diagram.interactionRouting.click")}</span><span>{content("diagram.interactionRouting.drag")}</span></div>
       </div>
     );
   }
 
   if (project.visual === "editor") {
     return (
-      <div className="system-visual editor-visual" aria-label={localize("Abstract Unity editor window layout")}>
-        <span className="visual-label">{localize("EDITOR_LAYER / MODULAR")}</span>
+      <div className="system-visual editor-visual" aria-label={content("visual.editor.aria")}>
+        <span className="visual-label">{content("visual.editor.label")}</span>
         <div className="fake-toolbar"><i /><i /><i /><i /></div>
         <div className="fake-tree"><span /><span /><span /><span /><span /></div>
-        <div className="fake-panel"><b>{localize("INSPECT")}</b><i /><i /><i /></div>
+        <div className="fake-panel"><b>{content("visual.editor.inspect")}</b><i /><i /><i /></div>
       </div>
     );
   }
 
   if (project.visual === "prototype") {
     return (
-      <div className="system-visual prototype-visual" aria-label={localize("Abstract movement trajectory diagram")}>
-        <span className="visual-label">{localize("MOTION_TRACE / ITERATION")}</span>
+      <div className="system-visual prototype-visual" aria-label={content("visual.prototype.aria")}>
+        <span className="visual-label">{content("visual.prototype.label")}</span>
         <div className="motion-line" />
         <div className="motion-point p1">A</div><div className="motion-point p2">B</div><div className="motion-point p3">C</div>
       </div>
     );
   }
 
-  return <div className="system-visual quiet-visual"><span className="visual-label">{localize("ARCHIVE")} / {project.year}</span><strong>{project.index}</strong></div>;
+  return <div className="system-visual quiet-visual"><span className="visual-label">{content("visual.archive")} / {project.year}</span><strong>{project.index}</strong></div>;
 }
 
 function FlowDiagram({ id }: { id: DiagramId }) {
-  const { localize } = useI18n();
+  const { content } = useI18n();
   if (id === "workflow-overview") {
     return (
-      <div className="flow-diagram flow-overview" aria-label={localize("zWorkFlow production workflow diagram")}>
-        <span className="flow-kicker">{localize("WORKFLOW_OVERVIEW")}</span>
-        <span className="flow-workbench">{localize("WORKBENCH")}</span>
-        <div className="flow-overview-steps"><b>{localize("Design documents")}</b><b>{localize("Draft modules")}</b><b>{localize("Review & approve")}</b><b>{localize("Implement & verify")}</b><b>{localize("Sync & archive")}</b></div>
-        <div className="flow-context-rail"><span>{localize("Project skills")}</span><span>OpenSpec</span><span>{localize("Code evidence")}</span></div>
+      <div className="flow-diagram flow-overview" aria-label={content("diagram.workflowOverview.aria")}>
+        <span className="flow-kicker">{content("diagram.workflowOverview.label")}</span>
+        <span className="flow-workbench">{content("diagram.shared.workbench")}</span>
+        <div className="flow-overview-steps"><b>{content("diagram.workflowOverview.designDocuments")}</b><b>{content("diagram.workflowOverview.draftModules")}</b><b>{content("diagram.workflowOverview.reviewApprove")}</b><b>{content("diagram.workflowOverview.implementVerify")}</b><b>{content("diagram.workflowOverview.syncArchive")}</b></div>
+        <div className="flow-context-rail"><span>{content("diagram.shared.projectSkills")}</span><span>OpenSpec</span><span>{content("diagram.workflowOverview.codeEvidence")}</span></div>
       </div>
     );
   }
 
   if (id === "editor-overview") {
     return (
-      <div className="flow-diagram editor-overview" aria-label={localize("zEditor workspace and scene tools overview")}>
-        <span className="flow-kicker">{localize("EDITOR_TOOLKIT / OVERVIEW")}</span>
-        <div className="editor-overview-columns"><section><small>{localize("ZEDITOR CONTRIBUTIONS")}</small><strong>{localize("Favorites interface")}</strong><span>{localize("Inspector component workflows")}</span></section><section><small>{localize("SCENE TOOLS")}</small><strong>{localize("Independent package")}</strong><span>{localize("Camera / Pivot / Saved expansion")}</span></section></div>
+      <div className="flow-diagram editor-overview" aria-label={content("diagram.editorOverview.aria")}>
+        <span className="flow-kicker">{content("diagram.editorOverview.label")}</span>
+        <div className="editor-overview-columns"><section><small>{content("diagram.editorOverview.contributions")}</small><strong>{content("diagram.editorOverview.favorites")}</strong><span>{content("diagram.editorOverview.inspectorWorkflows")}</span></section><section><small>{content("diagram.editorOverview.sceneTools")}</small><strong>{content("diagram.editorOverview.independentPackage")}</strong><span>{content("diagram.editorOverview.features")}</span></section></div>
       </div>
     );
   }
 
   if (id === "editor-navigation") {
     return (
-      <div className="flow-diagram editor-navigation" aria-label={localize("zEditor navigation schematic")}>
-        <span className="flow-kicker">{localize("EDITOR_NAVIGATION")}</span>
-        <div className="editor-nav-context"><b>{localize("Project overlay")}</b><b>{localize("Favorites window")}</b></div>
-        <div className="editor-nav-panel"><span>{localize("SHARED FAVORITES PANEL")}</span><div><i>{localize("Page tabs")}</i><i>{localize("Grid / list")}</i><i>{localize("Navigation")}</i></div></div>
-        <p>{localize("One interface · two contexts")}</p>
+      <div className="flow-diagram editor-navigation" aria-label={content("diagram.editorNavigation.aria")}>
+        <span className="flow-kicker">{content("diagram.editorNavigation.label")}</span>
+        <div className="editor-nav-context"><b>{content("diagram.editorNavigation.projectOverlay")}</b><b>{content("diagram.editorNavigation.favoritesWindow")}</b></div>
+        <div className="editor-nav-panel"><span>{content("diagram.editorNavigation.sharedPanel")}</span><div><i>{content("diagram.editorNavigation.pageTabs")}</i><i>{content("diagram.editorNavigation.gridList")}</i><i>{content("diagram.editorNavigation.navigation")}</i></div></div>
+        <p>{content("diagram.editorNavigation.summary")}</p>
       </div>
     );
   }
 
   if (id === "editor-scene") {
     return (
-      <div className="flow-diagram editor-scene" aria-label={localize("zEditor scene tools diagram")}>
-        <span className="flow-kicker">{localize("SCENE_TOOLS / PERSISTENT_STATE")}</span>
-        <div className="editor-scene-grid"><section><b>{localize("Camera follow & LookAt")}</b><small>{localize("SceneView follows and looks toward the target")}</small></section><section><b>{localize("Rotation root")}</b><small>{localize("Selected target becomes the pivot")}</small></section><section><b>{localize("Saved expansion")}</b><small>{localize("Scene · prefab · project folders")}</small></section></div>
+      <div className="flow-diagram editor-scene" aria-label={content("diagram.editorScene.aria")}>
+        <span className="flow-kicker">{content("diagram.editorScene.label")}</span>
+        <div className="editor-scene-grid"><section><b>{content("diagram.editorScene.camera")}</b><small>{content("diagram.editorScene.cameraDescription")}</small></section><section><b>{content("diagram.editorScene.rotationRoot")}</b><small>{content("diagram.editorScene.rotationDescription")}</small></section><section><b>{content("diagram.editorScene.savedExpansion")}</b><small>{content("diagram.editorScene.expansionDescription")}</small></section></div>
       </div>
     );
   }
 
   if (id === "vault-map") {
     return (
-      <div className="flow-diagram vault-map" aria-label={localize("Living design vault overview")}>
-        <span className="flow-kicker">{localize("LIVING DESIGN VAULT")}</span>
-        <div className="vault-map-groups"><section><small>01</small><b>{localize("Principles & world")}</b><span>{localize("Premise, rules, and setting")}</span></section><section><small>02</small><b>{localize("Hunt / Showdown / Settlement")}</b><span>{localize("Three phases, one consequence loop")}</span></section><section><small>03</small><b>{localize("Shared rules / Terms / References")}</b><span>{localize("Linked knowledge for revision")}</span></section></div>
+      <div className="flow-diagram vault-map" aria-label={content("diagram.vaultMap.aria")}>
+        <span className="flow-kicker">{content("diagram.vaultMap.label")}</span>
+        <div className="vault-map-groups"><section><small>01</small><b>{content("diagram.vaultMap.principles")}</b><span>{content("diagram.vaultMap.principlesDescription")}</span></section><section><small>02</small><b>{content("diagram.vaultMap.phases")}</b><span>{content("diagram.vaultMap.phasesDescription")}</span></section><section><small>03</small><b>{content("diagram.vaultMap.sharedRules")}</b><span>{content("diagram.vaultMap.sharedRulesDescription")}</span></section></div>
       </div>
     );
   }
 
   if (id === "vault-loop") {
     return (
-      <div className="flow-diagram vault-loop" aria-label={localize("Living design vault tactical loop")}>
-        <span className="flow-kicker">{localize("TACTICAL_LOOP")}</span>
-        <div className="vault-loop-steps"><section><b>{localize("Hunt")}</b><small>{localize("Information & risk")}</small></section><i>→</i><section><b>{localize("Showdown")}</b><small>{localize("Tactical commitment")}</small></section><i>→</i><section><b>{localize("Settlement")}</b><small>{localize("Lasting consequences")}</small></section><i>→</i><section><b>{localize("Preparation")}</b><small>{localize("Ready the next hunt")}</small></section></div>
+      <div className="flow-diagram vault-loop" aria-label={content("diagram.vaultLoop.aria")}>
+        <span className="flow-kicker">{content("diagram.vaultLoop.label")}</span>
+        <div className="vault-loop-steps"><section><b>{content("diagram.vaultLoop.hunt")}</b><small>{content("diagram.vaultLoop.huntDescription")}</small></section><i>→</i><section><b>{content("diagram.vaultLoop.showdown")}</b><small>{content("diagram.vaultLoop.showdownDescription")}</small></section><i>→</i><section><b>{content("diagram.vaultLoop.settlement")}</b><small>{content("diagram.vaultLoop.settlementDescription")}</small></section><i>→</i><section><b>{content("diagram.vaultLoop.preparation")}</b><small>{content("diagram.vaultLoop.preparationDescription")}</small></section></div>
+      </div>
+    );
+  }
+
+  if (id === "vault-structure") {
+    return (
+      <div className="flow-diagram vault-structure" aria-label={content("diagram.vaultStructure.aria")}>
+        <span className="flow-kicker">{content("diagram.vaultStructure.label")}</span>
+        <div className="vault-structure-grid"><b>{content("diagram.vaultStructure.inspirations")}</b><b>{content("diagram.vaultStructure.art")}</b><b>{content("diagram.vaultStructure.examples")}</b><b>{content("diagram.vaultStructure.documents")}</b><b>{content("diagram.vaultStructure.glossary")}</b><b>{content("diagram.vaultStructure.other")}</b></div>
+        <p>{content("diagram.vaultStructure.description")}</p>
+      </div>
+    );
+  }
+
+  if (id === "vault-ai-flow") {
+    return (
+      <div className="flow-diagram vault-ai-flow" aria-label={content("diagram.vaultAiFlow.aria")}>
+        <span className="flow-kicker">{content("diagram.vaultAiFlow.label")}</span>
+        <div className="flow-chain"><b>{content("diagram.vaultAiFlow.idea")}</b><i>→</i><b>{content("diagram.vaultAiFlow.review")}</b><i>→</i><b>{content("diagram.vaultAiFlow.route")}</b><i>→</i><b>{content("diagram.vaultAiFlow.connect")}</b></div>
+        <p>{content("diagram.vaultAiFlow.description")}</p>
+      </div>
+    );
+  }
+
+  if (id === "action-chain-overview") {
+    return (
+      <div className="flow-diagram action-chain-overview" aria-label={content("diagram.actionChainOverview.aria")}>
+        <span className="flow-kicker">{content("diagram.actionChainOverview.label")}</span>
+        <div className="action-root-flow"><b>{content("diagram.actionChainOverview.external")}</b><i>→</i><b>{content("diagram.actionChainOverview.rootQueue")}</b><i>→</i><strong>{content("diagram.actionChainOverview.currentChain")}</strong></div>
+        <div className="action-phase-flow"><span>{content("diagram.actionChainOverview.before")}</span><i>→</i><span>{content("diagram.actionChainOverview.execute")}</span><i>→</i><span>{content("diagram.actionChainOverview.after")}</span><i>↺</i></div>
+        <p>{content("diagram.actionChainOverview.description")}</p>
+      </div>
+    );
+  }
+
+  if (id === "action-chain-reactors") {
+    return (
+      <div className="flow-diagram action-chain-reactors" aria-label={content("diagram.actionChainReactors.aria")}>
+        <span className="flow-kicker">{content("diagram.actionChainReactors.label")}</span>
+        <div className="reactor-scopes"><b>{content("diagram.actionChainReactors.global")}</b><b>{content("diagram.actionChainReactors.entity")}</b><b>{content("diagram.actionChainReactors.chain")}</b><b>{content("diagram.actionChainReactors.subtree")}</b><b>{content("diagram.actionChainReactors.descendant")}</b><b>{content("diagram.actionChainReactors.local")}</b></div>
+        <i className="flow-line" />
+        <div className="reactor-hub">Reactor</div>
+        <i className="flow-line" />
+        <div className="reactor-results"><b>{content("diagram.actionChainReactors.modify")}</b><b>{content("diagram.actionChainReactors.prevent")}</b><b>{content("diagram.actionChainReactors.inject")}</b></div>
       </div>
     );
   }
 
   if (id === "workflow-lifecycle") {
     return (
-      <div className="flow-diagram flow-lifecycle" aria-label={localize("zWorkFlow change lifecycle diagram")}>
-        <span className="flow-kicker">{localize("CHANGE_LIFECYCLE")}</span>
-        <div className="flow-chain"><b>{localize("Design docs")}</b><i>→</i><b>{localize("Draft change")}</b><i>→</i><b>{localize("Review")}</b><i>→</i><b>{localize("Approve")}</b><i>→</i><b>{localize("Apply")}</b><i>→</i><b>{localize("Sync + archive")}</b></div>
-        <p>{localize("Human approval remains the gate between design intent and implementation.")}</p>
+      <div className="flow-diagram flow-lifecycle" aria-label={content("diagram.workflowLifecycle.aria")}>
+        <span className="flow-kicker">{content("diagram.workflowLifecycle.label")}</span>
+        <div className="flow-chain"><b>{content("visual.workflow.designDocs")}</b><i>→</i><b>{content("visual.workflow.draftChange")}</b><i>→</i><b>{content("visual.workflow.review")}</b><i>→</i><b>{content("diagram.workflowLifecycle.approve")}</b><i>→</i><b>{content("diagram.workflowLifecycle.apply")}</b><i>→</i><b>{content("diagram.workflowLifecycle.syncArchive")}</b></div>
+        <p>{content("diagram.workflowLifecycle.description")}</p>
       </div>
     );
   }
 
   if (id === "workflow-knowledge") {
     return (
-      <div className="flow-diagram flow-network" aria-label={localize("zWorkFlow shared project knowledge diagram")}>
-        <span className="flow-kicker">{localize("SHARED_PROJECT_CONTEXT")}</span>
-        <div className="flow-inputs"><b>OpenSpec</b><b>{localize("Project skills")}</b><b>{localize("Code index")}</b></div>
+      <div className="flow-diagram flow-network" aria-label={content("diagram.workflowKnowledge.aria")}>
+        <span className="flow-kicker">{content("diagram.workflowKnowledge.label")}</span>
+        <div className="flow-inputs"><b>OpenSpec</b><b>{content("diagram.shared.projectSkills")}</b><b>{content("diagram.workflowKnowledge.codeIndex")}</b></div>
         <i className="flow-line" />
-        <div className="flow-hub"><span>{localize("ONE SOURCE")}</span><strong>{localize("WORKBENCH")}</strong></div>
+        <div className="flow-hub"><span>{content("diagram.workflowKnowledge.oneSource")}</span><strong>{content("diagram.shared.workbench")}</strong></div>
         <i className="flow-line" />
-        <div className="flow-outputs"><b>Codex</b><b>Claude</b><b>{localize("Cursor + tools")}</b></div>
+        <div className="flow-outputs"><b>Codex</b><b>Claude</b><b>{content("diagram.workflowKnowledge.cursorTools")}</b></div>
       </div>
     );
   }
 
   if (id === "interaction-routing") {
     return (
-      <div className="flow-diagram flow-routing" aria-label={localize("Interaction System unified event routing diagram")}>
-        <span className="flow-kicker">{localize("UNIFIED_EVENT_ROUTING")}</span>
-        <div className="route-sources"><b>{localize("Physics raycast")}<small>{localize("3D OBJECT")}</small></b><b>EventSystem<small>UGUI</small></b></div>
-        <i>↓</i><div className="route-target">IInteractableTarget</div><i>↓</i><div className="route-dispatch">InteractionSystem / {localize("dispatch")}</div>
-        <div className="route-results"><b>{localize("FOCUS")}</b><b>{localize("CLICK")}</b><b>{localize("DRAG")}</b></div>
+      <div className="flow-diagram flow-routing" aria-label={content("diagram.interactionRouting.aria")}>
+        <span className="flow-kicker">{content("diagram.interactionRouting.label")}</span>
+        <div className="route-sources"><b>{content("diagram.interactionRouting.physicsRaycast")}<small>{content("diagram.interactionRouting.object3d")}</small></b><b>EventSystem<small>UGUI</small></b></div>
+        <i>↓</i><div className="route-target">IInteractableTarget</div><i>↓</i><div className="route-dispatch">InteractionSystem / {content("diagram.interactionRouting.dispatch")}</div>
+        <div className="route-results"><b>{content("diagram.interactionRouting.focus")}</b><b>{content("diagram.interactionRouting.click")}</b><b>{content("diagram.interactionRouting.drag")}</b></div>
       </div>
     );
   }
 
   return (
-    <div className="flow-diagram flow-typed" aria-label={localize("Interaction System typed drag communication diagram")}>
-      <span className="flow-kicker">{localize("TYPED_DRAG_COMMUNICATION")}</span>
-      <div className="typed-node"><small>{localize("SOURCE")}</small><b>IDraggable&lt;T&gt;</b><span>{localize("Card")}</span></div>
-      <i>→</i><div className="typed-cache"><small>{localize("CACHED MAP")}</small><strong>T</strong><span>{localize("cached method mappings")}</span></div>
-      <i>→</i><div className="typed-node"><small>{localize("TARGET")}</small><b>IFocusable&lt;T&gt;</b><span>{localize("Slot")}</span></div>
-      <p>{localize("ENTER · STAY · RELEASE · LEAVE")}</p>
+    <div className="flow-diagram flow-typed" aria-label={content("diagram.interactionTyped.aria")}>
+      <span className="flow-kicker">{content("diagram.interactionTyped.label")}</span>
+      <div className="typed-node"><small>{content("diagram.interactionTyped.source")}</small><b>IDraggable&lt;T&gt;</b><span>{content("diagram.interactionTyped.card")}</span></div>
+      <i>→</i><div className="typed-cache"><small>{content("diagram.interactionTyped.cachedMap")}</small><strong>T</strong><span>{content("diagram.interactionTyped.cachedMappings")}</span></div>
+      <i>→</i><div className="typed-node"><small>{content("diagram.interactionTyped.target")}</small><b>IFocusable&lt;T&gt;</b><span>{content("diagram.interactionTyped.slot")}</span></div>
+      <p>{content("diagram.interactionTyped.phases")}</p>
     </div>
   );
 }
@@ -308,6 +352,7 @@ function ProjectCover({ project }: { project: Project }) {
 
 const coverDiagramByProject: Partial<Record<string, DiagramId>> = {
   zworkflow: "workflow-overview",
+  "action-chain-weaver": "action-chain-overview",
   interaction: "interaction-routing",
   "editor-tools": "editor-overview",
   "tactics-design": "vault-map",
@@ -379,10 +424,11 @@ export function PortfolioShell({ page, children }: { page: ShellPage; children: 
 }
 
 function HomePage() {
-  const { localize, t } = useI18n();
-  const localizedProjects = useMemo(() => localize(projects), [localize]);
-  const localizedTabs = useMemo(() => localize(tabs), [localize]);
+  const { localizeProjects, localizeTabs, t } = useI18n();
+  const localizedProjects = useMemo(() => localizeProjects(projects), [localizeProjects]);
+  const localizedTabs = useMemo(() => localizeTabs(tabs), [localizeTabs]);
   const zworkflow = localizedProjects.technical[0];
+  const actionChain = localizedProjects.technical[1];
   const tactics = localizedProjects.design[0];
 
   return (
@@ -430,10 +476,7 @@ function HomePage() {
         <div className="featured-grid">
           <FeatureCard project={zworkflow} index="01" />
           <FeatureCard project={tactics} index="02" />
-          <article className="featured-card is-pending" aria-label={t("home.pendingLabel")}>
-            <div className="feature-media pending-art" aria-hidden="true"><i /><i /><i /></div>
-            <div className="feature-copy reading-surface"><div className="feature-title-row"><span className="feature-number">03</span><h3>ActionQueue</h3></div><div className="feature-meta"><span>{t("home.inPreparation")}</span></div><p className="feature-description">{t("home.comingSoon")}</p><span className="feature-link">{t("home.inPreparation")}</span></div>
-          </article>
+          <FeatureCard project={actionChain} index="03" />
         </div>
       </section>
       <nav className="discipline-nav" aria-label={t("home.exploreDisciplines")}>
@@ -474,8 +517,8 @@ function ProjectPreview({ project }: { project: Project }) {
 }
 
 function RenderingGallery({ project, standalone = false }: { project?: Project; standalone?: boolean }) {
-  const { localize, t } = useI18n();
-  const items = useMemo(() => project ? localize(getBoardItems(project)) : [], [localize, project]);
+  const { localizeBoardItems, t } = useI18n();
+  const items = useMemo(() => project ? localizeBoardItems(project.id, getBoardItems(project)) : [], [localizeBoardItems, project]);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const activeIndex = Math.min(selectedIndex, Math.max(0, items.length - 1));
   const selected = items[activeIndex] ?? items[0];
@@ -528,9 +571,9 @@ function archiveGroupCopy(page: TabId, t: ReturnType<typeof useI18n>["t"]) {
 }
 
 function ArchivePage({ page }: { page: TabId }) {
-  const { localize, t } = useI18n();
-  const localizedProjects = useMemo(() => localize(projects), [localize]);
-  const meta = localize(categoryMeta(page));
+  const { localizeProjects, localizeTab, t } = useI18n();
+  const localizedProjects = useMemo(() => localizeProjects(projects), [localizeProjects]);
+  const meta = localizeTab(categoryMeta(page));
   const groupCopy = archiveGroupCopy(page, t);
   const categoryProjects = localizedProjects[page];
   const releasedProjects = localizedProjects.technical.filter((project) => project.tier === "release");
@@ -608,7 +651,7 @@ function CaseMedia({ item, project, onExpand }: { item: BoardItem; project: Proj
   return null;
 }
 
-const relatedProjectIds: Partial<Record<string, string[]>> = { "tactics-design": ["hunting-in-darkness"], "hunting-in-darkness": ["tactics-design"], zworkflow: ["interaction"], interaction: ["zworkflow"] };
+const relatedProjectIds: Partial<Record<string, string[]>> = { "tactics-design": ["hunting-in-darkness"], "hunting-in-darkness": ["tactics-design"], zworkflow: ["action-chain-weaver", "interaction"], "action-chain-weaver": ["interaction", "zworkflow"], interaction: ["action-chain-weaver", "zworkflow"] };
 
 function relatedProjects(project: Project & { category: TabId }) {
   const preferred = relatedProjectIds[project.id] ?? [];
@@ -653,17 +696,17 @@ function CaseCopyContent({ item }: { item: BoardItem }) {
 }
 
 function ProjectDetailContent({ project, category }: { project: Project & { category: TabId }; category: TabId }) {
-  const { localize, t } = useI18n();
+  const { localizeBoardItems, localizeProject, localizeTab, t } = useI18n();
   const hasCaseMedia = Boolean(project.gallery?.length || project.image || project.visual);
   const isRenderingStudies = project.id === "rendering-studies";
   const articles = useMemo(() => project.articles ?? [], [project.articles]);
   const isComparative = articles.length > 0;
-  const hasBoardContent = hasCaseMedia || project.id === "tactics-design";
-  const items = useMemo(() => hasBoardContent ? localize(getBoardItems(project)) : [], [hasBoardContent, localize, project]);
+  const hasBoardContent = hasCaseMedia || project.id === "tactics-design" || project.id === "action-chain-weaver";
+  const items = useMemo(() => hasBoardContent ? localizeBoardItems(project.id, getBoardItems(project)) : [], [hasBoardContent, localizeBoardItems, project]);
   const [activeSection, setActiveSection] = useState(items[0]?.id ?? articles[0]?.id ?? "overview");
   const [dialogItem, setDialogItem] = useState<BoardItem | null>(null);
   const triggerRef = useRef<HTMLElement | null>(null);
-  const meta = localize(categoryMeta(category));
+  const meta = localizeTab(categoryMeta(category));
   const tocEntries = useMemo(() => items.length ? items.map((item) => ({ id: item.id, title: item.title })) : articles.length ? articles.map((article) => ({ id: article.id, title: article.title })) : project.details ? [{ id: "overview", title: t("case.overview") }] : [], [articles, items, project.details, t]);
 
   useEffect(() => {
@@ -743,6 +786,7 @@ function ProjectDetailContent({ project, category }: { project: Project & { cate
       {!isRenderingStudies && tocEntries.length > 0 && (
         <details className="mobile-toc reading-surface">
           <summary>{t("case.onThisPage")}</summary>
+          <BackLink category={category} projectId={project.id} className="toc-back" compact><span aria-hidden="true">←</span>{t("case.backProject")}</BackLink>
           <nav className="toc-links" aria-label={t("case.sections")}>
             {tocEntries.map((entry, index) => (
               <a key={entry.id} className="toc-link" onClick={(event) => { setActiveSection(entry.id); const menu = event.currentTarget.closest("details"); if (menu instanceof HTMLDetailsElement) menu.open = false; }} aria-current={activeSection === entry.id ? "location" : undefined} href={entry.id === "overview" ? "#overview" : "#chapter-" + entry.id}>
@@ -791,6 +835,7 @@ function ProjectDetailContent({ project, category }: { project: Project & { cate
             ) : null}
           </div>
           <aside className="case-toc reading-surface">
+            <BackLink category={category} projectId={project.id} className="toc-back" compact><span aria-hidden="true">←</span>{t("case.backProject")}</BackLink>
             <p>{t("case.inProject")}</p>
             <nav className="toc-links" aria-label={t("case.sections")}>
               {tocEntries.map((entry, index) => (
@@ -808,7 +853,7 @@ function ProjectDetailContent({ project, category }: { project: Project & { cate
         <div className="case-navigation-heading"><span>{t("case.continue")}</span><span>{meta.label.toUpperCase()}</span></div>
         <div className="case-navigation-links">
           <BackLink category={category} projectId={project.id}><span className="case-navigation-card"><small>{t("case.returnArchive")}</small><strong>{t("case.backTo", { category: meta.label })}</strong><i aria-hidden="true">↗</i></span></BackLink>
-          {relatedProjects(project).map((candidate) => localize(candidate)).map((candidate) => <InternalLink key={candidate.id} href={"/projects/" + candidate.id} onClick={(event) => rememberProjectOrigin(event, candidate.id)}><span className="case-navigation-card"><small>{t("case.nextProject")}</small><strong>{candidate.title}</strong><i aria-hidden="true">↗</i></span></InternalLink>)}
+          {relatedProjects(project).map((candidate) => localizeProject(candidate)).map((candidate) => <InternalLink key={candidate.id} href={"/projects/" + candidate.id} onClick={(event) => rememberProjectOrigin(event, candidate.id)}><span className="case-navigation-card"><small>{t("case.nextProject")}</small><strong>{candidate.title}</strong><i aria-hidden="true">↗</i></span></InternalLink>)}
         </div>
       </nav>
     </>
@@ -816,8 +861,8 @@ function ProjectDetailContent({ project, category }: { project: Project & { cate
 }
 
 export function ProjectDetail({ project, category }: { project: Project & { category: TabId }; category: TabId }) {
-  const { localize } = useI18n();
-  const localizedProject = useMemo(() => localize(project), [localize, project]);
+  const { localizeProject } = useI18n();
+  const localizedProject = useMemo(() => localizeProject(project), [localizeProject, project]);
   return <PortfolioShell page={category}><ProjectDetailContent project={localizedProject} category={category} /></PortfolioShell>;
 }
 

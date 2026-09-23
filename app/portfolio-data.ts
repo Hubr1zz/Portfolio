@@ -21,7 +21,7 @@ export type Project = {
   featured?: boolean;
   tier?: "release" | "study";
 };
-export type DiagramId = "workflow-lifecycle" | "workflow-knowledge" | "interaction-routing" | "interaction-typed" | "workflow-overview" | "editor-overview" | "editor-navigation" | "editor-scene" | "vault-map" | "vault-loop";
+export type DiagramId = "workflow-lifecycle" | "workflow-knowledge" | "interaction-routing" | "interaction-typed" | "workflow-overview" | "editor-overview" | "editor-navigation" | "editor-scene" | "vault-map" | "vault-loop" | "vault-structure" | "vault-ai-flow" | "action-chain-overview" | "action-chain-reactors";
 export type BoardItem = {
   id: string;
   title: string;
@@ -42,7 +42,7 @@ export const tabs: { id: TabId; label: string; count: string; description: strin
   {
     id: "technical",
     label: "Technical Projects",
-    count: "05",
+    count: "06",
     description: "Production tools, gameplay architecture, procedural motion, and real-time rendering studies.",
     path: "/technical",
   },
@@ -71,7 +71,7 @@ export const projects: Record<TabId, Project[]> = {
       eyebrow: "AI-assisted game production",
       year: "2026",
       description:
-        "A shared workflow that turns game design documents into reviewable specifications, implementation plans, and traceable technical decisions.",
+        "An AI workflow that bridges and manages game design documents and game projects, keeping design decisions, implementation plans, and code evidence connected.",
       details:
         "The system coordinates multiple AI coding tools around one source of truth, keeps design intent separate from implementation, and exposes dependency graphs, blockers, and change history through a Unity-based workbench.",
       tags: ["Unity", "OpenSpec", "Tooling", "Bilingual"],
@@ -81,8 +81,22 @@ export const projects: Record<TabId, Project[]> = {
       tier: "release",
     },
     {
-      id: "interaction",
+      id: "action-chain-weaver",
       index: "02",
+      title: "ActionChainWeaver",
+      eyebrow: "Reactive action orchestration for Unity",
+      year: "2026",
+      description:
+        "A Unity framework for strongly ordered resolution, branching action chains, and runtime injection, modification, or prevention—problems common in card games.",
+      details:
+        "A root FIFO and per-chain deque replace recursive execution. Composite actions yield children and continuations, while scoped Reactors can observe, modify, prevent, or extend the flow without coupling every effect to the original action.",
+      tags: ["Unity", "C#", "Gameplay Architecture", "Card Games"],
+      links: [{ label: "GitHub repository", href: "https://github.com/Hubr1zz/ActionChainWeaver" }],
+      tier: "release",
+    },
+    {
+      id: "interaction",
+      index: "03",
       title: "Interaction System",
       eyebrow: "Reusable Unity architecture",
       year: "2026",
@@ -97,7 +111,7 @@ export const projects: Record<TabId, Project[]> = {
     },
     {
       id: "editor-tools",
-      index: "03",
+      index: "04",
       title: "Unity Editor Tools",
       eyebrow: "Editor extensions & workflow adaptations",
       year: "2026",
@@ -121,7 +135,7 @@ export const projects: Record<TabId, Project[]> = {
     },
     {
       id: "procedural-motion",
-      index: "04",
+      index: "05",
       title: "Procedural Locomotion",
       eyebrow: "Gameplay animation study",
       year: "2023",
@@ -140,7 +154,7 @@ export const projects: Record<TabId, Project[]> = {
     },
     {
       id: "rendering-studies",
-      index: "05",
+      index: "06",
       title: "Stylized Rendering Studies",
       eyebrow: "Real-time graphics",
       year: "2023—24",
@@ -277,11 +291,11 @@ export const projects: Record<TabId, Project[]> = {
       index: "01",
       title: "Tactical Game Design Document",
       eyebrow: "Personal system-design project",
-      year: "2025—26",
+      year: "Ongoing",
       description:
-        "A living Obsidian design vault connecting the hunt, showdown, and settlement into a game about risk, preparation, and lasting consequences.",
+        "A long-term independent game project in active development, maintained in Obsidian as a 30,000-word design document.",
       details:
-        "I maintain this evolving game design as a local Obsidian vault, with linked Markdown rules, a terminology index, reference collections, and a visible revision history. The repository documents design intent and open questions; the separate playable prototype is one experiment around it.",
+        "The vault develops the game from its pillars and art direction through the hunt, showdown, settlement, and detailed mechanics, while keeping inspirations, references, examples, terminology, and AI-assisted maintenance clearly separated.",
       tags: ["Systems Design", "Obsidian", "Linked Documentation", "Card & dice"],
       links: [
         { label: "GitHub design document", href: "https://github.com/Hubr1zz/GameDesignVault" },
@@ -294,7 +308,7 @@ export const projects: Record<TabId, Project[]> = {
       index: "02",
       title: "Comparative Game Analysis",
       eyebrow: "Gameplay-oriented essays",
-      year: "2025—26",
+      year: "Ongoing",
       description:
         "Short-form essays examining how games position themselves, screen players, and produce different strategic behaviors through small systemic changes.",
       details:
@@ -373,6 +387,41 @@ export function getBoardItems(project: Project): BoardItem[] {
         description: "Different AI tools work from the same OpenSpec records, project skills, code evidence, and design documents.",
         details: "Thin tool-specific adapters point Codex, Claude Code, Cursor, and other supported agents at one shared source of truth. The Unity Workbench exposes review status, dependencies, blockers, translations, and implementation evidence without duplicating the workflow.",
         diagram: "workflow-knowledge",
+      },
+    ];
+  }
+
+  if (project.id === "action-chain-weaver") {
+    return [
+      {
+        id: "problem",
+        title: "A growing sequence, not a single function call",
+        description: "A card-game action can branch into targeting, checks, damage, reactions, healing, animation waits, and further derived actions whose length is not known in advance.",
+        details: "ActionChainWeaver treats that work as one traceable causal chain. External requests wait in a root FIFO, while the active chain resolves one work item at a time so unrelated roots never interleave and deeply nested effects do not consume the C# call stack.",
+        diagram: "action-chain-overview",
+      },
+      {
+        id: "reactors",
+        title: "Scoped reactions without hard-wired dependencies",
+        description: "Reactors can observe an action before execution or after resolution, then modify it, prevent it, or enqueue immediate and deferred follow-up actions.",
+        details: "Rules may be global, attached to a source or target entity, limited to the current chain, inherited by an action subtree or descendants, or local to one action instance. Type filtering, reaction gates, and each Reactor’s own match conditions keep routing explicit, while priority and registration order make conflicts deterministic.",
+        diagram: "action-chain-reactors",
+      },
+      {
+        id: "outcomes",
+        title: "Explicit outcomes, presentation, and debugging",
+        description: "The framework keeps gameplay facts, visual presentation, and infrastructure safeguards separate so each layer can be reasoned about independently.",
+        bullets: [
+          { title: "Four outcomes", text: "Succeeded, Failed, Prevented, and Cancelled distinguish rule failure from pre-emptive blocking and player cancellation." },
+          { title: "Presentation boundary", text: "Animations, audio, and floating text are requests in a separate PresentationSystem; an action chooses whether to await their real lifecycle." },
+          { title: "Loop protection", text: "A configurable per-chain action budget stops direct and indirect response loops, records the recent causal trace, and lets the next root request continue." },
+          { title: "Visual debugger", text: "The Unity Editor window exposes root requests, work queues, registered Reactors, causal trees, outcomes, breakpoints, and step-through execution." },
+        ],
+        layout: "features",
+        sources: [
+          { label: "ActionQueue guide", href: "https://github.com/Hubr1zz/ActionChainWeaver/blob/main/ActionQueue/GETTING_STARTED.md" },
+          { label: "PresentationSystem guide", href: "https://github.com/Hubr1zz/ActionChainWeaver/blob/main/Presentation/README.md" },
+        ],
       },
     ];
   }
@@ -472,54 +521,59 @@ export function getBoardItems(project: Project): BoardItem[] {
   }
 
   if (project.id === "tactics-design") {
-    const repositoryUrl = "https://github.com/Hubr1zz/GameDesignVault";
-    const historyUrl = "https://github.com/Hubr1zz/GameDesignVault/blob/master/%E4%BF%AE%E6%94%B9%E5%8E%86%E5%8F%B2.md";
+    const designRoot = "https://github.com/Hubr1zz/GameDesignVault/blob/master/%E8%AE%BE%E8%AE%A1%E6%96%87%E6%A1%A3";
     return [
       {
-        id: "vault-structure",
-        title: "A navigable design vault",
-        description: "I organize the vault around three playable phases—Hunt, Showdown, and Settlement—supported by shared rules for hunters, events, items, and keywords.",
-        details: "Design principles and world settings establish the premise. A separate glossary, inspiration library, art references, content examples, to-do list, and edit history make the surrounding reasoning easy to find.",
-        diagram: "vault-map",
-        href: repositoryUrl,
-        linkLabel: "Browse the Obsidian vault",
-      },
-      {
-        id: "phase-loop",
-        title: "Three phases, one consequence loop",
-        description: "I use the hunt to frame preparation and uncertainty, the showdown to concentrate tactical decisions, and the settlement to carry consequences into the next expedition.",
-        details: "The document gives maps, combat and monster behavior, action cards, timelines, inventions, and the workshop their own homes. This separation lets me develop each system while keeping its connection to the wider loop visible.",
+        id: "game-design",
+        title: "The game: from pillars to playable systems",
+        description: "The design begins with the experience I want to protect, establishes the world and visual language, then moves from the three-phase loop into the mechanics that shape each decision.",
+        bullets: [
+          { title: "Pillars and art direction", text: "Difficulty, frequent risk, amplified lucky breaks, and accepting or overcoming weakness anchor the experience. The world is oppressive, primitive, and beautiful, mixing unsettling biological forms with cold environments and warm shafts of light." },
+          { title: "The large-scale loop", text: "The Hunt creates preparation and uncertainty, the Showdown concentrates tactical decisions, and the Settlement turns consequences into inventions, relationships, losses, and the next expedition." },
+          { title: "Tabletop tactility", text: "Cards, dice, and board-game-like physical interactions shape both mechanics and interface. Three-dimensional scenes support immersion, while bosses can bend the combat rhythm toward different tabletop structures." },
+          { title: "Mechanics with emotional consequences", text: "Action order, inter-character effects, internalized traits, conditional events, equipment keywords, named hunters, and persistent camp memories turn restrictions and losses into new strategic possibilities." },
+        ],
+        layout: "features",
         diagram: "vault-loop",
+        sources: [
+          { label: "Pillars and design challenges", href: designRoot + "/Design%20Essentials%20%26%20Challenges.md" },
+          { label: "World and art direction", href: designRoot + "/World%20settings%20%E4%B8%96%E7%95%8C%E8%A7%82%E8%AE%BE%E5%AE%9A.md" },
+          { label: "Hunt phase", href: "https://github.com/Hubr1zz/GameDesignVault/tree/master/%E8%AE%BE%E8%AE%A1%E6%96%87%E6%A1%A3/%E7%8B%A9%E7%8C%8E%E9%98%B6%E6%AE%B5%20Hunt%20Phase" },
+          { label: "Combat system", href: "https://github.com/Hubr1zz/GameDesignVault/tree/master/%E8%AE%BE%E8%AE%A1%E6%96%87%E6%A1%A3/%E5%86%B3%E6%88%98%E9%98%B6%E6%AE%B5%20Showdown%20Phase/%E6%88%98%E6%96%97%E7%B3%BB%E7%BB%9F%20Combat%20System" },
+          { label: "Settlement phase", href: "https://github.com/Hubr1zz/GameDesignVault/tree/master/%E8%AE%BE%E8%AE%A1%E6%96%87%E6%A1%A3/%E8%90%A5%E5%9C%B0%E9%98%B6%E6%AE%B5%20Settlement%20Phase" },
+        ],
       },
       {
-        id: "design-principles",
-        title: "Make weakness part of the strategy",
-        description: "I want setbacks to change how a hunter is played. The design principles explore both overcoming a negative trait and internalizing it, preserving its drawback while opening a new advantage.",
-        details: "For example, a timid hunter could lose strength but gain evasion. Conditional event options and equipment keywords extend that thinking: the interesting question is what a limitation makes possible. These are design proposals, not claims of a finished balance model.",
-        href: "https://github.com/Hubr1zz/GameDesignVault/blob/master/%E8%AE%BE%E8%AE%A1%E6%96%87%E6%A1%A3/Design%20Essentials%20%26%20Challenges.md",
-        linkLabel: "Read the design principles",
+        id: "vault-organization",
+        title: "Six parts, one source of truth",
+        description: "I divide the document repository into six primary areas so accepted rules, unfinished thinking, visual research, and concrete examples do not blur into one another.",
+        bullets: [
+          { title: "Inspiration library", text: "An inbox for ideas, mechanics, issues, UX notes, and unresolved questions before they become formal rules." },
+          { title: "Art references", text: "Image references and visual material remain attached to the design reasoning they support." },
+          { title: "Content design examples", text: "Monsters, events, narrative samples, map objects, and resource points test how formal systems behave in authored content." },
+          { title: "Design documents", text: "Accepted and semi-formal material covers pillars, world setting, shared rules, and the Hunt, Showdown, and Settlement phases." },
+          { title: "Terminology dictionary", text: "Each stable term has one definition and links back to its primary design location, reducing ambiguity across a growing document." },
+          { title: "Other maintenance material", text: "Overview pages, history, backlog, Obsidian configuration, and agent-facing guidance keep the vault navigable and maintainable." },
+        ],
+        layout: "features",
+        diagram: "vault-structure",
       },
       {
-        id: "decisions",
-        title: "Commitment, coordination, and uncertainty",
-        description: "I am exploring card-and-dice combat where the order of hunters’ actions matters to the group. The June design history also records a limited thought-area resource, three colors of combat inspiration, and choices about replacing or expanding that resource.",
-        details: "I keep alternatives and unresolved questions visible in the inspiration collection. Ideas such as passing actions between hunters or giving bosses distinct timing patterns stay recognizable as proposals until they are resolved into formal rules.",
-        href: historyUrl,
-        linkLabel: "Follow the design history",
-      },
-      {
-        id: "continuity",
-        title: "A settlement with a memory",
-        description: "I want players to care about a camp beyond the strength of one character. The principles explore relationships, named hunters, disappearances, and later discoveries that turn loss into a continuing story.",
-        details: "They also identify a hard design problem: frequent death can create a downward spiral. Recruitment pacing and benefits for survivors are candidate responses; documenting both the intended emotion and the risk keeps that trade-off explicit.",
-      },
-      {
-        id: "maintenance",
-        title: "From scattered references to linked knowledge",
-        description: "I maintain formal rules, inspirations, and content examples separately. A glossary gives recurring terms one definition, while Obsidian links and the overview canvas help me move between related systems.",
-        details: "The June and July revision entries show the maintenance work: rebuilding system entry points, completing terminology, and standardizing inspiration types and related links. This makes the vault easier to revise as the design grows.",
-        href: historyUrl,
-        linkLabel: "View revisions",
+        id: "ai-workflow",
+        title: "A Skills-driven AI maintenance workflow",
+        description: "I designed a project Skill that lets AI assist with the vault without flattening tentative ideas into accepted design or losing the reasoning behind a change.",
+        bullets: [
+          { title: "Review before writing", text: "The workflow evaluates design goals, conflicts, player experience, and implementation impact before meaningful design changes enter the formal documents." },
+          { title: "Route information by maturity", text: "Fresh ideas and issues enter the inspiration library; stable terms, concrete examples, and approved rules move to their dedicated homes." },
+          { title: "Search and connect", text: "The agent reads nearby material first, finds related concepts, and maintains Obsidian links, lightweight metadata, and curated navigation." },
+          { title: "Protect the source of truth", text: "The local vault remains authoritative. Conflicting copies are surfaced for review, while renames and accepted changes update obvious inbound links and maintenance records." },
+        ],
+        layout: "features",
+        diagram: "vault-ai-flow",
+        sources: [
+          { label: "Vault maintenance Skill", href: "https://github.com/Hubr1zz/GameDesignVault/blob/master/Agent%E7%BB%B4%E6%8A%A4/SKILL.md" },
+          { label: "Workspace map", href: "https://github.com/Hubr1zz/GameDesignVault/blob/master/Agent%E7%BB%B4%E6%8A%A4/workspace-map.md" },
+        ],
       },
     ];
   }

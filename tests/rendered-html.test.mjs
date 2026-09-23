@@ -26,9 +26,9 @@ test("server-renders the redesigned portfolio home", async () => {
   assert.match(html, /class="featured-section[^"]*"[^>]*id="work"/);
   assert.match(html, /href="\/projects\/zworkflow\/?"/);
   assert.match(html, /href="\/projects\/tactics-design\/?"/);
-  assert.match(html, /ActionQueue/);
-  assert.doesNotMatch(html, /href="\/projects\/actionqueue\/?"/);
-  assert.match(html, /class="featured-card is-pending"/);
+  assert.match(html, /href="\/projects\/action-chain-weaver\/?"/);
+  assert.match(html, /ActionChainWeaver/);
+  assert.doesNotMatch(html, /class="featured-card is-pending"/);
   assert.doesNotMatch(html, /class="other-teaser"/);
   assert.match(html, /href="\/other\/?"/);
   assert.match(html, /class="site-footer"/);
@@ -52,7 +52,7 @@ test("server-renders the redesigned portfolio home", async () => {
 
 test("category pages contain overview cards and no reader chapters", async () => {
   const cases = [
-    ["/technical", "Technical Projects — Leon Zhou", ["zWorkFlow", "Interaction System", "Unity Editor Tools", "Procedural Locomotion", "Rendering studies"]],
+    ["/technical", "Technical Projects — Leon Zhou", ["zWorkFlow", "ActionChainWeaver", "Interaction System", "Unity Editor Tools", "Procedural Locomotion", "Rendering studies"]],
     ["/games", "Game Projects — Leon Zhou", ["Punch-in Rush", "Hunt in Darkness", "Outlaw’s Deadend", "Alive", "Top Hotpot"]],
     ["/design", "Design Projects — Leon Zhou", ["Tactical Game Design Document", "Comparative Game Analysis", "Design Breakdown Notes"]],
   ];
@@ -84,14 +84,12 @@ test("the tactical design document keeps the GitHub vault link on its case page"
   assert.match(html, /GitHub design document/);
   assert.match(html, /GameDesignVault/);
   assert.match(html, /Legacy Notion document/);
-  assert.match(html, /A navigable design vault/);
-  assert.match(html, /Three phases, one consequence loop/);
-  assert.match(html, /Make weakness part of the strategy/);
-  assert.match(html, /Commitment, coordination, and uncertainty/);
-  assert.match(html, /A settlement with a memory/);
-  assert.match(html, /From scattered references to linked knowledge/);
-  for (const id of ["vault-structure", "phase-loop", "design-principles", "decisions", "continuity", "maintenance"])
+  assert.match(html, /The game: from pillars to playable systems/);
+  assert.match(html, /Six parts, one source of truth/);
+  assert.match(html, /A Skills-driven AI maintenance workflow/);
+  for (const id of ["game-design", "vault-organization", "ai-workflow"])
     assert.ok(html.includes(`id="chapter-${id}"`), `tactical chapter: ${id}`);
+  assert.doesNotMatch(html, /Browse the Obsidian vault/);
   assert.ok(html.includes("Obsidian"), "tactical case should identify the Obsidian vault");
   assert.ok(!/src="[^"]*(?:design-document|hunt-overview|hunt-design|hunt-systems|hunt-production)\.webp/.test(html), "tactical case should not render the old demo images");
 

@@ -1,10 +1,11 @@
 "use client";
 /* eslint-disable @next/next/no-img-element */
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { PortfolioShell } from "./portfolio";
 import { assetPath, InternalLink } from "./portfolio-links";
 import { useI18n } from "./i18n";
+import { sideProjectCategories, sideProjects, type SideProject, type SideProjectCategory } from "./other-projects-data";
 
 type OtherSection = "games" | "projects";
 type LibraryScope = "primary" | "family";
@@ -196,12 +197,65 @@ function OtherHeader({ section }: { section: OtherSection }) {
   );
 }
 
-function ProjectsEmpty() {
+function SideProjectCard({ project }: { project: SideProject }) {
   const { t } = useI18n();
-  return <section className="side-projects-empty" aria-labelledby="side-projects-empty-heading"><div className="numbered-heading"><span className="section-index">02</span><h2 id="side-projects-empty-heading">{t("other.workbench")}</h2></div><p>{t("other.workbenchDescription")}</p></section>;
+  const cardRef = useRef<HTMLElement>(null);
+  const [activeMedia, setActiveMedia] = useState(0);
+  const [videoError, setVideoError] = useState(false);
+  const media = project.media[activeMedia];
+
+  useEffect(() => {
+    const card = cardRef.current;
+    if (!card || window.matchMedia("(prefers-reduced-motion: reduce)").matches)
+      return;
+    const observer = new IntersectionObserver((entries) => {
+      if (!entries.some((entry) => entry.isIntersecting))
+        return;
+      card.dataset.entered = "true";
+      observer.disconnect();
+    }, { threshold: 0.12 });
+    observer.observe(card);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <article className="side-project-card" ref={cardRef} aria-labelledby={project.id + "-title"}>
+      <div className="side-project-media" id={project.id + "-media"}>
+        {media.kind === "video" ? <video key={media.src} src={assetPath(media.src)} poster={media.poster ? assetPath(media.poster) : undefined} controls playsInline preload="none" aria-label={media.alt} onError={() => setVideoError(true)}><track kind="captions" /><a href={assetPath(media.src)}>{t("sideProjects.openVideo")}</a></video> : <a href={assetPath(media.src)} target="_blank" rel="noreferrer" aria-label={t("sideProjects.openImage", { label: media.label })}><img src={assetPath(media.src)} alt={media.alt} width={1537} height={804} loading="lazy" decoding="async" /></a>}
+      </div>
+      <div className="side-project-media-controls" role="group" aria-label={t("sideProjects.media", { title: project.title })}>
+        {project.media.map((item, index) => <button key={item.src} type="button" aria-pressed={activeMedia === index} aria-controls={project.id + "-media"} onClick={() => { setActiveMedia(index); setVideoError(false); }}><span aria-hidden="true">{item.kind === "video" ? "▷" : String(index + 1).padStart(2, "0")}</span>{item.label}</button>)}
+      </div>
+      {videoError && <p className="side-project-video-error" role="alert">{t("sideProjects.videoError")} <a href={assetPath(media.src)} target="_blank" rel="noreferrer">{t("sideProjects.openVideo")} ↗</a></p>}
+      <div className="side-project-copy reading-surface">
+        <span className="side-project-category">{t(`sideProjects.category.${project.category}`)}{project.tags.map((tag) => <span key={tag}> / {tag}</span>)}</span>
+        <h3 id={project.id + "-title"}>{project.title}</h3>
+        <p>{project.description}</p>
+      </div>
+    </article>
+  );
+}
+
+function SideProjectsGallery() {
+  const { t, localizeProject } = useI18n();
+  const [category, setCategory] = useState<SideProjectCategory>("all");
+  const visibleProjects = sideProjects.filter((project) => category === "all" || project.category === category);
+
+  return (
+    <section className="side-projects" aria-labelledby="side-projects-heading">
+      <div className="side-projects-heading"><div className="numbered-heading"><span className="section-index">02</span><h2 id="side-projects-heading">{t("other.projects")}</h2></div><p>{t("sideProjects.description")}</p></div>
+      <div className="side-project-filters" role="group" aria-label={t("sideProjects.filters")}>
+        {sideProjectCategories.map((item) => <button type="button" key={item.id} aria-pressed={category === item.id} aria-controls="side-project-gallery" onClick={() => setCategory(item.id)}>{t(item.label)}<span>{sideProjects.filter((project) => item.id === "all" || project.category === item.id).length}</span></button>)}
+      </div>
+      <p className="side-project-result-count" role="status">{t(visibleProjects.length === 1 ? "sideProjects.count" : "sideProjects.countPlural", { count: visibleProjects.length })}</p>
+      <div className="side-project-grid" id="side-project-gallery">
+        {visibleProjects.map((project) => <SideProjectCard key={project.id} project={localizeProject(project)} />)}
+      </div>
+      {visibleProjects.length === 0 && <p className="side-project-no-results">{t("sideProjects.empty")}</p>}
+    </section>
+  );
 }
 
 export function OtherContent({ section }: { section: OtherSection }) {
-  const { t } = useI18n();
-  return <PortfolioShell page="other"><div className="other-page"><OtherHeader section={section} />{section === "games" ? <GamesLibrary /> : <section className="side-projects" aria-labelledby="side-projects-heading"><div className="side-projects-heading"><div className="numbered-heading"><span className="section-index">02</span><h2 id="side-projects-heading">{t("other.projects")}</h2></div><p>{t("other.projectsDescription")}</p></div><ProjectsEmpty /></section>}</div></PortfolioShell>;
+  return <PortfolioShell page="other"><div className="other-page"><OtherHeader section={section} />{section === "games" ? <GamesLibrary /> : <SideProjectsGallery />}</div></PortfolioShell>;
 }

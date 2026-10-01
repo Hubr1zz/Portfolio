@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { flatProjects, getBoardItems, tabs } from "../app/portfolio-data.ts";
+import { sideProjects } from "../app/other-projects-data.ts";
 import { contentMessages, messages } from "../app/translations.ts";
 
 const translatableFields = new Set(["alt", "description", "details", "eyebrow", "imageAlt", "label", "language", "linkLabel", "summary", "text", "title", "year"]);
@@ -35,6 +36,7 @@ function collect(value, path, field = "") {
 }
 
 tabs.forEach((tab) => collect(tab, `tab.${tab.id}`));
+sideProjects.forEach((project) => collect(project, `project.${project.id}`));
 flatProjects.forEach((project) => {
   collect(project, `project.${project.id}`);
   getBoardItems(project).forEach((item) => collect(item, `project.${project.id}.section.${item.id}`));

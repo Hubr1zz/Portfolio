@@ -173,12 +173,15 @@ test("all known project slugs pre-render and unknown slugs return framework 404"
   await htmlAt("/projects/not-a-real-project", 404);
 });
 
-test("other routes are reachable and expose their empty state", async () => {
+test("other routes render the games library and side-project gallery", async () => {
   const other = await htmlAt("/other");
   assert.match(other, /<title>Other — Leon Zhou<\/title>/i);
   assert.match(other, /OFF THE CLOCK/);
   const projects = await htmlAt("/other/projects");
-  assert.match(projects, /On the workbench\./);
+  assert.match(projects, /Market Watch, Undercover/);
+  assert.match(projects, /unity-market-watch-profiler\.webp/);
+  assert.match(projects, /Experimental effects/);
+  assert.doesNotMatch(projects, /<video\b/);
   assert.doesNotMatch(other, /01 \/ PLAY HISTORY/);
   assert.doesNotMatch(projects, /02 \/ WORKBENCH/);
 });

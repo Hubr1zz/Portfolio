@@ -784,12 +784,100 @@ function ImageDialog({ item, onClose }: { item: BoardItem | null; onClose: () =>
   return <dialog className="image-dialog" ref={dialogRef} aria-labelledby="image-dialog-title" onCancel={(event) => { event.preventDefault(); onClose(); }} onClick={(event) => { if (event.target === event.currentTarget) onClose(); }}>{item && <><div className="image-dialog-header"><h2 id="image-dialog-title">{item.title}</h2><button type="button" className="dialog-close" onClick={onClose}>{t("case.close")}</button></div><div className="image-dialog-media"><Image src={assetPath(item.image ?? "")} alt={item.imageAlt ?? item.title} width={2000} height={1400} sizes="90vw" unoptimized /></div><div className="image-dialog-caption"><span>{item.imageAlt ?? item.title}</span><a href={assetPath(item.image ?? "")} target="_blank" rel="noreferrer">{t("case.openOriginal")}</a></div></>}</dialog>;
 }
 
-function CaseCopyContent({ item }: { item: BoardItem }) {
-  if (item.bullets?.length)
-    return <ul className="case-bullets">{item.bullets.map((bullet) => <li key={bullet.title}><strong>{bullet.title}</strong><span>{bullet.text}</span></li>)}</ul>;
-  if (item.details)
-    return <p>{item.details}</p>;
-  return null;
+type TocEntry = { id: string; title: string };
+type ExpandHandler = (event: MouseEvent<HTMLButtonElement>, item: BoardItem) => void;
+
+function chapterHref(id: string) {
+  return id === "overview" ? "#overview" : "#chapter-" + id;
+}
+
+function chapterNumber(index: number) {
+  return String(index + 1).padStart(2, "0");
+}
+
+function CaseBullets({ bullets }: { bullets: NonNullable<BoardItem["bullets"]> }) {
+  return <ul className="case-bullets">{bullets.map((bullet, index) => <li key={bullet.title}><span>{chapterNumber(index)}</span><strong>{bullet.title}</strong><p>{bullet.text}</p></li>)}</ul>;
+}
+
+// Chapters stack as number and title, a full-width figure, then one reading column; the figure's offset plate alternates sides.
+function CaseSection({ item, index, project, onExpand }: { item: BoardItem; index: number; project: Project; onExpand: ExpandHandler }) {
+  const { t } = useI18n();
+  const flipped = Boolean(item.image || item.diagram || item.visual) && index % 2 === 1;
+  return (
+    <section tabIndex={-1} className={"case-section" + (flipped ? " is-flipped" : "")} id={"chapter-" + item.id}>
+      <header className="case-section-heading reading-surface">
+        <span>{chapterNumber(index)}</span>
+        <h2>{item.title}</h2>
+      </header>
+      <CaseMedia item={item} project={project} onExpand={onExpand} />
+      <div className="case-copy reading-surface">
+        <p className="case-lead">{item.description}</p>
+        {item.details && <p>{item.details}</p>}
+        {item.bullets?.length ? <CaseBullets bullets={item.bullets} /> : null}
+        {item.href && <a className="case-source-link" href={item.href} target="_blank" rel="noreferrer">{item.linkLabel ?? t("common.viewSource")} ↗</a>}
+        {item.sources?.length ? <div className="case-sources">{item.sources.map((source) => <a key={source.href} href={source.href} target="_blank" rel="noreferrer">{source.label} ↗</a>)}</div> : null}
+      </div>
+    </section>
+  );
+}
+
+function CaseArticle({ article, index }: { article: NonNullable<Project["articles"]>[number]; index: number }) {
+  const { t } = useI18n();
+  const isDraft = article.status === "draft";
+  return (
+    <section tabIndex={-1} className="case-section case-section-article" id={"chapter-" + article.id}>
+      <header className="case-section-heading reading-surface">
+        <span>{chapterNumber(index)}</span>
+        <h2>{article.title}</h2>
+      </header>
+      <div className="case-copy reading-surface">
+        <p className="case-lead">{article.summary}</p>
+        <div className="article-card-meta"><span>{article.language}</span>{isDraft && <small className="article-status">{t("case.draft")}</small>}</div>
+        <a className="case-source-link" href={article.href} target="_blank" rel="noreferrer">{isDraft ? t("case.openDraft") : t("case.readArticle")} ↗</a>
+      </div>
+    </section>
+  );
+}
+
+function CaseSections({ items, articles, project, onExpand }: { items: BoardItem[]; articles: NonNullable<Project["articles"]>; project: Project; onExpand: ExpandHandler }) {
+  const { t } = useI18n();
+  if (items.length)
+    return <>{items.map((item, index) => <CaseSection key={item.id} item={item} index={index} project={project} onExpand={onExpand} />)}</>;
+  if (articles.length)
+    return <>{articles.map((article, index) => <CaseArticle key={article.id} article={article} index={index} />)}</>;
+  if (!project.details)
+    return null;
+  return (
+    <section tabIndex={-1} className="case-section" id="overview">
+      <header className="case-section-heading reading-surface">
+        <span>01</span>
+        <h2>{t("case.overview")}</h2>
+      </header>
+      <div className="case-copy reading-surface"><p className="case-lead">{project.details}</p></div>
+    </section>
+  );
+}
+
+function CaseContents({ entries, onSelect }: { entries: TocEntry[]; onSelect: (id: string) => void }) {
+  const { t } = useI18n();
+  return (
+    <nav className="case-contents reading-surface" aria-label={t("case.sections")}>
+      <p>{t("case.inProject")}</p>
+      <ol>{entries.map((entry, index) => <li key={entry.id}><a href={chapterHref(entry.id)} onClick={() => onSelect(entry.id)}><span>{chapterNumber(index)}</span>{entry.title}</a></li>)}</ol>
+    </nav>
+  );
+}
+
+function CaseRunner({ entries, activeSection, onSelect, category, projectId }: { entries: TocEntry[]; activeSection: string; onSelect: (id: string) => void; category: TabId; projectId: string }) {
+  const { t } = useI18n();
+  const activeIndex = Math.max(0, entries.findIndex((entry) => entry.id === activeSection));
+  return (
+    <nav className="case-runner" aria-label={t("case.onThisPage")}>
+      <ol>{entries.map((entry, index) => <li key={entry.id}><a href={chapterHref(entry.id)} aria-current={activeSection === entry.id ? "location" : undefined} onClick={() => onSelect(entry.id)}><span>{chapterNumber(index)}</span><span className="visually-hidden">{entry.title}</span></a></li>)}</ol>
+      <p className="case-runner-current" aria-hidden="true"><span>{chapterNumber(activeIndex)}</span>{entries[activeIndex]?.title}</p>
+      <BackLink category={category} projectId={projectId} className="case-runner-back" compact><span aria-hidden="true">←</span><span>{t("case.backProject")}</span></BackLink>
+    </nav>
+  );
 }
 
 function ProjectDetailContent({ project, category }: { project: Project & { category: TabId }; category: TabId }) {
@@ -866,84 +954,26 @@ function ProjectDetailContent({ project, category }: { project: Project & { cate
         <div className="case-heading reading-surface">
           <span className="section-index">{meta.label.toUpperCase()} / {project.year}</span>
           <h1>{project.title}</h1>
-          <p className="case-intro">{project.description}</p>
+        </div>
+        <span className="case-number" aria-hidden="true">{project.index}</span>
+        <p className="case-intro reading-surface">{project.description}</p>
+        <div className="case-facts reading-surface">
           <ul className="tag-list" aria-label={project.title + " " + t("case.technologies")}>
             {project.tags.map((tag) => <li key={tag}>{tag}</li>)}
           </ul>
+          {!isComparative && project.links.length > 0 && (
+            <div className="project-links">
+              {project.links.map((link) => <a key={link.href} href={link.href} target="_blank" rel="noreferrer"><span className="hover-shift-label"><span>{link.label}</span><span aria-hidden="true">↗</span></span></a>)}
+            </div>
+          )}
         </div>
-        {project.attribution && <aside className="source-credit" aria-label={project.attribution.title}><div><span>{project.attribution.title}</span><p>{project.attribution.text}</p></div><div className="source-credit-links">{project.attribution.links.map((link) => <a key={link.href} href={link.href} target="_blank" rel="noreferrer">{link.label} ↗</a>)}</div></aside>}
-        {!isComparative && project.links.length > 0 && (
-          <div className="project-links reading-surface">
-            {project.links.map((link) => <a key={link.href} href={link.href} target="_blank" rel="noreferrer"><span className="hover-shift-label"><span>{link.label}</span><span aria-hidden="true">↗</span></span></a>)}
-          </div>
-        )}
         {!isComparative && project.details && items.length > 0 && <p className="case-summary reading-surface">{project.details}</p>}
+        {project.attribution && <aside className="source-credit" aria-label={project.attribution.title}><div><span>{project.attribution.title}</span><p>{project.attribution.text}</p></div><div className="source-credit-links">{project.attribution.links.map((link) => <a key={link.href} href={link.href} target="_blank" rel="noreferrer">{link.label} ↗</a>)}</div></aside>}
+        {!tocEntries.length && <div className="case-cover-figure"><ProjectCover project={project} /></div>}
+        {tocEntries.length > 0 && <CaseContents entries={tocEntries} onSelect={setActiveSection} />}
       </header>
-      {tocEntries.length > 0 && (
-        <details className="mobile-toc reading-surface">
-          <summary>{t("case.onThisPage")}</summary>
-          <BackLink category={category} projectId={project.id} className="toc-back" compact><span aria-hidden="true">←</span>{t("case.backProject")}</BackLink>
-          <nav className="toc-links" aria-label={t("case.sections")}>
-            {tocEntries.map((entry, index) => (
-              <a key={entry.id} className="toc-link" onClick={(event) => { setActiveSection(entry.id); const menu = event.currentTarget.closest("details"); if (menu instanceof HTMLDetailsElement) menu.open = false; }} aria-current={activeSection === entry.id ? "location" : undefined} href={entry.id === "overview" ? "#overview" : "#chapter-" + entry.id}>
-                <span>{String(index + 1).padStart(2, "0")}</span>
-                {entry.title}
-              </a>
-            ))}
-          </nav>
-        </details>
-      )}
-      {!tocEntries.length ? null : (
-        <div className="case-layout">
-          <div className="case-content">
-            {items.length ? items.map((item, index) => (
-              <section tabIndex={-1} className={"case-section case-section-" + (item.layout ?? "prose")} id={"chapter-" + item.id} key={item.id}>
-                <header className="case-section-heading reading-surface">
-                  <span>{String(index + 1).padStart(2, "0")}</span>
-                  <h2>{item.title}</h2>
-                </header>
-                <CaseMedia item={item} project={project} onExpand={openImage} />
-                <div className="case-copy reading-surface">
-                  <p>{item.description}</p>
-                  <CaseCopyContent item={item} />
-                  {item.href && <a className="case-source-link" href={item.href} target="_blank" rel="noreferrer">{item.linkLabel ?? t("common.viewSource")} ↗</a>}
-                  {item.sources?.length ? <div className="case-sources">{item.sources.map((source) => <a key={source.href} href={source.href} target="_blank" rel="noreferrer">{source.label} ↗</a>)}</div> : null}
-                </div>
-              </section>
-            )) : articles.length ? articles.map((article, index) => (
-              <section tabIndex={-1} className="case-section article-case-section" id={"chapter-" + article.id} key={article.id}>
-                <div className="article-card">
-                  <header className="case-section-heading reading-surface">
-                    <span>{String(index + 1).padStart(2, "0")}</span>
-                    <h2>{article.title}</h2>
-                  </header>
-                  <div className="article-card-copy"><p>{article.summary}</p><div className="article-card-meta"><span>{article.language}</span>{article.status === "draft" && <small className="article-status">{t("case.draft")}</small>}</div><a href={article.href} target="_blank" rel="noreferrer">{article.status === "draft" ? t("case.openDraft") : t("case.readArticle")} ↗</a></div>
-                </div>
-              </section>
-            )) : project.details ? (
-              <section tabIndex={-1} className="case-section" id="overview">
-                <header className="case-section-heading reading-surface">
-                  <span>01</span>
-                  <h2>{t("case.overview")}</h2>
-                </header>
-                <div className="case-copy reading-surface"><p>{project.details}</p></div>
-              </section>
-            ) : null}
-          </div>
-          <aside className="case-toc reading-surface">
-            <BackLink category={category} projectId={project.id} className="toc-back" compact><span aria-hidden="true">←</span>{t("case.backProject")}</BackLink>
-            <p>{t("case.inProject")}</p>
-            <nav className="toc-links" aria-label={t("case.sections")}>
-              {tocEntries.map((entry, index) => (
-                <a key={entry.id} className="toc-link" onClick={() => setActiveSection(entry.id)} aria-current={activeSection === entry.id ? "location" : undefined} href={entry.id === "overview" ? "#overview" : "#chapter-" + entry.id}>
-                  <span>{String(index + 1).padStart(2, "0")}</span>
-                  {entry.title}
-                </a>
-              ))}
-            </nav>
-          </aside>
-        </div>
-      )}
+      {tocEntries.length > 0 && <CaseRunner entries={tocEntries} activeSection={activeSection} onSelect={setActiveSection} category={category} projectId={project.id} />}
+      {tocEntries.length > 0 && <div className="case-layout"><CaseSections items={items} articles={articles} project={project} onExpand={openImage} /></div>}
       {hasCaseMedia && !isComparative && <ImageDialog item={dialogItem} onClose={closeImage} />}
       <nav className="case-navigation" aria-label={t("case.navigation")}>
         <div className="case-navigation-heading"><span>{t("case.continue")}</span><span>{meta.label.toUpperCase()}</span></div>

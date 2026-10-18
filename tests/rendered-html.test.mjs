@@ -135,6 +135,7 @@ test("image-backed cases keep real media and image-only expansion controls", asy
   const html = await htmlAt("/projects/punch-in-rush");
   assert.match(html, /id="chapter-punch-0"/);
   assert.match(html, /src="\/images\/portfolio\/punch-overview\.webp"/);
+  assert.match(html, /<img[^>]*src="\/images\/portfolio\/punch-overview\.webp"[^>]*width="1600" height="731"/, "chapter images should declare their real pixel size");
   assert.match(html, /class="media-expand"/);
   assert.match(html, /aria-label="Enlarge image: From combat study to morning commute"/);
   assert.match(html, /class="image-dialog"/);

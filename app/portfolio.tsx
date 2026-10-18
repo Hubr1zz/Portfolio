@@ -740,7 +740,7 @@ function ArchivePage({ page }: { page: TabId }) {
 function CaseMedia({ item, project, onExpand }: { item: BoardItem; project: Project; onExpand: (event: MouseEvent<HTMLButtonElement>, item: BoardItem) => void }) {
   const { t } = useI18n();
   if (item.image)
-    return <div className="case-media"><Image src={assetPath(item.image)} alt={item.imageAlt ?? item.title} width={1600} height={1000} sizes="(max-width: 900px) 100vw, 65vw" unoptimized /><button className="media-expand" type="button" onClick={(event) => onExpand(event, item)} aria-label={t("case.enlarge") + ": " + item.title}>{t("case.enlarge")} ↗</button></div>;
+    return <div className="case-media"><Image src={assetPath(item.image)} alt={item.imageAlt ?? item.title} width={item.imageWidth} height={item.imageHeight} sizes="(max-width: 900px) 100vw, 65vw" unoptimized /><button className="media-expand" type="button" onClick={(event) => onExpand(event, item)} aria-label={t("case.enlarge") + ": " + item.title}>{t("case.enlarge")} ↗</button></div>;
   if (item.diagram)
     return <div className="case-media"><FlowDiagram id={item.diagram} /></div>;
   if (item.visual)

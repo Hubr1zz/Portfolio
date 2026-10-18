@@ -2,6 +2,7 @@ export type TabId = "technical" | "games" | "design";
 export type PageId = "home" | TabId;
 export type ProjectLink = { label: string; href: string };
 export type ProjectAttribution = { title: string; text: string; links: ProjectLink[] };
+export type GalleryImage = { src: string; alt: string; width: number; height: number };
 export type Project = {
   id: string;
   index: string;
@@ -16,7 +17,9 @@ export type Project = {
   articles?: { id: string; title: string; summary: string; href: string; language: string; status?: "draft" }[];
   image?: string;
   imageAlt?: string;
-  gallery?: { src: string; alt: string }[];
+  imageWidth?: number;
+  imageHeight?: number;
+  gallery?: GalleryImage[];
   visual?: "workflow" | "interaction" | "editor" | "prototype";
   featured?: boolean;
   tier?: "release" | "study";
@@ -34,6 +37,8 @@ export type BoardItem = {
   linkLabel?: string;
   image?: string;
   imageAlt?: string;
+  imageWidth?: number;
+  imageHeight?: number;
   diagram?: DiagramId;
   visual?: boolean;
 };
@@ -150,6 +155,8 @@ export const projects: Record<TabId, Project[]> = {
       ],
       image: "/images/tech-03.webp",
       imageAlt: "Unity editor showing a procedural multi-legged locomotion prototype",
+      imageWidth: 1121,
+      imageHeight: 629,
       tier: "study",
     },
     {
@@ -168,10 +175,10 @@ export const projects: Record<TabId, Project[]> = {
         { label: "GitHub profile", href: "https://github.com/Hubr1zz" },
       ],
       gallery: [
-        { src: "/images/tech-05.webp", alt: "Stylized animated grass in Unity" },
-        { src: "/images/tech-04.webp", alt: "Depth-based stylized water shader" },
-        { src: "/images/tech-06.webp", alt: "Warm stylized desert rendering study" },
-        { src: "/images/tech-01.webp", alt: "Grass geometry authored with Blender geometry nodes" },
+        { src: "/images/tech-05.webp", alt: "Stylized animated grass in Unity", width: 726, height: 407 },
+        { src: "/images/tech-04.webp", alt: "Depth-based stylized water shader", width: 699, height: 374 },
+        { src: "/images/tech-06.webp", alt: "Warm stylized desert rendering study", width: 726, height: 407 },
+        { src: "/images/tech-01.webp", alt: "Grass geometry authored with Blender geometry nodes", width: 690, height: 424 },
       ],
       featured: true,
       tier: "study",
@@ -195,10 +202,10 @@ export const projects: Record<TabId, Project[]> = {
         { label: "Read devlog", href: "https://leonzhouziang.notion.site/1c7ca7501690802cb125f737304092ee?v=1c7ca75016908036b2b5000c5f304776" },
       ],
       gallery: [
-        { src: "/images/portfolio/punch-overview.webp", alt: "Punch-in Rush overview and playable links" },
-        { src: "/images/portfolio/punch-concept.webp", alt: "Punch-in Rush concept, movement model, and design principles" },
-        { src: "/images/portfolio/punch-level-design.webp", alt: "Punch-in Rush level design iterations" },
-        { src: "/images/portfolio/punch-technical.webp", alt: "Punch-in Rush character controller and rendering studies" },
+        { src: "/images/portfolio/punch-overview.webp", alt: "Punch-in Rush overview and playable links", width: 1600, height: 731 },
+        { src: "/images/portfolio/punch-concept.webp", alt: "Punch-in Rush concept, movement model, and design principles", width: 1600, height: 731 },
+        { src: "/images/portfolio/punch-level-design.webp", alt: "Punch-in Rush level design iterations", width: 1600, height: 731 },
+        { src: "/images/portfolio/punch-technical.webp", alt: "Punch-in Rush character controller and rendering studies", width: 1600, height: 731 },
       ],
       featured: true,
     },
@@ -219,10 +226,10 @@ export const projects: Record<TabId, Project[]> = {
         { label: "Game website", href: "https://hubr1zz.github.io/HuntingInDarkness/" },
       ],
       gallery: [
-        { src: "/images/portfolio/hunt-overview.webp", alt: "Hunt in Darkness playable prototype" },
-        { src: "/images/portfolio/hunt-design.webp", alt: "Hunt in Darkness inspiration and design document" },
-        { src: "/images/portfolio/hunt-systems.webp", alt: "Hunt in Darkness combat actions, rules, and event balancing" },
-        { src: "/images/portfolio/hunt-production.webp", alt: "Hunt in Darkness Unity tooling and art pipeline" },
+        { src: "/images/portfolio/hunt-overview.webp", alt: "Hunt in Darkness playable prototype", width: 1600, height: 731 },
+        { src: "/images/portfolio/hunt-design.webp", alt: "Hunt in Darkness inspiration and design document", width: 1600, height: 731 },
+        { src: "/images/portfolio/hunt-systems.webp", alt: "Hunt in Darkness combat actions, rules, and event balancing", width: 1600, height: 731 },
+        { src: "/images/portfolio/hunt-production.webp", alt: "Hunt in Darkness Unity tooling and art pipeline", width: 1600, height: 731 },
       ],
     },
     {
@@ -241,9 +248,9 @@ export const projects: Record<TabId, Project[]> = {
         { label: "Watch video", href: "https://youtu.be/LEBErr-W2pE" },
       ],
       gallery: [
-        { src: "/images/portfolio/outlaws-overview.webp", alt: "Outlaw’s Deadend overview and core loop" },
-        { src: "/images/portfolio/outlaws-systems.webp", alt: "Outlaw’s Deadend puzzle rules and level editor" },
-        { src: "/images/portfolio/outlaws-teamwork.webp", alt: "Outlaw’s Deadend team roles and production workflow" },
+        { src: "/images/portfolio/outlaws-overview.webp", alt: "Outlaw’s Deadend overview and core loop", width: 1600, height: 731 },
+        { src: "/images/portfolio/outlaws-systems.webp", alt: "Outlaw’s Deadend puzzle rules and level editor", width: 1600, height: 731 },
+        { src: "/images/portfolio/outlaws-teamwork.webp", alt: "Outlaw’s Deadend team roles and production workflow", width: 1600, height: 731 },
       ],
     },
     {
@@ -262,9 +269,9 @@ export const projects: Record<TabId, Project[]> = {
         { label: "Watch video", href: "https://youtu.be/0MTk48wgJoM" },
       ],
       gallery: [
-        { src: "/images/portfolio/alive-overview.webp", alt: "Alive game overview and everything-is-alive theme" },
-        { src: "/images/portfolio/alive-systems.webp", alt: "Alive emergent systems and configurable card outputs" },
-        { src: "/images/portfolio/alive-teamwork.webp", alt: "Alive team leadership and production process" },
+        { src: "/images/portfolio/alive-overview.webp", alt: "Alive game overview and everything-is-alive theme", width: 1600, height: 731 },
+        { src: "/images/portfolio/alive-systems.webp", alt: "Alive emergent systems and configurable card outputs", width: 1600, height: 731 },
+        { src: "/images/portfolio/alive-teamwork.webp", alt: "Alive team leadership and production process", width: 1600, height: 731 },
       ],
     },
     {
@@ -280,9 +287,9 @@ export const projects: Record<TabId, Project[]> = {
       tags: ["VR", "Physics", "Shader", "Blender"],
       links: [{ label: "Watch video", href: "https://youtu.be/YI5XWamgaiQ" }],
       gallery: [
-        { src: "/images/portfolio/top-hotpot-overview.webp", alt: "Top Hotpot VR cooking loop" },
-        { src: "/images/portfolio/top-hotpot-engineering.webp", alt: "Top Hotpot ingredient simulation and cooking state implementation" },
-        { src: "/images/portfolio/top-hotpot-art.webp", alt: "Top Hotpot water effects and Blender asset production" },
+        { src: "/images/portfolio/top-hotpot-overview.webp", alt: "Top Hotpot VR cooking loop", width: 1600, height: 749 },
+        { src: "/images/portfolio/top-hotpot-engineering.webp", alt: "Top Hotpot ingredient simulation and cooking state implementation", width: 1600, height: 749 },
+        { src: "/images/portfolio/top-hotpot-art.webp", alt: "Top Hotpot water effects and Blender asset production", width: 1600, height: 751 },
       ],
     },
   ],
@@ -373,6 +380,11 @@ export const flatProjects = (Object.entries(projects) as [TabId, Project[]][]).f
 export function getProjectBySlug(slug: string) {
   return flatProjects.find((project) => project.id === slug);
 }
+
+function boardImage(image: GalleryImage) {
+  return { image: image.src, imageAlt: image.alt, imageWidth: image.width, imageHeight: image.height };
+}
+
 export function getBoardItems(project: Project): BoardItem[] {
   if (project.id === "zworkflow") {
     return [
@@ -586,6 +598,8 @@ export function getBoardItems(project: Project): BoardItem[] {
         details: "Where the vault is written for design work, the site is written for first contact. It opens with the world's tone—oppressive, primitive, beautiful—then walks through the settlement, hunt, and showdown loop and the six core pillars, with small interactive demos for flip-to-act cards, draw-based hit resolution, monster decks, equipment keywords, event checks, and flaws that open new choices.",
         image: "/images/portfolio/tactics-website.webp",
         imageAlt: "Hunting in Darkness website homepage: a skull crowned by a butterfly above the game title",
+        imageWidth: 1600,
+        imageHeight: 900,
         href: "https://hubr1zz.github.io/HuntingInDarkness/",
         linkLabel: "Visit the website",
       },
@@ -667,7 +681,7 @@ export function getBoardItems(project: Project): BoardItem[] {
         details: "Velocity updates use vector projections and state-specific formulas with explicit edge-case checks. I also studied ray-marched volumetric clouds and a Blender-baked wall-unfold animation; the latter was removed after testing because it conflicted with the final skybox and did not improve the experience.",
       },
     ];
-    return project.gallery.map((image, index) => ({ id: `punch-${index}`, ...explanations[index], image: image.src, imageAlt: image.alt }));
+    return project.gallery.map((image, index) => ({ id: `punch-${index}`, ...explanations[index], ...boardImage(image) }));
   }
 
   if (project.id === "hunting-in-darkness" && project.gallery) {
@@ -693,7 +707,7 @@ export function getBoardItems(project: Project): BoardItem[] {
         details: "Odin Serializer powers an event configuration tool, while DOTween and UniTask coordinate card animation and game flow. The monochrome comic direction was developed with generative image tools and refined in Photoshop to keep line weight, shadow, and atmosphere consistent.",
       },
     ];
-    return project.gallery.map((image, index) => ({ id: `hunt-${index}`, ...explanations[index], image: image.src, imageAlt: image.alt }));
+    return project.gallery.map((image, index) => ({ id: `hunt-${index}`, ...explanations[index], ...boardImage(image) }));
   }
 
   if (project.id === "outlaws-dead-end" && project.gallery) {
@@ -714,7 +728,7 @@ export function getBoardItems(project: Project): BoardItem[] {
         details: "Designers discussed puzzles in Figma, requirements and levels were tracked in shared spreadsheets, and artists delivered 2D and 3D assets against explicit briefs. A technical artist worked directly in Unity with me while the level-editing tools kept content integration consistent.",
       },
     ];
-    return project.gallery.map((image, index) => ({ id: `outlaws-${index}`, ...explanations[index], image: image.src, imageAlt: image.alt }));
+    return project.gallery.map((image, index) => ({ id: `outlaws-${index}`, ...explanations[index], ...boardImage(image) }));
   }
 
   if (project.id === "alive" && project.gallery) {
@@ -735,7 +749,7 @@ export function getBoardItems(project: Project): BoardItem[] {
         details: "Asset descriptions were tracked in a spreadsheet and delivered through the team’s communication channel. The finished project received a 500-yuan prize, which I divided across the group—a small but meaningful conclusion to the team’s work.",
       },
     ];
-    return project.gallery.map((image, index) => ({ id: `alive-${index}`, ...explanations[index], image: image.src, imageAlt: image.alt }));
+    return project.gallery.map((image, index) => ({ id: `alive-${index}`, ...explanations[index], ...boardImage(image) }));
   }
 
   if (project.id === "top-hotpot" && project.gallery) {
@@ -756,7 +770,7 @@ export function getBoardItems(project: Project): BoardItem[] {
         details: "Polar-coordinate tiling and a normal map help the plane read as disturbed hotpot broth. Most ingredients and tableware were modeled in Blender, keeping the stylized asset language consistent across the VR scene.",
       },
     ];
-    return project.gallery.map((image, index) => ({ id: `hotpot-${index}`, ...explanations[index], image: image.src, imageAlt: image.alt }));
+    return project.gallery.map((image, index) => ({ id: `hotpot-${index}`, ...explanations[index], ...boardImage(image) }));
   }
 
   if (project.id === "procedural-motion") {
@@ -768,6 +782,8 @@ export function getBoardItems(project: Project): BoardItem[] {
         details: "The controller combines a desired travel direction, a predicted body target, current foot anchors, and Cinemachine camera feedback. Locomotion is not a canned animation layered over movement—the visible pose is continuously reconstructed from environment queries and the support points that succeeded.",
         image: project.image,
         imageAlt: project.imageAlt,
+        imageWidth: project.imageWidth,
+        imageHeight: project.imageHeight,
       },
       {
         id: "foothold-search",
@@ -805,37 +821,33 @@ export function getBoardItems(project: Project): BoardItem[] {
         title: "Start with the silhouette and lighting target in Blender",
         description: "Geometry Nodes establishes grass density, blade distribution, and the broad lawn silhouette before the effect is rebuilt for real-time use.",
         details: "The study separates authoring questions from runtime questions. Procedural placement makes the source field easy to reshape, while baked normals soften lighting across individual blades so the field reads as one stylized surface rather than a collection of harsh flat cards.",
-        image: project.gallery[3].src,
-        imageAlt: project.gallery[3].alt,
+        ...boardImage(project.gallery[3]),
       },
       {
         id: "grass-runtime",
         title: "Transfer the authored grass language into a real-time shader",
         description: "The Unity version recreates the lighting response in Shader Graph and adds vertex animation so the static source becomes a moving gameplay surface.",
         details: "Baked normal information preserves the unified lighting target, while vertex displacement supplies wind rhythm without moving individual GameObjects. The experiment treats the Blender field as a visual specification: the runtime shader is judged by whether it preserves silhouette, softness, and motion at interactive cost.",
-        image: project.gallery[0].src,
-        imageAlt: project.gallery[0].alt,
+        ...boardImage(project.gallery[0]),
       },
       {
         id: "water-depth",
         title: "Use scene depth to anchor water edges and caustics",
         description: "The water shader compares the surface with scene depth, reconstructs world position, and uses that spatial information to place shoreline treatment and projected light.",
         details: "Because the effect is derived from the geometry behind the water, shallow edges and depth transitions respond to actual scene objects instead of a painted mask. Reconstructed world coordinates also drive the caustic noise, keeping the pattern stable in the world as the camera moves.",
-        image: project.gallery[1].src,
-        imageAlt: project.gallery[1].alt,
+        ...boardImage(project.gallery[1]),
       },
       {
         id: "desert-wind",
         title: "Layer authored dunes, shader motion, and particles into one wind cue",
         description: "The Journey-inspired desert separates three spatial scales: Blender shapes the broad terrain, HLSL animates the surface response, and particles reveal wind direction.",
         details: "No single layer has to carry the entire effect. Large undulation gives composition and silhouette, vertex motion adds local movement, and sparse particles provide temporal rhythm that remains readable from a gameplay camera. Together they imply a moving atmosphere without simulating sand grains.",
-        image: project.gallery[2].src,
-        imageAlt: project.gallery[2].alt,
+        ...boardImage(project.gallery[2]),
       },
     ];
   }
 
-  if (project.gallery) return project.gallery.map((image, index) => ({ id: `image-${index}`, title: image.alt, description: image.alt, image: image.src, imageAlt: image.alt }));
-  if (project.image) return [{ id: "image-0", title: project.imageAlt ?? project.title, description: project.imageAlt ?? "", image: project.image, imageAlt: project.imageAlt ?? project.title }];
+  if (project.gallery) return project.gallery.map((image, index) => ({ id: `image-${index}`, title: image.alt, description: image.alt, ...boardImage(image) }));
+  if (project.image) return [{ id: "image-0", title: project.imageAlt ?? project.title, description: project.imageAlt ?? "", image: project.image, imageAlt: project.imageAlt ?? project.title, imageWidth: project.imageWidth, imageHeight: project.imageHeight }];
   return [{ id: "system-visual", title: project.eyebrow, description: project.description, details: project.details, visual: true }];
 }

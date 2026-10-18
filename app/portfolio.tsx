@@ -819,7 +819,7 @@ function CaseSection({ item, index, project, onExpand }: { item: BoardItem; inde
         <p className="case-lead">{item.description}</p>
         {item.details && <p>{item.details}</p>}
         {item.bullets?.length ? <CaseBullets bullets={item.bullets} /> : null}
-        {item.href && <a className="case-source-link" href={item.href} target="_blank" rel="noreferrer">{item.linkLabel ?? t("common.viewSource")} ↗</a>}
+        {item.href && <a className="case-source-link details-action" href={item.href} target="_blank" rel="noreferrer"><span>{item.linkLabel ?? t("common.viewSource")}</span><span aria-hidden="true">↗</span></a>}
         {item.sources?.length ? <div className="case-sources">{item.sources.map((source) => <a key={source.href} href={source.href} target="_blank" rel="noreferrer">{source.label} ↗</a>)}</div> : null}
       </div>
     </section>
@@ -838,7 +838,7 @@ function CaseArticle({ article, index }: { article: NonNullable<Project["article
       <div className="case-copy reading-surface">
         <p className="case-lead">{article.summary}</p>
         <div className="article-card-meta"><span>{article.language}</span>{isDraft && <small className="article-status">{t("case.draft")}</small>}</div>
-        <a className="case-source-link" href={article.href} target="_blank" rel="noreferrer">{isDraft ? t("case.openDraft") : t("case.readArticle")} ↗</a>
+        <a className="case-source-link details-action" href={article.href} target="_blank" rel="noreferrer"><span>{isDraft ? t("case.openDraft") : t("case.readArticle")}</span><span aria-hidden="true">↗</span></a>
       </div>
     </section>
   );
@@ -866,7 +866,7 @@ function CaseSections({ items, articles, project, onExpand }: { items: BoardItem
 function CaseContents({ entries, onSelect }: { entries: TocEntry[]; onSelect: (id: string) => void }) {
   const { t } = useI18n();
   return (
-    <nav className="case-contents reading-surface" aria-label={t("case.sections")}>
+    <nav className={"case-contents reading-surface" + (entries.length % 2 === 0 && entries.length % 3 !== 0 ? " is-paired" : "")} aria-label={t("case.sections")}>
       <p>{t("case.inProject")}</p>
       <ol>{entries.map((entry, index) => <li key={entry.id}><a href={chapterHref(entry.id)} onClick={() => onSelect(entry.id)}><span>{chapterNumber(index)}</span>{entry.title}</a></li>)}</ol>
     </nav>

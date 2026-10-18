@@ -169,6 +169,11 @@ function ProjectVisual({ project }: { project: Project }) {
   return <div className="system-visual quiet-visual"><span className="visual-label">{content("visual.archive")} / {project.year}</span><strong>{project.index}</strong></div>;
 }
 
+// Camel-case identifiers such as BeforeExecution wrap between their words instead of mid-word in narrow nodes.
+function breakableIdentifier(label: string) {
+  return label.replace(/([a-z])([A-Z])/g, "$1\n$2").split("\n").flatMap((part, index) => index ? [<wbr key={index} />, part] : [part]);
+}
+
 function FlowDiagram({ id }: { id: DiagramId }) {
   const { content } = useI18n();
   if (id === "workflow-bridge") {
@@ -297,7 +302,7 @@ function FlowDiagram({ id }: { id: DiagramId }) {
       <div className="flow-diagram action-chain-overview" aria-label={content("diagram.actionChainOverview.aria")}>
         <span className="flow-kicker">{content("diagram.actionChainOverview.label")}</span>
         <div className="action-root-flow"><b>{content("diagram.actionChainOverview.external")}</b><i>→</i><b>{content("diagram.actionChainOverview.rootQueue")}</b><i>→</i><strong>{content("diagram.actionChainOverview.currentChain")}</strong></div>
-        <div className="action-phase-flow"><span>{content("diagram.actionChainOverview.before")}</span><i>→</i><span>{content("diagram.actionChainOverview.execute")}</span><i>→</i><span>{content("diagram.actionChainOverview.after")}</span><i>↺</i></div>
+        <div className="action-phase-flow"><span>{breakableIdentifier(content("diagram.actionChainOverview.before"))}</span><i>→</i><span>{content("diagram.actionChainOverview.execute")}</span><i>→</i><span>{breakableIdentifier(content("diagram.actionChainOverview.after"))}</span><i>↺</i></div>
         <p>{content("diagram.actionChainOverview.description")}</p>
       </div>
     );

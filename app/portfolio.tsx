@@ -974,7 +974,7 @@ function ProjectDetailContent({ project, category }: { project: Project & { cate
       </header>
       {tocEntries.length > 0 && <CaseRunner entries={tocEntries} activeSection={activeSection} onSelect={setActiveSection} category={category} projectId={project.id} />}
       {tocEntries.length > 0 && <div className="case-layout"><CaseSections items={items} articles={articles} project={project} onExpand={openImage} /></div>}
-      {hasCaseMedia && !isComparative && <ImageDialog item={dialogItem} onClose={closeImage} />}
+      {items.some((item) => item.image) && <ImageDialog item={dialogItem} onClose={closeImage} />}
       <nav className="case-navigation" aria-label={t("case.navigation")}>
         <div className="case-navigation-heading"><span>{t("case.continue")}</span><span>{meta.label.toUpperCase()}</span></div>
         <div className="case-navigation-links">

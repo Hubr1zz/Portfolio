@@ -216,6 +216,7 @@ export const projects: Record<TabId, Project[]> = {
       links: [
         { label: "Play on Itch.io", href: "https://leon-zhou.itch.io/rpg-demo" },
         { label: "Watch video", href: "https://youtu.be/JI4dIV5Zk6o" },
+        { label: "Game website", href: "https://hubr1zz.github.io/HuntingInDarkness/" },
       ],
       gallery: [
         { src: "/images/portfolio/hunt-overview.webp", alt: "Hunt in Darkness playable prototype" },
@@ -298,6 +299,7 @@ export const projects: Record<TabId, Project[]> = {
         "The vault develops the game from its pillars and art direction through the hunt, showdown, settlement, and detailed mechanics, while keeping inspirations, references, examples, terminology, and AI-assisted maintenance clearly separated.",
       tags: ["Systems Design", "Obsidian", "Linked Documentation", "Card & dice"],
       links: [
+        { label: "Project website", href: "https://hubr1zz.github.io/HuntingInDarkness/" },
         { label: "GitHub design document", href: "https://github.com/Hubr1zz/GameDesignVault" },
         { label: "Legacy Notion document", href: "https://www.notion.so/leonzhouziang/KDM-inspired-tactic-game-design-63affac2d3d843b5bad6e01835a1fba1?p=2a0ca75016908091a97ac2a359c6e375&pm=s" },
       ],
@@ -577,6 +579,16 @@ export function getBoardItems(project: Project): BoardItem[] {
   if (project.id === "tactics-design") {
     const designRoot = "https://github.com/Hubr1zz/GameDesignVault/blob/master/%E8%AE%BE%E8%AE%A1%E6%96%87%E6%A1%A3";
     return [
+      {
+        id: "pitch-site",
+        title: "A public face for Hunting in Darkness",
+        description: "A standalone bilingual website turns the design document into a pitch that players and collaborators can read in minutes.",
+        details: "Where the vault is written for design work, the site is written for first contact. It opens with the world's tone—oppressive, primitive, beautiful—then walks through the settlement, hunt, and showdown loop and the six core pillars, with small interactive demos for flip-to-act cards, draw-based hit resolution, monster decks, equipment keywords, event checks, and flaws that open new choices.",
+        image: "/images/portfolio/tactics-website.webp",
+        imageAlt: "Hunting in Darkness website homepage: a skull crowned by a butterfly above the game title",
+        href: "https://hubr1zz.github.io/HuntingInDarkness/",
+        linkLabel: "Visit the website",
+      },
       {
         id: "game-design",
         title: "The game: from pillars to playable systems",

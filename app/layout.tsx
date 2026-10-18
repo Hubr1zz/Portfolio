@@ -38,6 +38,32 @@ export const metadata: Metadata = {
   },
 };
 
+// After a deploy, a browser can still hold cached HTML that points at stylesheets the new build removed.
+// Reload such a page once with a cache-busting query, then strip the query from the address bar.
+const staleStylesheetRecovery = `(() => {
+  const url = new URL(location.href);
+  let retried = url.searchParams.has("_fresh");
+  if (retried) {
+    url.searchParams.delete("_fresh");
+    history.replaceState(history.state, "", url.pathname + url.search + url.hash);
+  }
+  const recover = () => {
+    if (retried)
+      return;
+    retried = true;
+    url.searchParams.set("_fresh", Date.now().toString(36));
+    location.replace(url.href);
+  };
+  document.addEventListener("error", (event) => {
+    if (event.target instanceof HTMLLinkElement && event.target.rel === "stylesheet")
+      recover();
+  }, true);
+  window.addEventListener("load", () => {
+    if ([...document.querySelectorAll('link[rel="stylesheet"]')].some((link) => !link.sheet))
+      recover();
+  });
+})();`;
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -45,6 +71,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: staleStylesheetRecovery }} />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >

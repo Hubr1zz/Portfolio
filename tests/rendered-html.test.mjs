@@ -21,8 +21,9 @@ test("server-renders the redesigned portfolio home", async () => {
   const html = await htmlAt("/");
   assert.match(html, /<title>Leon Zhou — Technical Designer<\/title>/i);
   assert.match(html, /class="home-intro/);
-  assert.match(html, /Designing play\./);
-  assert.match(html, /Building systems\./);
+  assert.match(html, /Designing play<b class="intro-full-stop">\.<\/b>/);
+  assert.match(html, /Building systems<b class="intro-full-stop">\.<\/b>/);
+  assert.doesNotMatch(html, /class="intro-plane"/);
   assert.match(html, /class="featured-section[^"]*"[^>]*id="work"/);
   assert.match(html, /href="\/projects\/zworkflow\/?"/);
   assert.match(html, /href="\/projects\/tactics-design\/?"/);
@@ -34,17 +35,18 @@ test("server-renders the redesigned portfolio home", async () => {
   assert.match(html, /class="site-footer"/);
   assert.match(html, /leonzhouziang@gmail\.com/);
   assert.match(html, /href="\/resume\/Ziang-Zhou-Resume\.pdf"/);
-  assert.match(html, /class="resume-action"/);
-  assert.match(html, /class="explore-action"/);
-  assert.match(html, /class="intro-registration"/);
+  assert.match(html, /class="intro-action resume-action"/);
+  assert.match(html, /class="intro-action explore-action"/);
+  assert.doesNotMatch(html, /intro-action-index/);
   assert.match(html, /class="profile-name"><span>Leon<\/span> <span>Zhou<\/span><\/p>/);
   assert.match(html, />About Me<\/h2>/);
   assert.match(html, /I am currently pursuing an M\.S\. in Game Design and Development at the University of Southern California \(USC\)\./);
   assert.equal((html.match(/Game designer, gameplay programmer, but most importantly, game player\./g) ?? []).length, 1);
   assert.ok(html.indexOf(">About Me</h2>") < html.indexOf('id="work"'), "About Me should precede Selected work");
   assert.doesNotMatch(html, /PROFILE \/ NOTES|How I work/);
-  assert.ok(html.indexOf('class="resume-action"') < html.indexOf('class="explore-action"'), "Resume should precede Explore");
-  assert.match(html, /<svg[^>]+viewBox="0 0 24 24"/);
+  assert.ok(html.indexOf('class="intro-action resume-action"') < html.indexOf('class="intro-action explore-action"'), "Resume should precede Explore");
+  assert.match(html, /class="feature-cover"/);
+  assert.match(html, /tactics-website.webp/);
   assert.match(html, />Selected work</);
   assert.doesNotMatch(html, />Ideas, made tangible\.</);
   assert.doesNotMatch(html, /brand-mark[^>]*>LZ<\/span>/);
@@ -53,8 +55,8 @@ test("server-renders the redesigned portfolio home", async () => {
 test("category pages contain overview cards and no reader chapters", async () => {
   const cases = [
     ["/technical", "Technical Projects — Leon Zhou", ["zWorkFlow", "ActionChainWeaver", "Interaction System", "Unity Editor Tools", "Procedural Locomotion", "Rendering studies"]],
-    ["/games", "Game Projects — Leon Zhou", ["Punch-in Rush", "Hunt in Darkness", "Outlaw’s Deadend", "Alive", "Top Hotpot"]],
-    ["/design", "Design Projects — Leon Zhou", ["Tactical Game Design Document", "Comparative Game Analysis", "Design Breakdown Notes"]],
+    ["/games", "Game Projects — Leon Zhou", ["Fractal Shelter", "Ariadne", "Punch-in Rush", "Hunting in Darkness", "Outlaw’s Deadend", "Alive", "Top Hotpot"]],
+    ["/design", "Design Projects — Leon Zhou", ["Tactical Game Design Document", "Comparative Game Analysis", "Design Breakdown Notes", "Ariadne"]],
   ];
 
   for (const [path, title, projectTitles] of cases) {
@@ -141,6 +143,28 @@ test("image-backed cases keep real media and image-only expansion controls", asy
   assert.match(html, /class="image-dialog"/);
 });
 
+test("document pages render as enlargeable thumbnails with a PDF download", async () => {
+  const html = await htmlAt("/projects/fractal-shelter");
+  const chapter = html.slice(html.indexOf('id="chapter-pitch-handbook"'));
+  assert.match(chapter, /class="case-media case-pages"/);
+  assert.equal((chapter.match(/aria-label="Enlarge image: /g) ?? []).length, 5, "every page should open in the image dialog");
+  assert.match(chapter, /<img[^>]*src="\/images\/portfolio\/fractal-shelter-handbook-essence\.webp"[^>]*width="1600" height="2262"/);
+  assert.match(chapter, /<a class="case-source-link details-action" href="\/documents\/fractal-shelter-pitch-handbook\.pdf" download="">/);
+  assert.match(html, /class="image-dialog"/);
+});
+
+test("Ariadne is listed under both Game and Design Projects and opens one case page", async () => {
+  for (const [path, index] of [["/games", "02"], ["/design", "04"]]) {
+    const html = await htmlAt(path);
+    const card = html.slice(html.indexOf('<article id="project-ariadne"'), html.indexOf("</article>", html.indexOf('<article id="project-ariadne"')));
+    assert.match(card, /href="\/projects\/ariadne\/?"/, path);
+    assert.match(card, new RegExp(`<span>${index}</span>`), path);
+  }
+  const html = await htmlAt("/projects/ariadne");
+  for (const id of ["record-maze", "second-surprise", "strike-dots", "sound-ripple", "dot-response", "ink-performance"])
+    assert.ok(html.includes(`id="chapter-${id}"`), `Ariadne chapter: ${id}`);
+});
+
 test("article collection renders comparative essays without media", async () => {
   const html = await htmlAt("/projects/comparative-writing");
   const mainHtml = html.slice(html.indexOf("<main"), html.lastIndexOf("</main>") + "</main>".length);
@@ -166,7 +190,7 @@ test("article collection renders comparative essays without media", async () => 
 test("all known project slugs pre-render and unknown slugs return framework 404", async () => {
   const slugs = [
     "zworkflow", "interaction", "editor-tools", "procedural-motion", "rendering-studies",
-    "punch-in-rush", "hunting-in-darkness", "outlaws-dead-end", "alive", "top-hotpot",
+    "fractal-shelter", "ariadne", "punch-in-rush", "hunting-in-darkness", "outlaws-dead-end", "alive", "top-hotpot",
     "tactics-design", "comparative-writing", "design-vault",
   ];
   for (const slug of slugs)

@@ -2,7 +2,7 @@ export type TabId = "technical" | "games" | "design";
 export type PageId = "home" | TabId;
 export type ProjectLink = { label: string; href: string };
 export type ProjectAttribution = { title: string; text: string; links: ProjectLink[] };
-export type GalleryImage = { src: string; alt: string; width: number; height: number };
+export type GalleryImage = { src: string; alt: string; width: number; height: number; label?: string };
 export type Project = {
   id: string;
   index: string;
@@ -23,6 +23,8 @@ export type Project = {
   visual?: "workflow" | "interaction" | "editor" | "prototype";
   featured?: boolean;
   tier?: "release" | "study";
+  // Other tabs that also list this project, each with the card index it takes there; the case page keeps the home category.
+  listedIn?: Partial<Record<TabId, string>>;
 };
 export type DiagramId = "workflow-bridge" | "workflow-lifecycle" | "workflow-knowledge" | "workflow-governance" | "interaction-routing" | "interaction-state" | "interaction-context" | "workflow-overview" | "editor-overview" | "editor-navigation" | "editor-inspector" | "editor-scene" | "locomotion-search" | "locomotion-gait" | "vault-map" | "vault-loop" | "vault-structure" | "vault-ai-flow" | "action-chain-overview" | "action-chain-lifecycle" | "action-chain-composite" | "action-chain-reactors" | "action-chain-insertion";
 export type BoardItem = {
@@ -35,12 +37,14 @@ export type BoardItem = {
   sources?: ProjectLink[];
   href?: string;
   linkLabel?: string;
+  download?: boolean;
   image?: string;
   imageAlt?: string;
   imageWidth?: number;
   imageHeight?: number;
   diagram?: DiagramId;
   visual?: boolean;
+  pages?: GalleryImage[];
 };
 
 export const tabs: { id: TabId; label: string; count: string; description: string; path: string }[] = [
@@ -54,14 +58,14 @@ export const tabs: { id: TabId; label: string; count: string; description: strin
   {
     id: "games",
     label: "Game Projects",
-    count: "05",
+    count: "07",
     description: "Playable prototypes, game-jam productions, and systems-led experiments where design decisions were validated through implementation.",
     path: "/games",
   },
   {
     id: "design",
     label: "Design Projects",
-    count: "03",
+    count: "04",
     description: "System design documents, comparative analysis, and an evolving library of design breakdowns.",
     path: "/design",
   },
@@ -186,8 +190,57 @@ export const projects: Record<TabId, Project[]> = {
   ],
   games: [
     {
-      id: "punch-in-rush",
+      id: "fractal-shelter",
       index: "01",
+      title: "Fractal Shelter",
+      eyebrow: "Comic-panel puzzle game in development",
+      year: "2026",
+      description:
+        "A 3D puzzle game played by moving the panels of a comic: one facility seen through many live cameras, where items become panels and every anomaly obeys a rule you can learn.",
+      details:
+        "I direct the game in a three-person core team and handle gameplay engineering, technical design, visuals, editor tools, system design, and UX. This page follows our Gate II pitch, from the core idea and mechanics to the playable prototype, pipeline, and roadmap.",
+      tags: ["Game Director", "Puzzle Design", "Unity 6", "Editor Tools"],
+      links: [
+        { label: "Watch trailer", href: "https://drive.google.com/file/d/1IX0fxcsUOGqvch-f8yeyMLnEMemrxamS/view" },
+        { label: "View pitch deck", href: "https://docs.google.com/presentation/d/1v7y9YwD2rTSSQL-b9VE_r8g9K5hg1lTJ2rZGc6G0ufw/edit?usp=sharing" },
+      ],
+      gallery: [
+        { src: "/images/portfolio/fractal-shelter-cover.webp", alt: "Fractal Shelter title slide beside an in-engine canvas of comic panels", width: 2000, height: 1125 },
+        { src: "/images/portfolio/fractal-shelter-essence.webp", alt: "Fractal Shelter in three ideas: panels are space, items are keys, anomalies are rules", width: 2000, height: 1125 },
+        { src: "/images/portfolio/fractal-shelter-narrative.webp", alt: "Mr. C concept art beside his want and need tracks across the levels", width: 2000, height: 1125 },
+        { src: "/images/portfolio/fractal-shelter-panels.webp", alt: "One 3D facility with color-coded camera volumes, each feeding a comic panel on the canvas", width: 2000, height: 1125 },
+        { src: "/images/portfolio/fractal-shelter-items.webp", alt: "A tape cut out of the scene as an item panel and dragged onto the gramophone", width: 2000, height: 1125 },
+        { src: "/images/portfolio/fractal-shelter-gates.webp", alt: "Progression map with knowledge, ability, and perspective gates and their in-engine examples", width: 2000, height: 1125 },
+        { src: "/images/portfolio/fractal-shelter-levels.webp", alt: "The four prototype levels and the Quiet Librarian’s hearing rules in the Audio Archive", width: 2000, height: 1125 },
+        { src: "/images/portfolio/fractal-shelter-pipeline.webp", alt: "Greybox, camera render, and canvas stages beside the target art direction concept", width: 2000, height: 1125 },
+        { src: "/images/portfolio/fractal-shelter-tools.webp", alt: "Custom Unity editor tools: a panel layout canvas, a panel camera inspector, and a top-down area map", width: 2000, height: 1125 },
+        { src: "/images/portfolio/fractal-shelter-scope.webp", alt: "Prototype scope, full-release targets, and the production roadmap", width: 2000, height: 1125 },
+      ],
+    },
+    {
+      id: "ariadne",
+      index: "02",
+      title: "Ariadne",
+      eyebrow: "Two-week course project on “Labyrinth”",
+      year: "2026",
+      description:
+        "A first-person maze inside a vinyl record. Strike the all-white floor with a needle to move through a widower’s memories of his violinist wife, and discover at the end that the maze is the record and its noises were her violin piece.",
+      details:
+        "A two-week course assignment on the theme Labyrinth that had to surprise the player twice, built by two people with AI tools. My teammate designed and built the scenes; I refined the gameplay, the visual and audio feedback, and performance. This page lists the problems I found and how each iteration solved them.",
+      tags: ["Mechanic Iteration", "Audio-Visual Feedback", "Performance", "AI-assisted"],
+      links: [],
+      listedIn: { design: "04" },
+      gallery: [
+        { src: "/images/portfolio/ariadne-cover.webp", alt: "The Ariadne record sleeve, printed with a labyrinth, beside its vinyl disc", width: 1600, height: 800 },
+        { src: "/images/portfolio/ariadne-record.webp", alt: "The ending pulls back to a turntable: the maze the player walked is the record’s grooves", width: 1600, height: 800 },
+        { src: "/images/portfolio/ariadne-score.webp", alt: "The needle retraces the route and draws a five-line staff, turning the black dots into notes", width: 1600, height: 800 },
+        { src: "/images/portfolio/ariadne-strike-ink.webp", alt: "The original mechanic: a needle strike splashes ink that makes the white maze walls appear", width: 1600, height: 800 },
+        { src: "/images/portfolio/ariadne-note-dot.webp", alt: "A black dot that has appeared on the white floor after being triggered", width: 1600, height: 800 },
+      ],
+    },
+    {
+      id: "punch-in-rush",
+      index: "03",
       title: "Punch-in Rush",
       eyebrow: "Movement prototype → parkour game",
       year: "2025",
@@ -211,8 +264,8 @@ export const projects: Record<TabId, Project[]> = {
     },
     {
       id: "hunting-in-darkness",
-      index: "02",
-      title: "Hunt in Darkness",
+      index: "04",
+      title: "Hunting in Darkness",
       eyebrow: "Tactical card-RPG prototype",
       year: "2025",
       description:
@@ -226,15 +279,15 @@ export const projects: Record<TabId, Project[]> = {
         { label: "Game website", href: "https://hubr1zz.github.io/HuntingInDarkness/" },
       ],
       gallery: [
-        { src: "/images/portfolio/hunt-overview.webp", alt: "Hunt in Darkness playable prototype", width: 1600, height: 731 },
-        { src: "/images/portfolio/hunt-design.webp", alt: "Hunt in Darkness inspiration and design document", width: 1600, height: 731 },
-        { src: "/images/portfolio/hunt-systems.webp", alt: "Hunt in Darkness combat actions, rules, and event balancing", width: 1600, height: 731 },
-        { src: "/images/portfolio/hunt-production.webp", alt: "Hunt in Darkness Unity tooling and art pipeline", width: 1600, height: 731 },
+        { src: "/images/portfolio/hunt-overview.webp", alt: "Hunting in Darkness playable prototype", width: 1600, height: 731 },
+        { src: "/images/portfolio/hunt-design.webp", alt: "Hunting in Darkness inspiration and design document", width: 1600, height: 731 },
+        { src: "/images/portfolio/hunt-systems.webp", alt: "Hunting in Darkness combat actions, rules, and event balancing", width: 1600, height: 731 },
+        { src: "/images/portfolio/hunt-production.webp", alt: "Hunting in Darkness Unity tooling and art pipeline", width: 1600, height: 731 },
       ],
     },
     {
       id: "outlaws-dead-end",
-      index: "03",
+      index: "05",
       title: "Outlaw’s Deadend",
       eyebrow: "GMTK Game Jam 2025",
       year: "2025",
@@ -255,7 +308,7 @@ export const projects: Record<TabId, Project[]> = {
     },
     {
       id: "alive",
-      index: "04",
+      index: "06",
       title: "Alive",
       eyebrow: "Team card / simulation game",
       year: "2025",
@@ -276,7 +329,7 @@ export const projects: Record<TabId, Project[]> = {
     },
     {
       id: "top-hotpot",
-      index: "05",
+      index: "07",
       title: "Top Hotpot",
       eyebrow: "VR cooking simulation",
       year: "2024",
@@ -310,6 +363,10 @@ export const projects: Record<TabId, Project[]> = {
         { label: "GitHub design document", href: "https://github.com/Hubr1zz/GameDesignVault" },
         { label: "Legacy Notion document", href: "https://www.notion.so/leonzhouziang/KDM-inspired-tactic-game-design-63affac2d3d843b5bad6e01835a1fba1?p=2a0ca75016908091a97ac2a359c6e375&pm=s" },
       ],
+      image: "/images/portfolio/tactics-website.webp",
+      imageAlt: "Hunting in Darkness website homepage: a skull crowned by a butterfly above the game title",
+      imageWidth: 1600,
+      imageHeight: 900,
       featured: true,
     },
     {
@@ -379,6 +436,14 @@ export const flatProjects = (Object.entries(projects) as [TabId, Project[]][]).f
 
 export function getProjectBySlug(slug: string) {
   return flatProjects.find((project) => project.id === slug);
+}
+
+export function getTabProjects<T extends Project>(groups: Record<TabId, T[]>, tab: TabId) {
+  const listed = Object.values(groups).flat().flatMap((project) => {
+    const index = project.listedIn?.[tab];
+    return index ? [{ ...project, index }] : [];
+  });
+  return [...groups[tab], ...listed].sort((a, b) => a.index.localeCompare(b.index));
 }
 
 function boardImage(image: GalleryImage) {
@@ -653,6 +718,178 @@ export function getBoardItems(project: Project): BoardItem[] {
         sources: [
           { label: "Vault maintenance Skill", href: "https://github.com/Hubr1zz/GameDesignVault/blob/master/Agent%E7%BB%B4%E6%8A%A4/SKILL.md" },
           { label: "Workspace map", href: "https://github.com/Hubr1zz/GameDesignVault/blob/master/Agent%E7%BB%B4%E6%8A%A4/workspace-map.md" },
+        ],
+      },
+    ];
+  }
+
+  if (project.id === "fractal-shelter" && project.gallery) {
+    return [
+      {
+        id: "essence",
+        title: "A puzzle game played by moving the panels of a comic",
+        description: "Fractal Shelter plays like a combat-free Metroidvania seen only through comic panels: the puzzles of Rusty Lake meet the exploration of Animal Well.",
+        bullets: [
+          { title: "Panels are space", text: "One 3D facility is seen through many cameras at once, and each camera is a comic panel." },
+          { title: "Items are keys", text: "Pick something up and it is cut out of the scene as a panel you can drag anywhere." },
+          { title: "Anomalies are rules", text: "There is no combat. Every entity obeys a hidden rule you can learn and exploit." },
+        ],
+        ...boardImage(project.gallery[1]),
+      },
+      {
+        id: "mr-c",
+        title: "Mr. C, a comic-book character pulled off the page",
+        description: "The protagonist has a camera lens for a face; an anomaly pulled him out of his comic and into the Fractal Shelter, a facility that has already lost control.",
+        details: "The Shelter collects anomalies—objects from other dimensions—and every room he escapes tells him a little more. His want is to leave the building and return to his own world, through the Reading Corner, Library, Audio Archive, and Collapsed Stacks. His need is to piece together what the Shelter really is and stay safe, through the first anomaly, the documents he finds, and the entities still to come. The two threads lead to two endings.",
+        ...boardImage(project.gallery[2]),
+      },
+      {
+        id: "one-world",
+        title: "One world, many panels",
+        description: "There is only one 3D world, and every panel is a live camera looking into it.",
+        details: "Move once and Mr. C appears in every panel that can see him at the same time. The orange-framed panel is the basis panel: WASD follows its camera, so the controls always belong to one clear view. As the player explores, new panels open on the canvas, which is literally how the map grows.",
+        ...boardImage(project.gallery[3]),
+      },
+      {
+        id: "items-are-keys",
+        title: "Items are keys",
+        description: "Picking something up cuts it out of the scene, like cropping a photo, and it lands on the canvas as its own small panel.",
+        details: "The cut follows four beats: select, tighten, lift, and land. The item panel can then be dragged onto an interactable in any panel, near or far. In the prototype, dropping the tape onto the gramophone starts the music—and something starts listening.",
+        ...boardImage(project.gallery[4]),
+      },
+      {
+        id: "gates",
+        title: "Three kinds of gates",
+        description: "As in a Metroidvania, rooms are locked, then unlocked, then revisited; the prototype builds the gates, while returning to old rooms with new knowledge, items, or cameras is planned for the full game.",
+        bullets: [
+          { title: "Knowledge gate", text: "A notice says the code hides in a red book. The keypad opens only once you know." },
+          { title: "Ability gate", text: "A staff card or lift card becomes an item panel that opens doors you walked past long ago." },
+          { title: "Perspective gate", text: "Unique to Fractal Shelter: some answers exist only in one camera, so a new panel can make an old room show something new." },
+          { title: "Several answers", text: "Cross the creaky floor under a ringing phone, or while the Librarian is busy carrying the gramophone." },
+        ],
+        ...boardImage(project.gallery[5]),
+      },
+      {
+        id: "levels",
+        title: "Four playable levels",
+        description: "The Gate II prototype has four playable levels, and the last two are each built around an anomaly.",
+        bullets: [
+          { title: "Reading Corner", text: "The tutorial: move, discover panels, and cut out your first item." },
+          { title: "Library", text: "Read the notice, find the red book from a close-up camera, open the lounge, and take the lift." },
+          { title: "Audio Archive", text: "FS-L01, the Quiet Librarian, hears only sounds louder than 3, goes to the loudest, and carries its source away; with full hands it hears nothing. The gramophone is 4, the creaky floor 5, and the phone 8, so ringing the phone first lets Mr. C cross the floor while it is busy." },
+          { title: "Collapsed Stacks", text: "FS-L02, the inverted vase, turns the room it sits in upside down. Moving it brings a ceiling door down to the floor." },
+        ],
+        ...boardImage(project.gallery[6]),
+      },
+      {
+        id: "pipeline",
+        title: "Rendered from one scene, not drawn by hand",
+        description: "Every panel is rendered live from one 3D scene, so more rooms means more cameras, not more illustrations.",
+        details: "The prototype is deliberately greybox: a room goes from greybox to camera render to a panel on the canvas without any hand-drawn page. It runs on Unity 6 and URP, with a render texture per panel refreshed on demand and custom editor tools for authoring. The concept art on the right shows the art direction we are heading toward.",
+        ...boardImage(project.gallery[7]),
+      },
+      {
+        id: "panel-anatomy",
+        title: "How a panel is made",
+        description: "A panel is assembled from four parts, and the editor tools we built let the team lay out panels, tune each camera with a live preview, and check camera areas on a top-down map of the level.",
+        bullets: [
+          { title: "PanelCamera", text: "A camera placed in the 3D scene, carrying its position and size on the canvas." },
+          { title: "StoryPanel", text: "The panel on the canvas, which renders that camera into its own texture on demand." },
+          { title: "Map canvas", text: "Zoom, pan, and reveal; it also picks the basis panel the controls follow." },
+          { title: "Item panels", text: "Cut out of a panel and dragged onto any object in any panel." },
+        ],
+        ...boardImage(project.gallery[8]),
+      },
+      {
+        id: "scope",
+        title: "Scope, roadmap, and team",
+        description: "Gate II is a playable prototype of a 20–40 minute game, made by a three-person core team that is now recruiting for production.",
+        bullets: [
+          { title: "Gate II prototype", text: "Four playable levels, eight items, and two anomalies; the Audio Archive alone is built from five panels." },
+          { title: "Full release", text: "Three main areas, 40+ items, 30+ puzzles, and two endings." },
+          { title: "Roadmap", text: "Pre-production in spring 2027, production in summer, alpha in fall, then beta and release across 2027–28." },
+          { title: "Core team", text: "I direct the game and handle gameplay, technical design, and tools; Jeffery Hu leads engineering and Steven Zhang leads design." },
+          { title: "Open roles", text: "Lead artist, 3D artist, level designer, sound designer, and producer." },
+        ],
+        ...boardImage(project.gallery[9]),
+      },
+      {
+        id: "pitch-handbook",
+        title: "Where it started: the Pitch Handbook",
+        description: "Fractal Shelter first took shape as a five-page Pitch Handbook laid out in Figma, covering the game’s essence, mechanics and loop, team and scope, and timeline.",
+        details: "The core was already there: a Metroidvania whose map is made of comic panels, items dragged onto panels to change a scene, anomalies that obey hidden rules, and stylized 3D-to-2D rendering. By Gate II, Mr. Camera had become Mr. C, panels were working as live cameras into one 3D world, and the target length had narrowed from 90–120 minutes with three endings to 20–40 minutes with two.",
+        href: "/documents/fractal-shelter-pitch-handbook.pdf",
+        linkLabel: "Download PDF (3.3 MB)",
+        download: true,
+        pages: [
+          { src: "/images/portfolio/fractal-shelter-handbook-cover.webp", alt: "Pitch Handbook cover with the founding team’s roles", width: 1600, height: 2262, label: "Cover" },
+          { src: "/images/portfolio/fractal-shelter-handbook-essence.webp", alt: "Game Essence page: Mr. Camera, the New Weird setting, the core experience, and target players", width: 1600, height: 2262, label: "Game Essence" },
+          { src: "/images/portfolio/fractal-shelter-handbook-mechanics.webp", alt: "Mechanics & Loop page: dragging anomalies onto panels, panel exploration, the core loop, and art style", width: 1600, height: 2262, label: "Mechanics & Loop" },
+          { src: "/images/portfolio/fractal-shelter-handbook-team.webp", alt: "Team & Scope page: a 25-person team plan, technology, marketing, scope goals, and the founding team", width: 1600, height: 2262, label: "Team & Scope" },
+          { src: "/images/portfolio/fractal-shelter-handbook-timeline.webp", alt: "Timeline page: five milestones from pre-production in spring 2027 to final release in spring 2028", width: 1600, height: 2262, label: "Timeline" },
+        ],
+      },
+    ];
+  }
+
+  if (project.id === "ariadne" && project.gallery) {
+    return [
+      {
+        id: "record-maze",
+        title: "A labyrinth inside a record",
+        description: "We wanted the player to walk a maze inside a record and be surprised to find, at the end, that the whole maze is the record.",
+        details: "The protagonist’s wife was a violinist. After she died of illness he could not let go, and kept listening to one piece she had written. The game shows scenes from their life, from the day they met to her death, to convey that he is trapped in this memory.",
+        ...boardImage(project.gallery[1]),
+      },
+      {
+        id: "second-surprise",
+        title: "A second surprise: the noise is a song",
+        description: "The idea still lacked a second surprise, so I proposed that walking plays sounds the player should not recognize as music, until the ending cutscene reveals that the noises they heard form one piece.",
+        details: "To build the music in, I placed black dots on the floor that each play a note. In the ending cutscene, the record needle travels back along the path the player came by and draws a five-line staff that strings those dots together, turning them into notes on the staff. I chose a violin piece to fit the story and the classical feel of vinyl.",
+        ...boardImage(project.gallery[2]),
+      },
+      {
+        id: "strike-dots",
+        title: "Iteration 1: the dots guided too strongly",
+        description: "The first version put the music straight onto the original strike mechanic: hit a dot with the needle and it plays its note.",
+        bullets: [
+          { title: "Starting point", text: "The scene is entirely white. Clicking strikes the floor with the needle and throws an ink-like splash; walls it touches appear, then fade after a while, so the player has to keep striking to move forward." },
+          { title: "Approach", text: "Black dots sit on the floor, and the player strikes one to hear its note." },
+          { title: "Problem", text: "The guidance was too strong. Players put too much attention on the dots I had placed and overlooked the maze scenes themselves." },
+        ],
+        ...boardImage(project.gallery[3]),
+      },
+      {
+        id: "sound-ripple",
+        title: "Iteration 2: players could not tell what was sounding",
+        description: "The second version stopped asking players to aim at the dots.",
+        bullets: [
+          { title: "Approach", text: "Each strike sends out a ripple, and every dot the ripple covers plays its note." },
+          { title: "What worked", text: "Players took the lead in exploring on their own." },
+          { title: "Problem", text: "Players found it hard to realize that the dots were the ones making the sound." },
+        ],
+      },
+      {
+        id: "dot-response",
+        title: "Iteration 3: the dot answers with a ripple and ink",
+        description: "I kept adjusting until sight and sound pointed to the same place: the dot that is playing.",
+        bullets: [
+          { title: "Approach", text: "A dot that is triggered sends out its own water-ripple effect." },
+          { title: "Ink moves to the dot", text: "Ink no longer comes from the player’s strike; it spreads from the dot when the dot plays." },
+          { title: "Result", text: "Together with the sound, the two effects feel intuitive, so players quickly realize the dots are making the sound." },
+          { title: "Keeping guidance light", text: "Dots stay invisible until a strike triggers them and the scene otherwise stays white, so players cannot see ahead where to go and must keep striking to inch forward." },
+        ],
+        ...boardImage(project.gallery[4]),
+      },
+      {
+        id: "ink-performance",
+        title: "Performance: keeping stacked ink fast",
+        description: "Because every dot that plays now leaves its own ink, a busy stretch of the maze can stack many ink layers on the same surfaces.",
+        bullets: [
+          { title: "Problem", text: "Every pixel scanned the whole ink history, so rendering cost grew with each new layer." },
+          { title: "Spatial index", text: "Ink layers are hashed into 8-metre cells, so each pixel only tests nearby ink, after conservative checks on range, spreading front and expiry." },
+          { title: "Less repeated work", text: "Noise gradients are cached, expired layers are compacted in a single pass, and GPU buffers are reused, so unchanged ink is never re-uploaded." },
+          { title: "Result", text: "With 128 overlapping layers, render-and-sync time fell 13–33% in three controlled 1280×720 views, while every layer kept its radius and fade." },
         ],
       },
     ];

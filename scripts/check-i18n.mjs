@@ -6,7 +6,7 @@ import { contentMessages, messages } from "../app/translations.ts";
 const translatableFields = new Set(["alt", "description", "details", "eyebrow", "imageAlt", "label", "language", "linkLabel", "summary", "text", "title", "year"]);
 const translatableArrays = new Set(["tags"]);
 const intentionalEnglish = new Set([
-  "3D Math", "Alive", "Blender", "C#", "Card", "Cinemachine", "Codex", "Cursor", "DOTween", "EventSystem", "GitHub", "HLSL", "Hunt in Darkness", "IInteractableTarget", "Interaction System", "Itch.io", "Obsidian", "Odin Serializer", "OpenSpec", "Outlaw’s Deadend", "Punch-in Rush", "ScriptableObjects", "Shader Graph", "Top Hotpot", "UGUI", "UniTask", "Unity", "Unity 2022.3+", "Unity Editor Tools", "UPM", "VR", "ZFramework", "vFavorites2", "vFolders2", "vHierarchy2", "vInspector2", "vTabs2", "zWorkFlow",
+  "3D Math", "Alive", "Ariadne", "Blender", "C#", "Card", "Cinemachine", "Codex", "Cursor", "DOTween", "EventSystem", "Fractal Shelter", "GitHub", "HLSL", "Hunting in Darkness", "IInteractableTarget", "Interaction System", "Itch.io", "Obsidian", "Odin Serializer", "OpenSpec", "Outlaw’s Deadend", "PanelCamera", "Punch-in Rush", "ScriptableObjects", "Shader Graph", "StoryPanel", "Top Hotpot", "UGUI", "UniTask", "Unity", "Unity 2022.3+", "Unity 6", "Unity Editor Tools", "UPM", "VR", "ZFramework", "vFavorites2", "vFolders2", "vHierarchy2", "vInspector2", "vTabs2", "zWorkFlow",
 ]);
 
 const requiredContent = new Map();

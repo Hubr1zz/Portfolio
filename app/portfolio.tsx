@@ -5,7 +5,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { assetPath, InternalLink } from "./portfolio-links";
 import { MarginContours } from "./presentation-extras";
-import { getBoardItems, projects, tabs, type BoardItem, type DiagramId, type PageId, type Project, type TabId } from "./portfolio-data";
+import { getBoardItems, getTabProjects, projects, tabs, type BoardItem, type DiagramId, type PageId, type Project, type TabId } from "./portfolio-data";
 import { useI18n } from "./i18n";
 
 export type { PageId } from "./portfolio-data";
@@ -75,7 +75,7 @@ function categoryPath(category: TabId) {
 }
 
 function BackLink({ category, projectId, className, compact = false, children }: { category: TabId; projectId: string; className?: string; compact?: boolean; children: ReactNode }) {
-  const { t } = useI18n();
+  const { localizeTab, t } = useI18n();
   const defaultHref = categoryPath(category) + "#project-" + projectId;
   const [href, setHref] = useState(defaultHref);
   const [originPath, setOriginPath] = useState<string | null>(null);
@@ -97,7 +97,13 @@ function BackLink({ category, projectId, className, compact = false, children }:
     }
   }, [projectId]);
 
-  return <InternalLink className={className} href={href}>{!compact && originPath !== null && normalizePortfolioPath(originPath) === "/" ? <span className="case-navigation-card"><small>{t("case.returnSelected")}</small><strong>{t("case.backSelected")}</strong><i aria-hidden="true">↗</i></span> : children}</InternalLink>;
+  if (!compact && originPath === "/")
+    return <InternalLink className={className} href={href}><span className="case-navigation-card"><small>{t("case.returnSelected")}</small><strong>{t("case.backSelected")}</strong><i aria-hidden="true">↗</i></span></InternalLink>;
+  // A project listed in several tabs returns to the tab it was opened from, so the card names that tab.
+  const originTab = tabs.find((tab) => tab.id !== category && normalizePortfolioPath(tab.path) === originPath);
+  if (!compact && originTab)
+    return <InternalLink className={className} href={href}><span className="case-navigation-card"><small>{t("case.returnArchive")}</small><strong>{t("case.backTo", { category: localizeTab(originTab).label })}</strong><i aria-hidden="true">↗</i></span></InternalLink>;
+  return <InternalLink className={className} href={href}>{children}</InternalLink>;
 }
 
 function ProjectVisual({ project }: { project: Project }) {
@@ -420,10 +426,6 @@ function FlowDiagram({ id }: { id: DiagramId }) {
   return null;
 }
 
-function TacticsMap() {
-  return <FlowDiagram id="vault-map" />;
-}
-
 function ArticleIndexCover({ articles }: { articles: NonNullable<Project["articles"]> }) {
   const { t } = useI18n();
   const draftCount = articles.filter((article) => article.status === "draft").length;
@@ -462,7 +464,7 @@ const coverDiagramByProject: Partial<Record<string, DiagramId>> = {
 
 function FeatureCard({ project, index }: { project: Project; index: string }) {
   const { t } = useI18n();
-  const visual = project.id === "tactics-design" ? <TacticsMap /> : <ProjectCover project={project} />;
+  const visual = project.image ? <Image className="feature-cover" src={assetPath(project.image)} alt={project.imageAlt ?? ""} width={project.imageWidth} height={project.imageHeight} sizes="(max-width: 600px) 100vw, (max-width: 960px) 50vw, 33vw" unoptimized /> : <ProjectCover project={project} />;
   return <InternalLink id={"project-" + project.id} className="featured-card" href={"/projects/" + project.id} onClick={(event) => rememberProjectOrigin(event, project.id)}><div className="feature-media">{visual}</div><div className="feature-copy reading-surface"><div className="feature-title-row"><span className="feature-number">{index}</span><h3>{project.title}</h3></div><div className="feature-meta"><span>{project.year}</span></div><p className="feature-description">{project.description}</p><span className="feature-link details-action"><span>{t("common.viewDetails")}</span><span aria-hidden="true">↗</span></span></div></InternalLink>;
 }
 
@@ -502,8 +504,27 @@ function Footer() {
   return <footer className="site-footer"><div><span className="footer-kicker">{t("footer.kicker")}</span><h2>{t("footer.titleLine1")}<br />{t("footer.titleLine2")}</h2></div><div className="footer-links"><button className="footer-copy" type="button" onClick={copyEmail}><span className="hover-shift-label"><span>leonzhouziang@gmail.com</span><small aria-live="polite">{copyLabel}</small></span></button><a href="https://github.com/Hubr1zz" target="_blank" rel="noreferrer"><span className="hover-shift-label"><span>GitHub</span><span aria-hidden="true">↗</span></span></a><a href="https://leon-zhou.itch.io/" target="_blank" rel="noreferrer"><span className="hover-shift-label"><span>Itch.io</span><span aria-hidden="true">↗</span></span></a><a href={resumeHref} target="_blank" rel="noreferrer"><span className="hover-shift-label"><span>{t("footer.resume")}</span><span aria-hidden="true">↗</span></span></a></div><div className="footer-base"><span>LEON ZHOU / PORTFOLIO</span><span>{t("footer.signature")}</span></div></footer>;
 }
 
+// Display type carries a left side bearing (about 0.07em in Geist) that reads as an indent beside body copy at the same grid line.
+// Each heading's first glyph is measured with canvas, the way Pretext measures text, and the heading is translated by that bearing so its ink sits on the line.
+const opticalEdgeSelector = ".intro-title > span, .profile-section h2, .profile-name > span:first-child, .featured-section .section-heading h2, .archive-header h1, .archive-group-heading h2, .numbered-heading h2, .other-header h1, .case-heading h1, .case-section-heading > span, .case-section-heading h2, .site-footer h2";
+
+function alignOpticalEdges() {
+  const context = document.createElement("canvas").getContext("2d");
+  if (!context)
+    return;
+  document.querySelectorAll<HTMLElement>(opticalEdgeSelector).forEach((element) => {
+    const text = element.textContent?.trimStart();
+    if (!text)
+      return;
+    const style = getComputedStyle(element);
+    context.font = style.fontStyle + " " + style.fontWeight + " " + style.fontSize + " " + style.fontFamily;
+    const bearing = context.measureText(text[0]).actualBoundingBoxLeft;
+    element.style.translate = Math.abs(bearing) < parseFloat(style.fontSize) * .15 ? bearing + "px 0" : "";
+  });
+}
+
 export function PortfolioShell({ page, children }: { page: ShellPage; children: ReactNode }) {
-  const { t } = useI18n();
+  const { locale, t } = useI18n();
   const pathname = usePathname();
   const mainContentRef = useRef<HTMLDivElement>(null);
   useRestoreOrigin();
@@ -522,7 +543,28 @@ export function PortfolioShell({ page, children }: { page: ShellPage; children: 
     window.addEventListener("pageshow", handlePageShow);
     return () => window.removeEventListener("pageshow", handlePageShow);
   }, []);
+  useEffect(() => {
+    let active = true;
+    const align = () => {
+      if (active)
+        alignOpticalEdges();
+    };
+    void document.fonts.ready.then(align);
+    window.addEventListener("resize", align);
+    return () => {
+      active = false;
+      window.removeEventListener("resize", align);
+    };
+  }, [pathname, locale]);
   return <main className={"site-shell page-" + page + " theme-amber"}><a className="skip-link" href="#main-content">{t("nav.skip")}</a><MarginContours /><Navigation page={page} /><div id="main-content" key={pathname} ref={mainContentRef}>{children}</div><Footer /></main>;
+}
+
+// A closing full stop becomes an amber square (a Swiss typographic accent); the character stays for screen readers.
+function squareFullStop(text: string) {
+  const last = text.at(-1);
+  if (last !== "." && last !== "。")
+    return text;
+  return <>{text.slice(0, -1)}<b className="intro-full-stop">{last}</b></>;
 }
 
 function HomePage() {
@@ -541,15 +583,14 @@ function HomePage() {
           <span>{t("home.location")}</span>
         </div>
         <h1 className="intro-title reading-surface">
-          <span>{t("home.title1")}</span>
-          <span>{t("home.title2")}</span>
+          <span>{squareFullStop(t("home.title1"))}</span>
+          <span>{squareFullStop(t("home.title2"))}</span>
         </h1>
         <div className="intro-bottom">
           <p className="intro-summary reading-surface">{t("home.summary")}</p>
           <div className="intro-actions reading-surface">
-            <svg className="intro-registration" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path pathLength="1" d="M4 4H20V20" /></svg>
-            <a className="resume-action" href={resumeHref} target="_blank" rel="noreferrer"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 3.5h8l4 4V20.5H6z" /><path d="M14 3.5v4h4M9 12h6M9 15.5h6" /></svg><span>{t("footer.resume")}</span><small>PDF</small></a>
-            <a className="explore-action" href="#work">{t("home.explore")}</a>
+            <a className="intro-action resume-action" href={resumeHref} target="_blank" rel="noreferrer"><span className="intro-action-label">{t("footer.resume")}</span><span className="intro-action-meta">PDF<i aria-hidden="true">↗</i></span></a>
+            <a className="intro-action explore-action" href="#work"><span className="intro-action-label">{t("home.explore")}</span><span className="intro-action-meta"><i aria-hidden="true">↓</i></span></a>
           </div>
         </div>
       </section>
@@ -677,7 +718,7 @@ function ArchivePage({ page }: { page: TabId }) {
   const localizedProjects = useMemo(() => localizeProjects(projects), [localizeProjects]);
   const meta = localizeTab(categoryMeta(page));
   const groupCopy = archiveGroupCopy(page, t);
-  const categoryProjects = localizedProjects[page];
+  const categoryProjects = getTabProjects(localizedProjects, page);
   const releasedProjects = localizedProjects.technical.filter((project) => project.tier === "release");
   const studyProjects = localizedProjects.technical.filter((project) => project.tier === "study" && project.id !== "rendering-studies");
 
@@ -746,6 +787,9 @@ function CaseMedia({ item, project, onExpand }: { item: BoardItem; project: Proj
   const { t } = useI18n();
   if (item.image)
     return <div className="case-media"><Image src={assetPath(item.image)} alt={item.imageAlt ?? item.title} width={item.imageWidth} height={item.imageHeight} sizes="(max-width: 900px) 100vw, 65vw" unoptimized /><button className="media-expand" type="button" onClick={(event) => onExpand(event, item)} aria-label={t("case.enlarge") + ": " + item.title}>{t("case.enlarge")} ↗</button></div>;
+  // Document pages sit side by side like a contact sheet; each page opens full size in the image dialog.
+  if (item.pages)
+    return <div className="case-media case-pages"><ol>{item.pages.map((page) => <li key={page.src}><button type="button" onClick={(event) => onExpand(event, { ...item, image: page.src, imageAlt: page.alt, imageWidth: page.width, imageHeight: page.height })} aria-label={t("case.enlarge") + ": " + page.alt}><Image src={assetPath(page.src)} alt={page.alt} width={page.width} height={page.height} sizes="(max-width: 600px) 50vw, (max-width: 960px) 30vw, 18vw" unoptimized />{page.label && <span className="case-page-label">{page.label}</span>}</button></li>)}</ol></div>;
   if (item.diagram)
     return <div className="case-media"><FlowDiagram id={item.diagram} /></div>;
   if (item.visual)
@@ -804,7 +848,7 @@ function CaseBullets({ bullets }: { bullets: NonNullable<BoardItem["bullets"]> }
   return <ul className="case-bullets">{bullets.map((bullet, index) => <li key={bullet.title}><span>{chapterNumber(index)}</span><strong>{bullet.title}</strong><p>{bullet.text}</p></li>)}</ul>;
 }
 
-// Chapters stack as number and title, a full-width figure, then one reading column; the figure's offset plate alternates sides.
+// Chapters stack as number and title, a full-width figure, then the copy: lead and details side by side, links and sources under the details, key points across both columns.
 function CaseSection({ item, index, project, onExpand }: { item: BoardItem; index: number; project: Project; onExpand: ExpandHandler }) {
   const { t } = useI18n();
   const flipped = Boolean(item.image || item.diagram || item.visual) && index % 2 === 1;
@@ -818,9 +862,12 @@ function CaseSection({ item, index, project, onExpand }: { item: BoardItem; inde
       <div className="case-copy reading-surface">
         <p className="case-lead">{item.description}</p>
         {item.details && <p>{item.details}</p>}
+        {(item.href || item.sources?.length) ? <aside className="case-aside" aria-label={t("case.references")}>
+          {item.href && item.download && <a className="case-source-link details-action" href={assetPath(item.href)} download><span>{item.linkLabel ?? t("common.viewSource")}</span><span aria-hidden="true">↓</span></a>}
+          {item.href && !item.download && <a className="case-source-link details-action" href={item.href} target="_blank" rel="noreferrer"><span>{item.linkLabel ?? t("common.viewSource")}</span><span aria-hidden="true">↗</span></a>}
+          {item.sources?.length ? <div className="case-sources"><p className="case-aside-label">{t("case.references")}</p>{item.sources.map((source) => <a key={source.href} href={source.href} target="_blank" rel="noreferrer"><span>{source.label}</span><span aria-hidden="true">↗</span></a>)}</div> : null}
+        </aside> : null}
         {item.bullets?.length ? <CaseBullets bullets={item.bullets} /> : null}
-        {item.href && <a className="case-source-link details-action" href={item.href} target="_blank" rel="noreferrer"><span>{item.linkLabel ?? t("common.viewSource")}</span><span aria-hidden="true">↗</span></a>}
-        {item.sources?.length ? <div className="case-sources">{item.sources.map((source) => <a key={source.href} href={source.href} target="_blank" rel="noreferrer">{source.label} ↗</a>)}</div> : null}
       </div>
     </section>
   );
@@ -979,7 +1026,7 @@ function ProjectDetailContent({ project, category }: { project: Project & { cate
       </header>
       {tocEntries.length > 0 && <CaseRunner entries={tocEntries} activeSection={activeSection} onSelect={setActiveSection} category={category} projectId={project.id} />}
       {tocEntries.length > 0 && <div className="case-layout"><CaseSections items={items} articles={articles} project={project} onExpand={openImage} /></div>}
-      {items.some((item) => item.image) && <ImageDialog item={dialogItem} onClose={closeImage} />}
+      {items.some((item) => item.image || item.pages) && <ImageDialog item={dialogItem} onClose={closeImage} />}
       <nav className="case-navigation" aria-label={t("case.navigation")}>
         <div className="case-navigation-heading"><span>{t("case.continue")}</span><span>{meta.label.toUpperCase()}</span></div>
         <div className="case-navigation-links">

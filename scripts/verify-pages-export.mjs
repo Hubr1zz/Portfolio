@@ -17,6 +17,8 @@ const expectedRoutes = [
   "projects/editor-tools",
   "projects/procedural-motion",
   "projects/rendering-studies",
+  "projects/fractal-shelter",
+  "projects/ariadne",
   "projects/punch-in-rush",
   "projects/hunting-in-darkness",
   "projects/outlaws-dead-end",

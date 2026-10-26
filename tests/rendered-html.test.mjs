@@ -171,6 +171,7 @@ test("Ariadne is listed under both Game and Design Projects and opens one case p
   const html = await htmlAt("/projects/ariadne");
   for (const id of ["record-maze", "second-surprise", "strike-dots", "sound-ripple", "dot-response", "ink-performance"])
     assert.ok(html.includes(`id="chapter-${id}"`), `Ariadne chapter: ${id}`);
+  assert.match(html, /href="https:\/\/pub-30230b5a750a48db8189dfdc8e9b6e27\.r2\.dev\/ariadne-playthrough-web\.mp4"/, "Ariadne should link its playthrough video");
 });
 
 test("article collection renders comparative essays without media", async () => {

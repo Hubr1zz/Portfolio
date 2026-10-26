@@ -229,7 +229,7 @@ export const projects: Record<TabId, Project[]> = {
       details:
         "A two-week course assignment on the theme Labyrinth that had to surprise the player twice, built by two people with AI tools. My teammate designed and built the scenes; I refined the gameplay, the visual and audio feedback, and performance. This page lists the problems I found and how each iteration solved them.",
       tags: ["Mechanic Iteration", "Audio-Visual Feedback", "Performance", "AI-assisted"],
-      links: [],
+      links: [{ label: "Watch video", href: "https://pub-30230b5a750a48db8189dfdc8e9b6e27.r2.dev/ariadne-playthrough-web.mp4" }],
       listedIn: { design: "04" },
       gallery: [
         { src: "/images/portfolio/ariadne-cover.webp", alt: "The Ariadne record sleeve, printed with a labyrinth, beside its vinyl disc", width: 1600, height: 800 },

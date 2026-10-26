@@ -23,7 +23,7 @@ test("server-renders the redesigned portfolio home", async () => {
   assert.match(html, /class="home-intro/);
   assert.match(html, /Designing play<b class="intro-full-stop">\.<\/b>/);
   assert.match(html, /Building systems<b class="intro-full-stop">\.<\/b>/);
-  assert.doesNotMatch(html, /class="intro-plane"/);
+  assert.match(html, /class="intro-plane" aria-hidden="true"/);
   assert.match(html, /class="featured-section[^"]*"[^>]*id="work"/);
   assert.match(html, /href="\/projects\/zworkflow\/?"/);
   assert.match(html, /href="\/projects\/tactics-design\/?"/);
@@ -141,6 +141,14 @@ test("image-backed cases keep real media and image-only expansion controls", asy
   assert.match(html, /class="media-expand"/);
   assert.match(html, /aria-label="Enlarge image: From combat study to morning commute"/);
   assert.match(html, /class="image-dialog"/);
+});
+
+test("Fractal Shelter links its playable build from the header and the levels chapter", async () => {
+  const html = await htmlAt("/projects/fractal-shelter");
+  const header = html.slice(html.indexOf('class="case-header'), html.indexOf("</header>", html.indexOf('class="case-header')));
+  assert.match(header, /<a href="https:\/\/leon-zhou\.itch\.io\/fractalshelterprototype"[^>]*>.*?Play on Itch\.io/);
+  const levels = html.slice(html.indexOf('id="chapter-levels"'), html.indexOf('id="chapter-pipeline"'));
+  assert.match(levels, /href="https:\/\/leon-zhou\.itch\.io\/fractalshelterprototype"[^>]*><span>Play the prototype in your browser<\/span>/);
 });
 
 test("document pages render as enlargeable thumbnails with a PDF download", async () => {

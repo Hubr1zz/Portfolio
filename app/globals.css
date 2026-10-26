@@ -375,7 +375,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--signal); outlin
 .other-header > div { min-width: 0; position: relative; z-index: 1; }
 .other-header h1 { max-width: 9ch; margin: 16px 0 10px; color: var(--ink); font-size: clamp(48px, 6vw, 72px); font-weight: 620; line-height: 1; letter-spacing: -.055em; }
 .other-header p { max-width: 48ch; margin: 0; color: var(--muted); font-size: 17px; line-height: 1.55; }
-.other-header-field { width: min(520px, 48%); height: auto; position: absolute; right: -2%; bottom: -12%; opacity: .2; pointer-events: none; }
+.other-header-field { width: min(520px, 48%); height: auto; position: absolute; right: 0; bottom: 0; opacity: .2; pointer-events: none; }
 .other-header-field path { fill: none; stroke: var(--signal-light); stroke-width: 1; vector-effect: non-scaling-stroke; }
 .other-header-field .other-header-field-major { stroke: var(--signal); stroke-width: 1.4; }
 .other-tabs { min-width: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border-bottom: 1px solid var(--line-strong); }
@@ -392,8 +392,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--signal); outlin
 .library-heading, .side-projects-heading { min-width: 0; display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(180px, .65fr); gap: 48px; padding-bottom: 28px; border-bottom: 1px solid var(--line-strong); }
 .library-heading h2, .side-projects-heading h2 { max-width: 20ch; margin: 14px 0 8px; color: var(--ink); font-size: clamp(34px, 4vw, 48px); font-weight: 600; line-height: 1.05; letter-spacing: -.045em; }
 .library-heading p, .side-projects-heading p { max-width: 52ch; margin: 0; color: var(--muted); font-size: 16px; line-height: 1.6; }
-.library-meta { align-self: end; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px 18px; color: var(--muted); font: 12px/1.4 var(--font-mono); letter-spacing: .07em; text-transform: uppercase; }
-.library-meta span + span::before { content: "·"; margin-right: 18px; color: var(--signal-light); }
+.library-meta { align-self: end; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; color: var(--muted); font: 12px/1.4 var(--font-mono); letter-spacing: .07em; text-transform: uppercase; }
 .library-controls { margin: 28px 0 24px; display: grid; grid-template-columns: auto minmax(180px, 1fr) auto minmax(160px, .45fr); align-items: center; gap: 12px; color: var(--muted); font: 12px/1.3 var(--font-mono); letter-spacing: .06em; text-transform: uppercase; }
 .library-controls input, .library-controls select { width: 100%; min-height: 44px; padding: 10px 12px; border: 1px solid var(--line-strong); border-radius: 0; background: var(--surface); color: var(--ink); font: 14px/1.4 var(--font-sans); letter-spacing: 0; text-transform: none; }
 .library-controls input::placeholder { color: var(--muted); opacity: .8; }
@@ -461,7 +460,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--signal); outlin
 @media (max-width: 900px) {
   .other-page { width: calc(100% - 48px); }
   .other-header { min-height: 220px; padding-top: 48px; grid-template-columns: minmax(0, 1fr); }
-  .other-header-field { width: 58%; right: -6%; bottom: -8%; }
+  .other-header-field { width: 58%; }
   .games-library, .side-projects { padding-top: 48px; }
   .library-heading, .side-projects-heading { grid-template-columns: minmax(0, 1fr) minmax(160px, .65fr); gap: 28px; }
   .library-controls { grid-template-columns: auto minmax(0, 1fr); }
@@ -474,13 +473,12 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--signal); outlin
   .other-header { min-height: 200px; padding: 40px 0 30px; }
   .other-header h1 { font-size: clamp(44px, 13vw, 58px); }
   .other-header p { font-size: 16px; }
-  .other-header-field { width: 68%; right: -12%; bottom: -3%; opacity: .16; }
+  .other-header-field { width: 68%; opacity: .16; }
   .other-tabs a { min-height: 64px; padding-right: 10px; grid-template-columns: 28px minmax(0, 1fr) 18px; font-size: 12px; }
   .other-tabs a + a { padding-left: 10px; }
   .library-heading, .side-projects-heading { grid-template-columns: minmax(0, 1fr); gap: 16px; }
   .library-heading h2, .side-projects-heading h2 { font-size: 36px; }
-  .library-meta { justify-content: flex-start; }
-  .library-meta span + span::before { margin-right: 10px; }
+  .library-meta { align-items: flex-start; }
   .library-controls { grid-template-columns: minmax(0, 1fr); gap: 8px; }
   .library-controls label:nth-of-type(2), .library-controls select { grid-column: 1; }
   .game-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px 14px; }
@@ -898,7 +896,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--signal); outlin
 .archive-decoration { width: 30%; max-width: 420px; position: absolute; top: 24px; right: 0; z-index: 0; opacity: .18; pointer-events: none; }
 .archive-decoration path, .archive-decoration circle { fill: none; stroke: var(--signal); stroke-width: 1; vector-effect: non-scaling-stroke; }
 .archive-decoration circle { fill: var(--signal-soft); stroke-width: 1.5; }
-.archive-decoration-design path:last-child { stroke-width: 1.4; }
+.archive-decoration-design path:last-child, .archive-decoration-games path:nth-of-type(3) { stroke-width: 1.4; }
 .archive-group { position: relative; }
 .archive-group + .archive-group { margin-top: 64px; }
 .archive-group-heading { grid-template-columns: 56px minmax(0, 1fr); gap: 16px; padding-top: 28px; border-top: 2px solid var(--ink); border-bottom: 1px solid var(--line); position: relative; }
@@ -934,7 +932,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--signal); outlin
 .other-tabs a, .other-tabs a + a { padding: 20px 24px 18px; }
 
 @media (max-width: 760px) {
-  .archive-decoration { width: 42%; top: 12px; right: -2%; opacity: .12; }
+  .archive-decoration { width: 42%; top: 12px; right: 0; opacity: .12; }
   .archive-header h1, .archive-header > p { max-width: 78%; }
   .source-credit { grid-template-columns: minmax(0, 1fr); gap: 12px; }
   .source-credit-links { justify-content: flex-start; }
@@ -993,6 +991,15 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--signal); outlin
 /* Hero actions: a Swiss-style index block (2px ink rule, two-digit rows whose 16px inset plus 40px index make the shared 56px number column). */
 .intro-summary { align-self: end; }
 .intro-actions { min-width: 0; align-self: end; display: grid; grid-template-columns: minmax(0, 1fr); position: relative; border-top: 2px solid var(--ink); }
+/* Solid slanted plane resting on the action column's ink rule: it rises from 30% of the column to its right edge and never passes the container. Three squares break off the slope at different angles. */
+.home-intro { --intro-plane-height: 150px; }
+.intro-title { width: fit-content; }
+.intro-plane { height: var(--intro-plane-height); position: absolute; right: 0; bottom: 100%; left: 0; z-index: 0; pointer-events: none; }
+.intro-plane::before { content: ""; position: absolute; inset: 0; background: var(--signal-soft); clip-path: polygon(30% 100%, 100% 0, 100% 100%); animation: headerReveal 850ms cubic-bezier(.22, 1, .36, 1) both; }
+.intro-plane i { position: absolute; background: var(--signal); translate: -50% -50%; animation: actionReveal 480ms cubic-bezier(.22, 1, .36, 1) 520ms both; }
+.intro-plane i:nth-child(1) { width: 22px; height: 22px; left: calc(30% + 70% * .46); top: calc(54% - 26px); rotate: 24deg; }
+.intro-plane i:nth-child(2) { width: 14px; height: 14px; left: calc(30% + 70% * .29); top: calc(71% - 20px); rotate: -12deg; animation-delay: 600ms; }
+.intro-plane i:nth-child(3) { width: 9px; height: 9px; left: calc(30% + 70% * .14); top: calc(86% - 15px); rotate: 41deg; animation-delay: 680ms; }
 .intro-full-stop { width: .15em; height: .15em; margin-left: .05em; display: inline-block; overflow: hidden; background: var(--signal); color: transparent; font-weight: inherit; }
 :root:lang(zh) .intro-full-stop { margin-left: .12em; }
 .intro-action { min-width: 0; min-height: 64px; padding: 14px 16px; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; column-gap: 16px; border-bottom: 1px solid var(--line-strong); color: var(--ink); position: relative; isolation: isolate; transition: color 260ms ease; }
@@ -1059,7 +1066,8 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--signal); outlin
   .site-header, .home-intro, .featured-section, .discipline-nav, .profile-section, .archive-header, .archive-body, .case-header, .case-layout, .case-navigation, .case-runner, .site-footer, .other-page, .rendering-gallery-standalone { width: calc(100% - 48px); }
   .intro-bottom { grid-template-columns: minmax(0, 1fr); gap: 32px; }
   .intro-title { max-width: 100%; }
-  .intro-actions { width: min(100%, 520px); margin-left: auto; }
+  .intro-actions { width: min(100%, 520px); margin-top: 72px; margin-left: auto; }
+  .home-intro { --intro-plane-height: 96px; }
   .profile-section { min-height: 0; grid-template-columns: minmax(0, 1fr); gap: 28px; align-items: start; }
   .profile-title-group, .profile-copy { align-self: start; margin-top: 0; }
 }
@@ -1068,7 +1076,8 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--signal); outlin
   .site-header, .home-intro, .featured-section, .discipline-nav, .profile-section, .archive-header, .archive-body, .case-header, .case-layout, .case-navigation, .case-runner, .site-footer, .other-page, .rendering-gallery-standalone { width: calc(100% - 32px); }
   .home-intro { padding-top: 30px; padding-bottom: 44px; }
   .intro-bottom { gap: 24px; }
-  .intro-actions { width: 100%; }
+  .intro-actions { width: 100%; margin-top: 64px; }
+  .home-intro { --intro-plane-height: 84px; }
   .profile-section { padding: 48px 0; }
   .profile-name { max-width: 100%; font-size: clamp(44px, 15vw, 68px); }
   .case-navigation { padding: 16px 14px 20px; }
@@ -1095,7 +1104,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--signal); outlin
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .intro-kicker > span:first-child, .intro-title span, .intro-actions .resume-action, .intro-actions .explore-action, .archive-header .section-index, .archive-header h1, .archive-header > p, .archive-decoration path, .archive-decoration circle, .case-heading, .case-summary, .case-section-heading, .rendering-stage-copy, .type-reveal, .other-header h1, .other-header p { animation: none !important; animation-delay: 0s !important; clip-path: none !important; opacity: 1 !important; transform: none !important; stroke-dashoffset: 0 !important; }
+  .intro-kicker > span:first-child, .intro-title span, .intro-plane::before, .intro-plane i, .intro-actions .resume-action, .intro-actions .explore-action, .archive-header .section-index, .archive-header h1, .archive-header > p, .archive-decoration path, .archive-decoration circle, .case-heading, .case-summary, .case-section-heading, .rendering-stage-copy, .type-reveal, .other-header h1, .other-header p { animation: none !important; animation-delay: 0s !important; clip-path: none !important; opacity: 1 !important; transform: none !important; stroke-dashoffset: 0 !important; }
   .intro-title span, .intro-kicker > span:first-child { clip-path: none !important; }
 }
 
@@ -1120,7 +1129,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--signal); outlin
 .project-grid, .side-project-grid, .game-grid { column-gap: 24px; }
 /* Line breaking, after Pretext's layout ideas but done natively since all copy is static: headings balance their lines; paragraphs avoid a last line of one word or one Chinese character. */
 :is(.case-heading h1, .case-section-heading h2, .featured-card h3, .project-preview h2, .archive-header h1, .archive-group-heading h2, .other-header h1, .side-project-copy h3, .site-footer h2, .discipline-link h3, .case-bullets strong) { text-wrap: balance; }
-:is(.intro-summary, .profile-lead, .profile-copy p, .feature-description, .preview-description, .case-intro, .case-summary, .case-copy p, .case-bullets p, .archive-header > p, .side-project-copy p, .discipline-link p) { text-wrap: pretty; }
+:is(.intro-summary, .profile-lead, .profile-copy p, .library-heading p, .side-projects-heading p, .feature-description, .preview-description, .case-intro, .case-summary, .case-copy p, .case-bullets p, .archive-header > p, .side-project-copy p, .discipline-link p) { text-wrap: pretty; }
 :root:lang(zh) :is(.intro-summary, .profile-copy p, .feature-description, .preview-description, .case-copy p, .case-summary, .case-bullets p, .side-project-copy p) { line-height: 1.85; }
 
 /* Case studies: a typographic cover, a running chapter index, and chapters composed as figure–text spreads on the 12-column grid. */

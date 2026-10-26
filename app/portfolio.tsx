@@ -473,7 +473,8 @@ function ArchiveDecoration({ page }: { page: TabId }) {
     return <svg className="archive-decoration archive-decoration-technical" viewBox="0 0 420 260" aria-hidden="true" focusable="false"><path pathLength="1" d="M16 224V154h92V82h98V34h190" /><path pathLength="1" d="M108 154h72v54h102V112h114" /><path pathLength="1" d="M206 82v76h94" /><circle cx="16" cy="224" r="4" /><circle cx="108" cy="154" r="4" /><circle cx="206" cy="82" r="4" /><circle cx="306" cy="112" r="4" /><circle cx="396" cy="34" r="4" /></svg>;
   if (page === "design")
     return <svg className="archive-decoration archive-decoration-design" viewBox="0 0 420 260" aria-hidden="true" focusable="false"><path pathLength="1" d="M94 34h172l46 46v148H94z" /><path pathLength="1" d="M266 34v46h46" /><path pathLength="1" d="M58 70h172l46 46v110H58z" /><path pathLength="1" d="M230 70v46h46" /><path pathLength="1" d="M34 40v18m-9-9h18M374 190v18m-9-9h18M342 46v14m-7-7h14" /></svg>;
-  return <svg className="archive-decoration archive-decoration-games" viewBox="0 0 420 260" aria-hidden="true" focusable="false"><path pathLength="1" d="M12 214C84 72 146 52 206 122s88 102 202-80" /><path pathLength="1" d="M12 246C84 104 146 84 206 154s88 102 202-80" /><circle cx="12" cy="214" r="4" /><circle cx="206" cy="122" r="4" /><circle cx="408" cy="42" r="4" /><circle cx="146" cy="84" r="3" /></svg>;
+  // Games: a Metroidvania room map (rooms, one sealed room, the route through them), after the Fractal Shelter structure diagram.
+  return <svg className="archive-decoration archive-decoration-games" viewBox="0 0 420 260" aria-hidden="true" focusable="false"><path pathLength="1" d="M40 164h72v56H40zM40 100h72v56H40zM120 100h72v56h-72zM120 36h72v56h-72zM200 36h72v56h-72zM280 36h72v56h-72zM280 100h72v56h-72zM280 164h72v56h-72zM200 164h72v56h-72z" /><path pathLength="1" d="M200 100h72v56h-72zM228 120h16v16h-16z" /><path pathLength="1" d="M76 192V128h80V64h160v128h-80" /><circle cx="76" cy="192" r="4" /><circle cx="316" cy="128" r="3" /><circle cx="236" cy="192" r="4" /></svg>;
 }
 
 function Navigation({ page }: { page: ShellPage }) {
@@ -589,6 +590,7 @@ function HomePage() {
         <div className="intro-bottom">
           <p className="intro-summary reading-surface">{t("home.summary")}</p>
           <div className="intro-actions reading-surface">
+            <span className="intro-plane" aria-hidden="true"><i /><i /><i /></span>
             <a className="intro-action resume-action" href={resumeHref} target="_blank" rel="noreferrer"><span className="intro-action-label">{t("footer.resume")}</span><span className="intro-action-meta">PDF<i aria-hidden="true">↗</i></span></a>
             <a className="intro-action explore-action" href="#work"><span className="intro-action-label">{t("home.explore")}</span><span className="intro-action-meta"><i aria-hidden="true">↓</i></span></a>
           </div>

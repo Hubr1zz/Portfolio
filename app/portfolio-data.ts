@@ -201,6 +201,7 @@ export const projects: Record<TabId, Project[]> = {
         "I direct the game in a three-person core team and handle gameplay engineering, technical design, visuals, editor tools, system design, and UX. This page follows our Gate II pitch, from the core idea and mechanics to the playable prototype, pipeline, and roadmap.",
       tags: ["Game Director", "Puzzle Design", "Unity 6", "Editor Tools"],
       links: [
+        { label: "Play on Itch.io", href: "https://leon-zhou.itch.io/fractalshelterprototype" },
         { label: "Watch trailer", href: "https://drive.google.com/file/d/1IX0fxcsUOGqvch-f8yeyMLnEMemrxamS/view" },
         { label: "View pitch deck", href: "https://docs.google.com/presentation/d/1v7y9YwD2rTSSQL-b9VE_r8g9K5hg1lTJ2rZGc6G0ufw/edit?usp=sharing" },
       ],
@@ -232,10 +233,10 @@ export const projects: Record<TabId, Project[]> = {
       listedIn: { design: "04" },
       gallery: [
         { src: "/images/portfolio/ariadne-cover.webp", alt: "The Ariadne record sleeve, printed with a labyrinth, beside its vinyl disc", width: 1600, height: 800 },
-        { src: "/images/portfolio/ariadne-record.webp", alt: "The ending pulls back to a turntable: the maze the player walked is the record’s grooves", width: 1600, height: 800 },
+        { src: "/images/portfolio/ariadne-record.webp", alt: "As the ending pulls back from the needle, the maze turns out to be the grooves of the Ariadne record, with the memory rooms set into them", width: 1600, height: 800 },
         { src: "/images/portfolio/ariadne-score.webp", alt: "The needle retraces the route and draws a five-line staff, turning the black dots into notes", width: 1600, height: 800 },
-        { src: "/images/portfolio/ariadne-strike-ink.webp", alt: "The original mechanic: a needle strike splashes ink that makes the white maze walls appear", width: 1600, height: 800 },
-        { src: "/images/portfolio/ariadne-note-dot.webp", alt: "A black dot that has appeared on the white floor after being triggered", width: 1600, height: 800 },
+        { src: "/images/portfolio/ariadne-strike-dots.webp", alt: "Recreated for this page: in the first version every dot was visible, so after striking one, the rest formed a black trail across the white maze", width: 1600, height: 800 },
+        { src: "/images/portfolio/ariadne-note-dot.webp", alt: "The moment the sound wave reaches a hidden dot: the dot appears, sends out a ripple, and ink starts to spread", width: 1600, height: 800 },
       ],
     },
     {
@@ -773,6 +774,8 @@ export function getBoardItems(project: Project): BoardItem[] {
         id: "levels",
         title: "Four playable levels",
         description: "The Gate II prototype has four playable levels, and the last two are each built around an anomaly.",
+        href: "https://leon-zhou.itch.io/fractalshelterprototype",
+        linkLabel: "Play the prototype in your browser",
         bullets: [
           { title: "Reading Corner", text: "The tutorial: move, discover panels, and cut out your first item." },
           { title: "Library", text: "Read the notice, find the red book from a close-up camera, open the lounge, and take the lift." },
@@ -838,7 +841,10 @@ export function getBoardItems(project: Project): BoardItem[] {
         id: "record-maze",
         title: "A labyrinth inside a record",
         description: "We wanted the player to walk a maze inside a record and be surprised to find, at the end, that the whole maze is the record.",
-        details: "The protagonist’s wife was a violinist. After she died of illness he could not let go, and kept listening to one piece she had written. The game shows scenes from their life, from the day they met to her death, to convey that he is trapped in this memory.",
+        bullets: [
+          { title: "Story", text: "The protagonist’s wife was a violinist. After she died of illness he could not let go, and kept listening to one piece she had written. The game shows scenes from their life, from the day they met to her death, to convey that he is trapped in this memory." },
+          { title: "Core gameplay", text: "The scene is entirely white. Clicking strikes the floor with the needle and throws an ink-like splash; walls it touches appear, then fade after a while, so the player has to keep striking to move forward." },
+        ],
         ...boardImage(project.gallery[1]),
       },
       {
@@ -851,9 +857,8 @@ export function getBoardItems(project: Project): BoardItem[] {
       {
         id: "strike-dots",
         title: "Iteration 1: the dots guided too strongly",
-        description: "The first version put the music straight onto the original strike mechanic: hit a dot with the needle and it plays its note.",
+        description: "The first version added the music straight on top of the core gameplay.",
         bullets: [
-          { title: "Starting point", text: "The scene is entirely white. Clicking strikes the floor with the needle and throws an ink-like splash; walls it touches appear, then fade after a while, so the player has to keep striking to move forward." },
           { title: "Approach", text: "Black dots sit on the floor, and the player strikes one to hear its note." },
           { title: "Problem", text: "The guidance was too strong. Players put too much attention on the dots I had placed and overlooked the maze scenes themselves." },
         ],

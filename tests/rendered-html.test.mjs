@@ -214,6 +214,8 @@ test("other routes render the games library and side-project gallery", async () 
   const projects = await htmlAt("/other/projects");
   assert.match(projects, /Market Watch, Undercover/);
   assert.match(projects, /unity-market-watch-profiler\.webp/);
+  assert.match(projects, /RefBox/);
+  assert.match(projects, /refbox-library\.webp/);
   assert.match(projects, /Experimental effects/);
   assert.doesNotMatch(projects, /<video\b/);
   assert.doesNotMatch(other, /01 \/ PLAY HISTORY/);

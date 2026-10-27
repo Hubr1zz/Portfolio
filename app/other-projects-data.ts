@@ -22,4 +22,16 @@ export const sideProjects: SideProject[] = [
       { id: "demo", kind: "video", src: "/videos/unity-market-watch.mp4", label: "Watch demo", alt: "A 32-second demonstration of the Unity market viewer and Profiler disguise", poster: "/images/other-projects/unity-market-watch-profiler.webp" },
     ],
   },
+  {
+    id: "refbox",
+    title: "RefBox",
+    category: "tools",
+    tags: ["Cloudflare", "React"],
+    description: "A personal art-reference library on Cloudflare Workers, modeled on Eagle: tags, folders, and search by color. An iPhone shortcut saves images from any app in one tap.",
+    media: [
+      { id: "library", kind: "image", src: "/images/other-projects/refbox-library.webp", label: "Library", alt: "RefBox library with a masonry grid of reference images, folders and tags in the sidebar, and the selected image's palette, rating, and tags in the inspector" },
+      { id: "color", kind: "image", src: "/images/other-projects/refbox-color-search.webp", label: "Color search", alt: "RefBox filtered to the images that share a red picked from a cover's palette" },
+      { id: "viewer", kind: "image", src: "/images/other-projects/refbox-viewer.webp", label: "Viewer", alt: "RefBox full-size viewer with zoom level, fit and 1:1 controls, and arrows to step through the library" },
+    ],
+  },
 ];

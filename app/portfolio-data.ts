@@ -42,6 +42,8 @@ export type BoardItem = {
   imageAlt?: string;
   imageWidth?: number;
   imageHeight?: number;
+  // Chinese version of an image with baked-in text; same pixel size as `image`.
+  imageZh?: string;
   diagram?: DiagramId;
   visual?: boolean;
   pages?: GalleryImage[];
@@ -668,6 +670,17 @@ export function getBoardItems(project: Project): BoardItem[] {
         imageHeight: 900,
         href: "https://hubr1zz.github.io/HuntingInDarkness/",
         linkLabel: "Visit the website",
+      },
+      {
+        id: "gameplay-overview",
+        title: "The game on one page",
+        description: "A one-page overview maps how a campaign plays, from the main loop to the combat idea, the progression approach, and the questions still open.",
+        details: "The campaign sets the frame: each trip around the Settlement, Hunt, and Showdown loop returns the party to camp and moves the timeline forward one year. Flip-to-act cards replace drawing, permanent flaws can turn into strengths, and the open questions on map generation and content volume stay on the page beside the answers.",
+        image: "/images/portfolio/tactics-gameplay-overview.webp",
+        imageZh: "/images/portfolio/tactics-gameplay-overview-zh.webp",
+        imageAlt: "One-page overview of Hunting in Darkness: the player flow, campaign contents, the Settlement, Hunt, and Showdown loop with expected shares, flip-card combat, progression through flaws, open questions, and five reference images",
+        imageWidth: 2000,
+        imageHeight: 1125,
       },
       {
         id: "game-design",

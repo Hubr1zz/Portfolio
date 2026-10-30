@@ -89,7 +89,7 @@ test("the tactical design document keeps the GitHub vault link on its case page"
   assert.match(html, /The game: from pillars to playable systems/);
   assert.match(html, /Six parts, one source of truth/);
   assert.match(html, /A Skills-driven AI maintenance workflow/);
-  for (const id of ["game-design", "vault-organization", "ai-workflow"])
+  for (const id of ["gameplay-overview", "game-design", "vault-organization", "ai-workflow"])
     assert.ok(html.includes(`id="chapter-${id}"`), `tactical chapter: ${id}`);
   assert.doesNotMatch(html, /Browse the Obsidian vault/);
   assert.ok(html.includes("Obsidian"), "tactical case should identify the Obsidian vault");

@@ -15,7 +15,7 @@ type I18nContextValue = {
   localizeProjects: <T extends Record<string, { id: string }[]>>(projects: T) => T;
   localizeTab: <T extends { id: string }>(tab: T) => T;
   localizeTabs: <T extends { id: string }[]>(tabs: T) => T;
-  localizeBoardItems: <T extends { id: string }[]>(projectId: string, items: T) => T;
+  localizeBoardItems: <T extends { id: string; imageZh?: string }[]>(projectId: string, items: T) => T;
 };
 
 const storageKey = "portfolio-locale";
@@ -43,6 +43,12 @@ function localizeValue<T>(value: T, path: string, locale: Locale): T {
   if (value && typeof value === "object")
     return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, localizeValue(item, `${path}.${key}`, locale)])) as T;
   return value;
+}
+
+function localizeImage<T extends { imageZh?: string }>(item: T, locale: Locale): T {
+  if (locale === "en" || !item.imageZh)
+    return item;
+  return { ...item, image: item.imageZh };
 }
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
@@ -81,7 +87,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   const localizeProjects = useCallback(<T extends Record<string, { id: string }[]>,>(projectGroups: T) => Object.fromEntries(Object.entries(projectGroups).map(([group, groupProjects]) => [group, groupProjects.map((project) => localizeValue(project, `project.${project.id}`, locale))])) as T, [locale]);
   const localizeTab = useCallback(<T extends { id: string },>(tab: T) => localizeValue(tab, `tab.${tab.id}`, locale), [locale]);
   const localizeTabs = useCallback(<T extends { id: string }[],>(tabList: T) => tabList.map((tab) => localizeValue(tab, `tab.${tab.id}`, locale)) as T, [locale]);
-  const localizeBoardItems = useCallback(<T extends { id: string }[],>(projectId: string, items: T) => items.map((item) => localizeValue(item, `project.${projectId}.section.${item.id}`, locale)) as T, [locale]);
+  const localizeBoardItems = useCallback(<T extends { id: string; imageZh?: string }[],>(projectId: string, items: T) => items.map((item) => localizeImage(localizeValue(item, `project.${projectId}.section.${item.id}`, locale), locale)) as T, [locale]);
   const contextValue = useMemo(() => ({ locale, setLocale, toggleLocale, t, content, localizeProject, localizeProjects, localizeTab, localizeTabs, localizeBoardItems }), [locale, setLocale, toggleLocale, t, content, localizeProject, localizeProjects, localizeTab, localizeTabs, localizeBoardItems]);
 
   return <I18nContext.Provider value={contextValue}>{children}</I18nContext.Provider>;

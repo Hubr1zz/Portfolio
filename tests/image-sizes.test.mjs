@@ -27,7 +27,7 @@ async function webpSize(src) {
 function declaredImages(project) {
   const gallery = (project.gallery ?? []).map((image, index) => ({ where: "gallery." + index, src: image.src, size: [image.width, image.height] }));
   const cover = project.image ? [{ where: "image", src: project.image, size: [project.imageWidth, project.imageHeight] }] : [];
-  const chapters = getBoardItems(project).filter((item) => item.image).map((item) => ({ where: "section." + item.id, src: item.image, size: [item.imageWidth, item.imageHeight] }));
+  const chapters = getBoardItems(project).filter((item) => item.image).flatMap((item) => [item.image, item.imageZh].filter(Boolean).map((src) => ({ where: "section." + item.id, src, size: [item.imageWidth, item.imageHeight] })));
   const pages = getBoardItems(project).flatMap((item) => (item.pages ?? []).map((page, index) => ({ where: "section." + item.id + ".pages." + index, src: page.src, size: [page.width, page.height] })));
   return [...gallery, ...cover, ...chapters, ...pages].map((image) => ({ ...image, where: project.id + "." + image.where }));
 }

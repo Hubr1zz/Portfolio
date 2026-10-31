@@ -1157,26 +1157,29 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--signal); outlin
 .case-cover-figure::before { content: ""; width: 100%; height: 100%; position: absolute; top: 40px; left: var(--case-gutter); z-index: -1; background: var(--signal-soft); clip-path: polygon(0 0, 100% 0, 100% calc(100% - 56px), calc(100% - 56px) 100%, 0 100%); }
 .case-cover-figure > * { min-height: 0; border: 1px solid var(--line); }
 .case-contents { grid-column: 1 / -1; margin-top: clamp(56px, 6vw, 96px); padding-top: 16px; display: grid; border-top: 2px solid var(--ink); }
-.case-contents > p { grid-column: 1 / 4; margin: 0; color: var(--signal); font: 12px/1.3 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; }
-.case-contents ol { grid-column: 4 / -1; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: var(--case-gutter); list-style: none; }
-@media (min-width: 601px) {
-  .case-contents.is-paired ol { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
-.case-contents li { display: grid; }
-.case-contents a { min-height: 64px; padding: 12px 0 16px; display: grid; grid-template-columns: 32px minmax(0, 1fr); align-items: baseline; gap: 8px; border-bottom: 1px solid var(--line); color: var(--ink); font-size: 15px; line-height: 1.4; overflow-wrap: anywhere; transition: color 260ms ease, border-color 260ms ease; }
-.case-contents a > span { color: var(--signal); font: 12px/1.3 var(--font-mono); }
+.case-contents > p { grid-column: 1 / 3; margin: 0; color: var(--signal); font: 12px/1.3 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; }
+/* Reads down then across, so the second column starts on the line of the facts column above and the list on the line of the chapter titles below. */
+.case-contents ol { grid-column: 3 / -1; margin: -12px 0 0; padding: 0; columns: 2; column-gap: var(--case-gutter); list-style: none; }
+.case-contents li { break-inside: avoid; }
+.case-contents a { min-height: 56px; padding: 14px 0; display: grid; grid-template-columns: 56px minmax(0, 1fr); align-items: baseline; gap: 16px; border-bottom: 1px solid var(--line); color: var(--ink); font-size: 17px; font-weight: 500; line-height: 1.35; letter-spacing: -.01em; overflow-wrap: anywhere; transition: color 260ms ease, border-color 260ms ease; }
+.case-contents a > span { color: var(--signal); font: 12px/1.3 var(--font-mono); letter-spacing: 0; }
 .case-contents a:hover, .case-contents a:focus-visible { border-color: var(--signal); color: var(--signal); }
 
-.case-runner { min-height: var(--case-runner-height); margin-top: clamp(48px, 5vw, 80px); position: sticky; top: var(--case-header-offset); z-index: 15; display: grid; align-items: center; border-top: 1px solid var(--ink); border-bottom: 1px solid var(--line-strong); background: var(--paper); }
-.case-runner ol { grid-column: 1 / 5; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px; list-style: none; }
-.case-runner ol a { width: 36px; height: 30px; display: grid; place-items: center; border: 1px solid var(--line-strong); color: var(--muted); font: 12px/1 var(--font-mono); transition: color 200ms ease, background-color 200ms ease, border-color 200ms ease; }
-.case-runner ol a:hover, .case-runner ol a:focus-visible { border-color: var(--signal); color: var(--signal); }
-.case-runner ol a[aria-current="location"] { border-color: var(--signal); background: var(--signal); color: var(--paper); }
+.case-runner { min-height: var(--case-runner-height); position: sticky; top: var(--case-header-offset); z-index: 15; display: grid; align-items: center; border-top: 1px solid var(--ink); border-bottom: 1px solid var(--line-strong); background: var(--paper); transition: opacity 200ms ease; }
+/* The bar keeps its place but stays out of sight until it sticks, so it never repeats the chapter index right above it. */
+.case-runner.is-resting:not(:focus-within) { opacity: 0; pointer-events: none; }
+.case-runner ol { grid-column: 1 / 5; margin: 0; padding: 0; display: flex; flex-wrap: wrap; list-style: none; }
+.case-runner ol a { width: 36px; height: 30px; position: relative; display: grid; place-items: center; color: var(--muted); font: 12px/1 var(--font-mono); transition: color 200ms ease; }
+.case-runner ol a::after { content: ""; height: 2px; position: absolute; right: 0; bottom: -1px; left: 0; transition: background-color 200ms ease; }
+.case-runner ol a:hover, .case-runner ol a:focus-visible { color: var(--signal); }
+.case-runner li:has(~ li a[aria-current="location"]) a { color: var(--ink); }
+.case-runner ol a[aria-current="location"] { color: var(--signal); font-weight: 600; }
+.case-runner li:has(~ li a[aria-current="location"]) a::after, .case-runner ol a[aria-current="location"]::after { background: var(--signal); }
 /* From tablet width up, a long chapter list narrows its cells instead of wrapping, so the bar keeps one row at its fixed height; short lists keep 36px cells. */
 @media (min-width: 601px) {
   .case-runner ol { flex-wrap: nowrap; }
   .case-runner li { min-width: 0; flex: 0 1 36px; }
-  .case-runner ol a { width: 100%; }
+  .case-runner ol a { width: 100%; height: 46px; }
 }
 .case-runner-current { grid-column: 5 / 11; min-width: 0; margin: 0; overflow: hidden; color: var(--ink); font-size: 14px; line-height: 1.3; text-overflow: ellipsis; white-space: nowrap; }
 .case-runner-current > span { margin-right: 12px; color: var(--signal); font: 12px/1 var(--font-mono); }
@@ -1251,7 +1254,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--signal); outlin
   .case-number { grid-column: 10 / -1; padding-left: 16px; align-self: start; margin-top: clamp(56px, 7vw, 104px); font-size: clamp(64px, 13vw, 120px); }
   .case-intro, .case-facts, .case-summary, .case-header > .source-credit, .case-cover-figure, .case-contents > p, .case-contents ol { grid-column: 1 / -1; }
   .case-facts { grid-row: auto; margin-top: 32px; }
-  .case-contents ol { margin-top: 12px; }
+  .case-contents ol { margin-top: 2px; }
   .case-runner ol { grid-column: 1 / 6; }
   .case-runner-current { grid-column: 6 / 10; }
   .case-runner-back { grid-column: 10 / -1; }
@@ -1263,16 +1266,23 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--signal); outlin
   .case-pages li:first-child { grid-row: span 2; }
 }
 
+/* Below this width the back label collides with the current chapter title, so only its arrow stays. */
+@media (max-width: 760px) {
+  .case-runner-current { grid-column: 6 / 12; }
+  .case-runner-back { grid-column: 12 / -1; }
+  .case-runner-back > span:last-child { width: 1px; height: 1px; position: absolute; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
+}
+
 @media (max-width: 600px) {
   :root { --case-gutter: 12px; --case-header-offset: 111px; }
   .case-header { padding-top: 24px; }
   .case-heading h1 { font-size: clamp(38px, 11vw, 52px); }
   .case-intro { font-size: 18px; }
-  .case-contents ol { grid-template-columns: minmax(0, 1fr); }
+  .case-contents ol { columns: 1; }
+  .case-contents a { grid-template-columns: 32px minmax(0, 1fr); gap: 8px; }
   .case-runner ol { grid-column: 1 / 10; }
   .case-runner-current { display: none; }
   .case-runner-back { grid-column: 10 / -1; }
-  .case-runner-back > span:last-child { width: 1px; height: 1px; position: absolute; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
   .case-section-heading > span { font-size: 64px; }
   .case-section-heading h2 { font-size: 30px; }
   .case-media { margin-bottom: 24px; }
@@ -1287,4 +1297,5 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--signal); outlin
 
 @media (prefers-reduced-motion: reduce) {
   .case-number::before { animation: none !important; transform: none !important; opacity: .42 !important; }
+  .case-runner { transition: none; }
 }

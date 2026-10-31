@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type MouseEvent, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type MouseEvent, type ReactNode, type RefObject } from "react";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { assetPath, InternalLink } from "./portfolio-links";
@@ -915,18 +915,18 @@ function CaseSections({ items, articles, project, onExpand }: { items: BoardItem
 function CaseContents({ entries, onSelect }: { entries: TocEntry[]; onSelect: (id: string) => void }) {
   const { t } = useI18n();
   return (
-    <nav className={"case-contents reading-surface" + (entries.length % 2 === 0 && entries.length % 3 !== 0 ? " is-paired" : "")} aria-label={t("case.sections")}>
+    <nav className="case-contents reading-surface" aria-label={t("case.sections")}>
       <p>{t("case.inProject")}</p>
       <ol>{entries.map((entry, index) => <li key={entry.id}><a href={chapterHref(entry.id)} onClick={() => onSelect(entry.id)}><span>{chapterNumber(index)}</span>{entry.title}</a></li>)}</ol>
     </nav>
   );
 }
 
-function CaseRunner({ entries, activeSection, onSelect, category, projectId }: { entries: TocEntry[]; activeSection: string; onSelect: (id: string) => void; category: TabId; projectId: string }) {
+function CaseRunner({ entries, activeSection, onSelect, category, projectId, resting, runnerRef }: { entries: TocEntry[]; activeSection: string; onSelect: (id: string) => void; category: TabId; projectId: string; resting: boolean; runnerRef: RefObject<HTMLElement | null> }) {
   const { t } = useI18n();
   const activeIndex = Math.max(0, entries.findIndex((entry) => entry.id === activeSection));
   return (
-    <nav className="case-runner" aria-label={t("case.onThisPage")}>
+    <nav ref={runnerRef} className={"case-runner" + (resting ? " is-resting" : "")} aria-label={t("case.onThisPage")}>
       <ol>{entries.map((entry, index) => <li key={entry.id}><a href={chapterHref(entry.id)} aria-current={activeSection === entry.id ? "location" : undefined} onClick={() => onSelect(entry.id)}><span>{chapterNumber(index)}</span><span className="visually-hidden">{entry.title}</span></a></li>)}</ol>
       <p className="case-runner-current" aria-hidden="true"><span>{chapterNumber(activeIndex)}</span>{entries[activeIndex]?.title}</p>
       <BackLink category={category} projectId={projectId} className="case-runner-back" compact><span aria-hidden="true">←</span><span>{t("case.backProject")}</span></BackLink>
@@ -943,6 +943,8 @@ function ProjectDetailContent({ project, category }: { project: Project & { cate
   const items = useMemo(() => hasBoardContent ? localizeBoardItems(project.id, getBoardItems(project)) : [], [hasBoardContent, localizeBoardItems, project]);
   const [activeSection, setActiveSection] = useState(items[0]?.id ?? articles[0]?.id ?? "overview");
   const [dialogItem, setDialogItem] = useState<BoardItem | null>(null);
+  const [runnerResting, setRunnerResting] = useState(true);
+  const runnerRef = useRef<HTMLElement | null>(null);
   const triggerRef = useRef<HTMLElement | null>(null);
   const meta = localizeTab(categoryMeta(category));
   const tocEntries = useMemo(() => items.length ? items.map((item) => ({ id: item.id, title: item.title })) : articles.length ? articles.map((article) => ({ id: article.id, title: article.title })) : project.details ? [{ id: "overview", title: t("case.overview") }] : [], [articles, items, project.details, t]);
@@ -960,6 +962,8 @@ function ProjectDetailContent({ project, category }: { project: Project & { cate
       const current = sections.filter((section) => section.getBoundingClientRect().top <= offset).at(-1) ?? sections[0];
       if (current)
         setActiveSection(current.id.replace("chapter-", ""));
+      if (runnerRef.current)
+        setRunnerResting(runnerRef.current.getBoundingClientRect().top > parseFloat(getComputedStyle(runnerRef.current).top) + 1);
     };
     const scheduleUpdate = () => {
       if (frame)
@@ -1026,7 +1030,7 @@ function ProjectDetailContent({ project, category }: { project: Project & { cate
         {!tocEntries.length && <div className="case-cover-figure"><ProjectCover project={project} /></div>}
         {tocEntries.length > 0 && <CaseContents entries={tocEntries} onSelect={setActiveSection} />}
       </header>
-      {tocEntries.length > 0 && <CaseRunner entries={tocEntries} activeSection={activeSection} onSelect={setActiveSection} category={category} projectId={project.id} />}
+      {tocEntries.length > 0 && <CaseRunner entries={tocEntries} activeSection={activeSection} onSelect={setActiveSection} category={category} projectId={project.id} resting={runnerResting} runnerRef={runnerRef} />}
       {tocEntries.length > 0 && <div className="case-layout"><CaseSections items={items} articles={articles} project={project} onExpand={openImage} /></div>}
       {items.some((item) => item.image || item.pages) && <ImageDialog item={dialogItem} onClose={closeImage} />}
       <nav className="case-navigation" aria-label={t("case.navigation")}>

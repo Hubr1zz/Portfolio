@@ -266,9 +266,9 @@ export const projects: Record<TabId, Project[]> = {
       featured: true,
     },
     {
-      id: "hunting-in-darkness",
+      id: "card-dice-hunt-prototype",
       index: "04",
-      title: "Hunting in Darkness",
+      title: "Card & Dice Hunt Prototype",
       eyebrow: "Tactical card-RPG prototype",
       year: "2025",
       description:
@@ -279,13 +279,13 @@ export const projects: Record<TabId, Project[]> = {
       links: [
         { label: "Play on Itch.io", href: "https://leon-zhou.itch.io/rpg-demo" },
         { label: "Watch video", href: "https://youtu.be/JI4dIV5Zk6o" },
-        { label: "Game website", href: "https://hubr1zz.github.io/HuntingInDarkness/" },
+        { label: "Main project website", href: "https://hubr1zz.github.io/HuntingInDarkness/" },
       ],
       gallery: [
-        { src: "/images/portfolio/hunt-overview.webp", alt: "Hunting in Darkness playable prototype", width: 1600, height: 731 },
-        { src: "/images/portfolio/hunt-design.webp", alt: "Hunting in Darkness inspiration and design document", width: 1600, height: 731 },
-        { src: "/images/portfolio/hunt-systems.webp", alt: "Hunting in Darkness combat actions, rules, and event balancing", width: 1600, height: 731 },
-        { src: "/images/portfolio/hunt-production.webp", alt: "Hunting in Darkness Unity tooling and art pipeline", width: 1600, height: 731 },
+        { src: "/images/portfolio/hunt-overview.webp", alt: "Card & Dice Hunt Prototype playable build", width: 1600, height: 731 },
+        { src: "/images/portfolio/hunt-design.webp", alt: "Card & Dice Hunt Prototype inspiration and design document", width: 1600, height: 731 },
+        { src: "/images/portfolio/hunt-systems.webp", alt: "Card & Dice Hunt Prototype combat actions, rules, and event balancing", width: 1600, height: 731 },
+        { src: "/images/portfolio/hunt-production.webp", alt: "Card & Dice Hunt Prototype Unity tooling and art pipeline", width: 1600, height: 731 },
       ],
     },
     {
@@ -939,7 +939,7 @@ export function getBoardItems(project: Project): BoardItem[] {
     return project.gallery.map((image, index) => ({ id: `punch-${index}`, ...explanations[index], ...boardImage(image) }));
   }
 
-  if (project.id === "hunting-in-darkness" && project.gallery) {
+  if (project.id === "card-dice-hunt-prototype" && project.gallery) {
     const explanations = [
       {
         title: "Playable tactical slice",

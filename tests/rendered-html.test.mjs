@@ -55,7 +55,7 @@ test("server-renders the redesigned portfolio home", async () => {
 test("category pages contain overview cards and no reader chapters", async () => {
   const cases = [
     ["/technical", "Technical Projects — Leon Zhou", ["zWorkFlow", "ActionChainWeaver", "Interaction System", "Unity Editor Tools", "Procedural Locomotion", "Rendering studies"]],
-    ["/games", "Game Projects — Leon Zhou", ["Fractal Shelter", "Ariadne", "Punch-in Rush", "Hunting in Darkness", "Outlaw’s Deadend", "Alive", "Top Hotpot"]],
+    ["/games", "Game Projects — Leon Zhou", ["Fractal Shelter", "Ariadne", "Punch-in Rush", "Card &amp; Dice Hunt Prototype", "Outlaw’s Deadend", "Alive", "Top Hotpot"]],
     ["/design", "Design Projects — Leon Zhou", ["Tactical Game Design Document", "Comparative Game Analysis", "Design Breakdown Notes", "Ariadne"]],
   ];
 
@@ -199,7 +199,7 @@ test("article collection renders comparative essays without media", async () => 
 test("all known project slugs pre-render and unknown slugs return framework 404", async () => {
   const slugs = [
     "zworkflow", "interaction", "editor-tools", "procedural-motion", "rendering-studies",
-    "fractal-shelter", "ariadne", "punch-in-rush", "hunting-in-darkness", "outlaws-dead-end", "alive", "top-hotpot",
+    "fractal-shelter", "ariadne", "punch-in-rush", "card-dice-hunt-prototype", "outlaws-dead-end", "alive", "top-hotpot",
     "tactics-design", "comparative-writing", "design-vault",
   ];
   for (const slug of slugs)

@@ -799,7 +799,7 @@ function CaseMedia({ item, project, onExpand }: { item: BoardItem; project: Proj
   return null;
 }
 
-const relatedProjectIds: Partial<Record<string, string[]>> = { "tactics-design": ["hunting-in-darkness"], "hunting-in-darkness": ["tactics-design"], zworkflow: ["action-chain-weaver", "interaction"], "action-chain-weaver": ["interaction", "zworkflow"], interaction: ["action-chain-weaver", "zworkflow"] };
+const relatedProjectIds: Partial<Record<string, string[]>> = { "tactics-design": ["card-dice-hunt-prototype"], "card-dice-hunt-prototype": ["tactics-design"], zworkflow: ["action-chain-weaver", "interaction"], "action-chain-weaver": ["interaction", "zworkflow"], interaction: ["action-chain-weaver", "zworkflow"] };
 
 function relatedProjects(project: Project & { category: TabId }) {
   const preferred = relatedProjectIds[project.id] ?? [];

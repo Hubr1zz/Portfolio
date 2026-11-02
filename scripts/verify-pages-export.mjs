@@ -20,7 +20,7 @@ const expectedRoutes = [
   "projects/fractal-shelter",
   "projects/ariadne",
   "projects/punch-in-rush",
-  "projects/hunting-in-darkness",
+  "projects/card-dice-hunt-prototype",
   "projects/outlaws-dead-end",
   "projects/alive",
   "projects/top-hotpot",
